@@ -13,3 +13,4 @@ C:\Users\Mohsen Ali\Desktop\OMSV1\OMSV1.Infrastructure\bin\Debug\net8.0\OMSV1.Do
 C:\Users\Mohsen Ali\Desktop\OMSV1\OMSV1.Infrastructure\bin\Debug\net8.0\OMSV1.Domain.pdb
 C:\Users\Mohsen Ali\Desktop\OMSV1\OMSV1.Infrastructure\obj\Debug\net8.0\OMSV1.Infrastructure.csproj.AssemblyReference.cache
 C:\Users\Mohsen Ali\Desktop\OMSV1\OMSV1.Infrastructure\obj\Debug\net8.0\OMSV1.In.0CDCC19D.Up2Date
+C:\Users\Mohsen Ali\Desktop\OMSV1\OMSV1.Infrastructure\obj\Debug\net8.0\OMSV1.Infrastructure.sourcelink.json
