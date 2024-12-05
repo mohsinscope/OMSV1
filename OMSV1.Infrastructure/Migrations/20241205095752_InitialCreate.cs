@@ -100,6 +100,42 @@ namespace OMSV1.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Attendances",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    ReceivingStaff = table.Column<int>(type: "integer", nullable: false),
+                    AccountStaff = table.Column<int>(type: "integer", nullable: false),
+                    PrintingStaff = table.Column<int>(type: "integer", nullable: false),
+                    QualityStaff = table.Column<int>(type: "integer", nullable: false),
+                    DeliveryStaff = table.Column<int>(type: "integer", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Note = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    WorkingHours = table.Column<int>(type: "integer", nullable: false),
+                    OfficeId = table.Column<int>(type: "integer", nullable: false),
+                    GovernorateId = table.Column<int>(type: "integer", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attendances", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Attendances_Governorates_GovernorateId",
+                        column: x => x.GovernorateId,
+                        principalTable: "Governorates",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Attendances_Offices_OfficeId",
+                        column: x => x.OfficeId,
+                        principalTable: "Offices",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DamagedDevices",
                 columns: table => new
                 {
@@ -185,9 +221,12 @@ namespace OMSV1.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Url = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    DamagedDeviceId = table.Column<int>(type: "integer", nullable: false),
+                    FileName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    FilePath = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    EntityType = table.Column<string>(type: "text", nullable: false),
+                    EntityId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DamagedDeviceId = table.Column<int>(type: "integer", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -197,6 +236,11 @@ namespace OMSV1.Infrastructure.Migrations
                         name: "FK_AttachmentCUs_DamagedDevices_DamagedDeviceId",
                         column: x => x.DamagedDeviceId,
                         principalTable: "DamagedDevices",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_DamagedDevice_Attachments",
+                        column: x => x.EntityId,
+                        principalTable: "DamagedDevices",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -205,6 +249,21 @@ namespace OMSV1.Infrastructure.Migrations
                 name: "IX_AttachmentCUs_DamagedDeviceId",
                 table: "AttachmentCUs",
                 column: "DamagedDeviceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AttachmentCUs_EntityId",
+                table: "AttachmentCUs",
+                column: "EntityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Attendances_GovernorateId",
+                table: "Attendances",
+                column: "GovernorateId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Attendances_OfficeId",
+                table: "Attendances",
+                column: "OfficeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DamagedDevices_DamagedDeviceTypeId",
@@ -252,6 +311,9 @@ namespace OMSV1.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AttachmentCUs");
+
+            migrationBuilder.DropTable(
+                name: "Attendances");
 
             migrationBuilder.DropTable(
                 name: "DamagedPassports");

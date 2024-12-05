@@ -4,6 +4,7 @@ using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
+using OMSV1.Domain.Enums;
 
 namespace OMSV1.Domain.Entities.DamagedDevices;
 
@@ -23,13 +24,31 @@ public class DamagedDevice(
     public int OfficeId { get; private set; } = officeId;
     public int GovernorateId { get; private set; } = governorateId;
     public int ProfileId { get; private set; } = profileId;
-    public DamagedDeviceType? DamagedType { get; private set; }
+    public DamagedDeviceType? DamagedDeviceTypes { get; private set; }
     public DeviceType? DeviceType { get; private set; }
     public Governorate? Governorate { get; private set; }
     public Office? Office { get; private set; }
 
-    // protected List<AttachmentCU> _attachments = new List<AttachmentCU>();
-    // public IReadOnlyCollection<OMSV1.Domain.Entities.Attachments.AttachmentCU> AttachmentCUs => _attachments.AsReadOnly();
+
+    private readonly List<AttachmentCU> _attachments = new();
+
+    public IReadOnlyCollection<AttachmentCU> Attachments => _attachments.AsReadOnly();
+
+
+
+
+    public void AddAttachment(string fileName, string filePath)
+    {
+        var attachment = new AttachmentCU(
+            fileName: fileName,
+            filePath: filePath,
+            entityType: EntityType.DamagedDevice,
+            entityId: Id 
+        );
+
+        _attachments.Add(attachment);
+    }
+
 
 
 }

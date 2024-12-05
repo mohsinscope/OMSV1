@@ -7,26 +7,29 @@ namespace OMSV1.Infrastructure.Configurations;
 
 public class AttachmentConfiguration : IEntityTypeConfiguration<AttachmentCU>
 {
-    public void Configure(EntityTypeBuilder<AttachmentCU> builder)
+ public void Configure(EntityTypeBuilder<AttachmentCU> builder)
     {
-        builder.HasKey(a => a.Id); // Assuming `Entity` has an `Id` as the primary key.
+        // Primary Key
+        builder.HasKey(a => a.Id);
 
-        builder.Property(a => a.Name)
+        // Properties
+        builder.Property(a => a.FileName)
             .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(255);
 
-        builder.Property(a => a.Url)
+        builder.Property(a => a.FilePath)
             .IsRequired()
-            .HasMaxLength(200); // Adjust length as needed.
+            .HasMaxLength(500);
 
-        builder.Property(a => a.DamagedDeviceId)
+        builder.Property(a => a.EntityType)
+            .IsRequired()
+            .HasConversion<string>(); // Store as string in the database
+
+        builder.Property(a => a.EntityId)
             .IsRequired();
 
-        // Relationship
-        // builder.HasOne(a => a.DamagedDevice)
-        //       .WithMany(dd => dd.AttachmentCUs)
-        //       .HasForeignKey(a => a.DamagedDeviceId)
-        //       .OnDelete(DeleteBehavior.Restrict);
+        builder.Property(a => a.CreatedAt)
+            .IsRequired();
 
         // Table Mapping
         builder.ToTable("AttachmentCUs");

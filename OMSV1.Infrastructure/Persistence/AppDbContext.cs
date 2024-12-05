@@ -17,7 +17,7 @@ namespace OMSV1.Infrastructure.Persistence;
         public required DbSet<DamagedType> DamagedTypes { get; set; }
         public required DbSet<DamagedDeviceType> DamagedDeviceTypes { get; set; }
         public required DbSet<DeviceType> DeviceTypes { get; set; }
-        // public required DbSet<AttachmentCU> AttachmentCU { get; set; }
+        public required DbSet<AttachmentCU> AttachmentCUs { get; set; }
         public required DbSet<Office> Offices { get; set; }
         public required DbSet<Governorate> Governorates { get; set; }
 

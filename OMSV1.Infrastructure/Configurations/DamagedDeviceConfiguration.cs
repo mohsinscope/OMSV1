@@ -1,6 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.DamagedDevices;
 
 namespace OMSV1.Infrastructure.Configurations;
@@ -34,7 +35,7 @@ public class DamagedDeviceConfiguration : IEntityTypeConfiguration<DamagedDevice
             .IsRequired();
 
         // Relationships
-        builder.HasOne(dd => dd.DamagedType)
+        builder.HasOne(dd => dd.DamagedDeviceTypes)
             .WithMany() // Adjust navigation property in `DamagedDeviceType` if necessary.
             .HasForeignKey(dd => dd.DamagedDeviceTypeId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -54,11 +55,16 @@ public class DamagedDeviceConfiguration : IEntityTypeConfiguration<DamagedDevice
             .HasForeignKey(dd => dd.OfficeId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Attachments relationship (One-to-Many)
-        // builder.Navigation(dd => dd.AttachmentCUs)
-        //     .UsePropertyAccessMode(PropertyAccessMode.Field); // For private backing field.
+        // Configure Attachments
+        builder.HasMany<AttachmentCU>()
+            .WithOne()
+            .HasForeignKey(a => a.EntityId)
+            .HasPrincipalKey(dd => dd.Id)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_DamagedDevice_Attachments");
 
         // Table Mapping
         builder.ToTable("DamagedDevices");
     }
 }
+ 
