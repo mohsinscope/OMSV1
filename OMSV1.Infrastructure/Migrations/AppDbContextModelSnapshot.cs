@@ -30,27 +30,96 @@ namespace OMSV1.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("DamagedDeviceId")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("DamagedDeviceId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DamagedDeviceId");
+
+                    b.HasIndex("EntityId");
+
+                    b.ToTable("AttachmentCUs", (string)null);
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Attendances.Attendance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccountStaff")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DeliveryStaff")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("GovernorateId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<string>("Url")
+                    b.Property<string>("Note")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("OfficeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PrintingStaff")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QualityStaff")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ReceivingStaff")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WorkingHours")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DamagedDeviceId");
+                    b.HasIndex("GovernorateId");
 
-                    b.ToTable("AttachmentCUs", (string)null);
+                    b.HasIndex("OfficeId");
+
+                    b.ToTable("Attendances", (string)null);
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", b =>
@@ -289,18 +358,40 @@ namespace OMSV1.Infrastructure.Migrations
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Attachments.AttachmentCU", b =>
                 {
-                    b.HasOne("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", "DamagedDevice")
+                    b.HasOne("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", null)
+                        .WithMany("Attachments")
+                        .HasForeignKey("DamagedDeviceId");
+
+                    b.HasOne("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", null)
                         .WithMany()
-                        .HasForeignKey("DamagedDeviceId")
+                        .HasForeignKey("EntityId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_DamagedDevice_Attachments");
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Attendances.Attendance", b =>
+                {
+                    b.HasOne("OMSV1.Domain.Entities.Governorates.Governorate", "Governorate")
+                        .WithMany()
+                        .HasForeignKey("GovernorateId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("DamagedDevice");
+                    b.HasOne("OMSV1.Domain.Entities.Offices.Office", "Office")
+                        .WithMany()
+                        .HasForeignKey("OfficeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Governorate");
+
+                    b.Navigation("Office");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", b =>
                 {
-                    b.HasOne("OMSV1.Domain.Entities.DamagedDevices.DamagedDeviceType", "DamagedType")
+                    b.HasOne("OMSV1.Domain.Entities.DamagedDevices.DamagedDeviceType", "DamagedDeviceTypes")
                         .WithMany()
                         .HasForeignKey("DamagedDeviceTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -324,7 +415,7 @@ namespace OMSV1.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("DamagedType");
+                    b.Navigation("DamagedDeviceTypes");
 
                     b.Navigation("DeviceType");
 
@@ -369,6 +460,11 @@ namespace OMSV1.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Governorate");
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", b =>
+                {
+                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Governorates.Governorate", b =>
