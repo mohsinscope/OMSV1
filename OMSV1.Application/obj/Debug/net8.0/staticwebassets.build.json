@@ -1,12 +1,11 @@
 {
   "Version": 1,
-  "Hash": "x13i9j5w6UjZlphxG/pupMFx8uxCXADk/cS2MwvB0Xo=",
+  "Hash": "dX55f39r59oBYYysRtKHwkw6mM+8G5PTse6cFDjS/Pw=",
   "Source": "OMSV1.Application",
   "BasePath": "_content/OMSV1.Application",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
+  "Assets": []
 }
