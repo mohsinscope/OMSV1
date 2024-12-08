@@ -1,19 +1,14 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using OMSV1.Application.Queries;
+using OMSV1.Application.Queries.Offices;
 
-namespace OMSV1.Application.Controllers
+namespace OMSV1.Application.Controllers.Offices
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class OfficeController : ControllerBase
+    public class OfficeController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public OfficeController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        private readonly IMediator _mediator = mediator;
 
         [HttpGet]
         public async Task<IActionResult> GetAllOffices()

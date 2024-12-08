@@ -5,16 +5,11 @@ using OMSV1.Domain.SeedWork;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OMSV1.Application.Handlers
+namespace OMSV1.Application.Handlers.Offices
 {
-    public class AddOfficeCommandHandler : IRequestHandler<AddOfficeCommand, int>
+    public class AddOfficeCommandHandler(IGenericRepository<Office> repository) : IRequestHandler<AddOfficeCommand, int>
     {
-        private readonly IGenericRepository<Office> _repository;
-
-        public AddOfficeCommandHandler(IGenericRepository<Office> repository)
-        {
-            _repository = repository;
-        }
+        private readonly IGenericRepository<Office> _repository = repository;
 
         public async Task<int> Handle(AddOfficeCommand request, CancellationToken cancellationToken)
         {

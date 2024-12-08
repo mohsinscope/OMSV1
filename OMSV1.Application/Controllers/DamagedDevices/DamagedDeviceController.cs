@@ -1,19 +1,14 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using OMSV1.Application.Queries;
+using OMSV1.Application.Queries.DamagedDevices;
 
-namespace OMSV1.Application.Controllers
+namespace OMSV1.Application.Controllers.DamagedDevices
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class DamagedDeviceController : ControllerBase
+    public class DamagedDeviceController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public DamagedDeviceController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        private readonly IMediator _mediator = mediator;
 
         [HttpGet]
         public async Task<IActionResult> GetAllDamagedDevices()

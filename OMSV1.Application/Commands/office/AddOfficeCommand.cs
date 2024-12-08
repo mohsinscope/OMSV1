@@ -4,7 +4,7 @@ namespace OMSV1.Application.Commands.Office
 {
     public class AddOfficeCommand : IRequest<int>
     {
-        public string Name { get; set; }
+        public required string Name { get; set; }
         public int Code { get; set; }
         public int ReceivingStaff { get; set; }
         public int AccountStaff { get; set; }

@@ -4,14 +4,9 @@ using OMSV1.Infrastructure.Persistence;
 
 namespace OMSV1.Infrastructure.Repositories
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : Entity
+    public class GenericRepository<T>(AppDbContext context) : IGenericRepository<T> where T : Entity
     {
-        private readonly AppDbContext _context;
-
-        public GenericRepository(AppDbContext context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         public async Task<T> AddAsync(T entity)
         {

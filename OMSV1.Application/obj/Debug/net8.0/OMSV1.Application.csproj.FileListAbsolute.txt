@@ -140,6 +140,7 @@ C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\bin\Debug\net8.0\OMSV1.App
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\bin\Debug\net8.0\OMSV1.Application.dll
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\bin\Debug\net8.0\OMSV1.Application.pdb
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\bin\Debug\net8.0\Autofac.dll
+C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\bin\Debug\net8.0\Autofac.Extensions.DependencyInjection.dll
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\bin\Debug\net8.0\Humanizer.dll
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\bin\Debug\net8.0\MediatR.dll
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\bin\Debug\net8.0\MediatR.Contracts.dll
@@ -265,10 +266,10 @@ C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\staticweb
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.OMSV1.Application.props
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.OMSV1.Application.props
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\staticwebassets.pack.json
-C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\OMSV1.Ap.C9D43592.Up2Date
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\OMSV1.Application.dll
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\refint\OMSV1.Application.dll
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\OMSV1.Application.pdb
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\OMSV1.Application.genruntimeconfig.cache
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\ref\OMSV1.Application.dll
+C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

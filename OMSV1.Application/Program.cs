@@ -1,6 +1,13 @@
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using MediatR;
+using MediatR.Extensions.Autofac.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using OMSV1.Application.Handlers;
+using OMSV1.Application.DependencyInjection;
+using OMSV1.Application.Handlers.DamagedDevices;
+using OMSV1.Application.Handlers.DamagedPassports;
+using OMSV1.Application.Handlers.Governorates;
+using OMSV1.Application.Handlers.Offices;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Infrastructure.Persistence;
 using OMSV1.Infrastructure.Repositories;
@@ -15,12 +22,25 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 // Register MediatR
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllOfficesQueryHandler).Assembly));
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllGovernoratesQueryHandler).Assembly));
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllDamagedPassportsQueryHandler).Assembly));
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllDamagedDevicesQueryHandler).Assembly));
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllOfficesQueryHandler).Assembly));
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllGovernoratesQueryHandler).Assembly));
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllDamagedPassportsQueryHandler).Assembly));
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllDamagedDevicesQueryHandler).Assembly));
 
+// Use Autofac as the DI container
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
+// Autofac Module Registration
+builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
+{
+    // Register Role-Based Modules
+    containerBuilder.RegisterModule(new AdminRoleModule());
+    containerBuilder.RegisterModule(new SupervisorRoleModule());
+    //containerBuilder.RegisterModule(new EmployeeRoleModule());
+    containerBuilder.RegisterModule(new ManagerRoleModule());
+    //containerBuilder.RegisterModule(new EmployeeOfExpensesRoleModule());
+    //containerBuilder.RegisterModule(new EmployeeOfDamagedRoleModule());
+});
 // Add Controllers
 builder.Services.AddControllers();
 
