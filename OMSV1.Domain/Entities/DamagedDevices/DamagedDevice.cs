@@ -31,10 +31,7 @@ public class DamagedDevice(
 
 
     private readonly List<AttachmentCU> _attachments = new();
-
     public IReadOnlyCollection<AttachmentCU> Attachments => _attachments.AsReadOnly();
-
-
 
 
     public void AddAttachment(string fileName, string filePath)

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OMSV1.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+34260796054c37b9c58d370fce502125231307a5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e0bc27383bd964713bde03f1546561c828a5c48b")]
 [assembly: System.Reflection.AssemblyProductAttribute("OMSV1.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OMSV1.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
