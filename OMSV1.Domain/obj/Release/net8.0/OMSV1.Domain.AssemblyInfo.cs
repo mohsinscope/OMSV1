@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OMSV1.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1bb566669f73f9f6a5a1d8b9d5f31870b82156f6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e0bc27383bd964713bde03f1546561c828a5c48b")]
 [assembly: System.Reflection.AssemblyProductAttribute("OMSV1.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OMSV1.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
