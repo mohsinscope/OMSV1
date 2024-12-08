@@ -273,7 +273,6 @@ C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\OMSV1.App
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\OMSV1.Application.genruntimeconfig.cache
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\ref\OMSV1.Application.dll
 <<<<<<< HEAD
-C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Application\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 =======
 C:\Users\Mohsen Ali\Desktop\OMSV1\OMSV1.Application\bin\Debug\net8.0\Autofac.dll
 C:\Users\Mohsen Ali\Desktop\OMSV1\OMSV1.Application\bin\Debug\net8.0\MediatR.dll
