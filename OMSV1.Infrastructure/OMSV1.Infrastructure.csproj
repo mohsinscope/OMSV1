@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OMSV1.Domain\OMSV1.Domain.csproj" />
+    
   </ItemGroup>
 
   <ItemGroup>
