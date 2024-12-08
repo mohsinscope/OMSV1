@@ -1,17 +1,16 @@
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace OMSV1.Domain.SeedWork;
-
-public interface IGenericRepository<T> where T : Entity
+namespace OMSV1.Domain.SeedWork
 {
-//    IEnumerable<T> Specify(ISpecification<T> spec);
-//    IEnumerable<T> Specify2(ISpecification<T> spec);
-   IUnitOfWork UnitOfWork{get;}
-   Task<T> AddAsync(T entity);
-   void DeleteAsync(T entity);
-   Task<T> GetByIdAsync(int Id);
-   //Task<T> GetAsync(Expression<Func<T,bool>> predicate);
-//    Task<T> GetAsync(ISpecification<T> spec);
-   Task<IReadOnlyList<T>> GetAllAsync();
-   Task UpdateAsync(T entity);
+    public interface IGenericRepository<T> where T : Entity
+    {
+        Task<T> AddAsync(T entity);
+        void DeleteAsync(T entity);
+        Task<T> GetByIdAsync(int id);
+        Task<IReadOnlyList<T>> GetAllAsync();
+        Task UpdateAsync(T entity);
+    }
 }
+
