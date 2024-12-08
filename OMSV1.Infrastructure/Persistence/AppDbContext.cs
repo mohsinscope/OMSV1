@@ -1,5 +1,7 @@
 using System;
 using System.Net.Mail;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.DamagedDevices;
@@ -10,8 +12,9 @@ using OMSV1.Domain.Entities.Offices;
 namespace OMSV1.Infrastructure.Persistence;
 
 
- public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
-    {
+public class AppDbContext(DbContextOptions options) 
+    : IdentityDbContext<IdentityUser, IdentityRole, string> (options)// Updated base class
+{
         public required DbSet<DamagedDevice> DamagedDevices { get; set; }
         public required DbSet<DamagedPassport> DamagedPassports { get; set; }
         public required DbSet<DamagedType> DamagedTypes { get; set; }

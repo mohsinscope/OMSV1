@@ -1,6 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.DamagedPassport;
 
 namespace OMSV1.Infrastructure.Configurations;
@@ -43,6 +44,14 @@ public class DamagedPassportConfiguration : IEntityTypeConfiguration<DamagedPass
             .WithMany() // Adjust navigation property as needed.
             .HasForeignKey(dp => dp.DamagedTypeId)
             .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany<AttachmentCU>()
+            .WithOne()
+            .HasForeignKey(a => a.EntityId)
+            .HasPrincipalKey(dd => dd.Id)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_DamagedPassport_Attachments");
+
 
         // Table Mapping
         builder.ToTable("DamagedPassports");
