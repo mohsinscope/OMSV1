@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Handlers;
 using OMSV1.Domain.SeedWork;
+using OMSV1.Infrastructure.Extensions;
 using OMSV1.Infrastructure.Persistence;
 using OMSV1.Infrastructure.Repositories;
 
@@ -11,21 +12,22 @@ var builder = WebApplication.CreateBuilder(args);
 // Add DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+    builder.Services.AddIdentityServices(builder.Configuration);
     // Add Identity
-    builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => 
-    {
-        // Configure Identity options
-        options.Password.RequireDigit = true;
-        options.Password.RequiredLength = 8;
-        options.Password.RequireNonAlphanumeric = true;
-        options.User.RequireUniqueEmail = true;
-    })
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+    // builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => 
+    // {
+    //     // Configure Identity options
+    //     options.Password.RequireDigit = true;
+    //     options.Password.RequiredLength = 8;
+    //     options.Password.RequireNonAlphanumeric = true;
+    //     options.User.RequireUniqueEmail = true;
+    // })
+    // .AddEntityFrameworkStores<AppDbContext>()
+    // .AddDefaultTokenProviders();
 
 // Add Generic Repository
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
 
 // Register MediatR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllOfficesQueryHandler).Assembly));

@@ -5,7 +5,7 @@
 namespace OMSV1.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class mifration : Migration
+    public partial class InitialCreateAuth5 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

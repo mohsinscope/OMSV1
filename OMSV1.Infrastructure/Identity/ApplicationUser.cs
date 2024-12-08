@@ -6,12 +6,12 @@ namespace OMSV1.Infrastructure.Identity;
 
 using Microsoft.AspNetCore.Identity;
 
-public class ApplicationUser 
+public class ApplicationUser :IdentityUser<int>
 {
-    // // Implement the interface explicitly
-    // int IUserReference.Id => Id;
-    // string IUserReference.Email => Email;
-    // string IUserReference.UserName => UserName;
+    public DateTime Created { get; set; } = DateTime.UtcNow;
+    public DateTime LastActive { get; set; } = DateTime.UtcNow;
 
-    // // Existing ApplicationUser implementation
+    public ICollection<AppUserRole> UserRoles { get; set; } = [];
+
+
 }

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "+ZOkkgedAQs=",
+  "dgSpecHash": "OxnH8tj70FA=",
   "success": true,
   "projectFilePath": "C:\\Users\\Mohsen Ali\\Desktop\\OMSV1\\OMSV1.Application\\OMSV1.Application.csproj",
   "expectedPackageFiles": [
@@ -70,12 +70,5 @@
     "C:\\Users\\Mohsen Ali\\.nuget\\packages\\system.text.encoding.codepages\\6.0.0\\system.text.encoding.codepages.6.0.0.nupkg.sha512",
     "C:\\Users\\Mohsen Ali\\.nuget\\packages\\system.threading.channels\\6.0.0\\system.threading.channels.6.0.0.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "Undefined",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Problem reading the cache file C:\\Users\\Mohsen Ali\\Desktop\\OMSV1\\OMSV1.Application\\obj\\project.nuget.cache : Invalid property identifier character: <. Path 'version', line 3, position 0."
-    }
-  ]
+  "logs": []
 }
