@@ -1,30 +1,37 @@
 using System;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OMSV1.Domain.Entities.Profiles;
 
 namespace OMSV1.Infrastructure.Configurations;
 
-public class ProfileConfiguration
-{
-    // public void Configure(EntityTypeBuilder<Profile> builder)
-    // {
-    //     // Primary Key Configuration
-    //     builder.HasKey(p => p.Id);
+public class ProfileConfiguration : IEntityTypeConfiguration<Profile>
+    {
+        public void Configure(EntityTypeBuilder<Profile> builder)
+        {
+            // Primary key
+            builder.HasKey(p => p.Id);
 
-    //     // One-to-one relationship between Profile and ApplicationUser
-    //     builder.HasOne(p => p.User)  // Profile has one User
-    //         .WithOne() // ApplicationUser has one Profile
-    //         .HasForeignKey<Profile>(p => p.UserId) // Foreign key is UserId
-    //         .OnDelete(DeleteBehavior.Cascade); // Optional cascading delete
+            // Configure the relationship with IdentityUser
+            builder.HasOne<IdentityUser>()
+                   .WithOne()
+                   .HasForeignKey<Profile>(p => p.UserId)
+                   .OnDelete(DeleteBehavior.Cascade);
 
-    //     // Configure additional properties if necessary
-    //     builder.Property(p => p.FirstName)
-    //         .IsRequired()  // FirstName is required
-    //         .HasMaxLength(100);
+            // Configure properties
+            builder.Property(p => p.FirstName)
+                   .HasMaxLength(100)
+                   .IsRequired();
 
-    //     builder.Property(p => p.LastName)
-    //         .IsRequired()  // LastName is required
-    //         .HasMaxLength(100);
-    // }
-}
+            builder.Property(p => p.LastName)
+                   .HasMaxLength(100)
+                   .IsRequired();
+
+            builder.Property(p => p.DateOfBirth)
+                   .IsRequired();
+
+            // Table name
+            builder.ToTable("Profiles");
+        }
+    }

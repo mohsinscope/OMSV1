@@ -4,32 +4,37 @@ using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Domain.Entities.Profiles;
 
-// Domain/Entities/Profile.cs
-public class Profile : Entity
-{
-    public int UserId { get; private set; }
-    
-    // Reference the interface instead of concrete implementation
-    public IUserReference User { get; private set; }
-
-    public string FirstName { get; private set; }
-    public string LastName { get; private set; }
-
-    private Profile() {} // For EF Core
-
-    public static Profile Create(
-        IUserReference user, 
-        string firstName, 
-        string lastName)
+ public class Profile : IAggregateRoot
     {
-        return new Profile
+        public Guid Id { get; private set; }
+
+        public string UserId { get; private set; }
+
+        public string FirstName { get; private set; }
+        public string LastName { get; private set; }
+        public DateTime DateOfBirth { get; private set; }
+
+        private Profile() { }
+
+        public Profile(string userId, string firstName, string lastName, DateTime dateOfBirth)
         {
-            Id = 0, // Default value, assuming the database generates it.
-            UserId = user.Id,
-            User = user,
-            FirstName = firstName,
-            LastName = lastName
-        };
+            Id = Guid.NewGuid();
+            UserId = userId;
+            FirstName = firstName;
+            LastName = lastName;
+            DateOfBirth = dateOfBirth;
+        }
+
+        public void UpdateName(string firstName, string lastName)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+        }
+
+        public void UpdateDateOfBirth(DateTime dateOfBirth)
+        {
+            DateOfBirth = dateOfBirth;
+        }
     }
-}
+
 
