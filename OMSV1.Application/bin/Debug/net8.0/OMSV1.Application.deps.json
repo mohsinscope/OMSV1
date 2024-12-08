@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v8.0": {
       "OMSV1.Application/1.0.0": {
         "dependencies": {
+          "Autofac.Extensions.DependencyInjection": "10.0.0",
           "MediatR": "12.4.1",
           "MediatR.Extensions.Autofac.DependencyInjection": "12.2.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "8.0.11",
@@ -30,6 +31,18 @@
           "lib/net8.0/Autofac.dll": {
             "assemblyVersion": "8.1.1.0",
             "fileVersion": "8.1.1.0"
+          }
+        }
+      },
+      "Autofac.Extensions.DependencyInjection/10.0.0": {
+        "dependencies": {
+          "Autofac": "8.1.1",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.0"
+        },
+        "runtime": {
+          "lib/net8.0/Autofac.Extensions.DependencyInjection.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.0.0"
           }
         }
       },
@@ -805,7 +818,10 @@
       "System.Threading.Channels/6.0.0": {},
       "OMSV1.Domain/1.0.0": {
         "runtime": {
-          "OMSV1.Domain.dll": {}
+          "OMSV1.Domain.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "OMSV1.Infrastructure/1.0.0": {
@@ -821,7 +837,10 @@
           "OMSV1.Domain": "1.0.0"
         },
         "runtime": {
-          "OMSV1.Infrastructure.dll": {}
+          "OMSV1.Infrastructure.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }
@@ -838,6 +857,13 @@
       "sha512": "sha512-lhHjVB/XJtxPDUQ/FAHWAC7Spu+P9TNfDbyx2W0ABqD1eTRo7TkcZ7l7Oq1S5pKNg7NXswdk9uH73qbOzSwQFA==",
       "path": "autofac/8.1.1",
       "hashPath": "autofac.8.1.1.nupkg.sha512"
+    },
+    "Autofac.Extensions.DependencyInjection/10.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ZjR/onUlP7BzQ7VBBigQepWLAyAzi3VRGX3pP6sBqkPRiT61fsTZqbTpRUKxo30TMgbs1o3y6bpLbETix4SJog==",
+      "path": "autofac.extensions.dependencyinjection/10.0.0",
+      "hashPath": "autofac.extensions.dependencyinjection.10.0.0.nupkg.sha512"
     },
     "Humanizer.Core/2.14.1": {
       "type": "package",

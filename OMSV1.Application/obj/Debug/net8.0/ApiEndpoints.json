@@ -1,6 +1,6 @@
 [
   {
-    "ContainingType": "OMSV1.Application.Controllers.DamagedDeviceController",
+    "ContainingType": "OMSV1.Application.Controllers.DamagedDevices.DamagedDeviceController",
     "Method": "GetAllDamagedDevices",
     "RelativePath": "api/DamagedDevice",
     "HttpMethod": "GET",
@@ -10,7 +10,7 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "OMSV1.Application.Controllers.DamagedPassportController",
+    "ContainingType": "OMSV1.Application.Controllers.DamagedPassports.DamagedPassportController",
     "Method": "GetAllDamagedPassports",
     "RelativePath": "api/DamagedPassport",
     "HttpMethod": "GET",
@@ -20,7 +20,7 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "OMSV1.Application.Controllers.GovernorateController",
+    "ContainingType": "OMSV1.Application.Controllers.Governorates.GovernorateController",
     "Method": "GetAllGovernorates",
     "RelativePath": "api/Governorate",
     "HttpMethod": "GET",
@@ -30,7 +30,7 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "OMSV1.Application.Controllers.OfficeController",
+    "ContainingType": "OMSV1.Application.Controllers.Offices.OfficeController",
     "Method": "GetAllOffices",
     "RelativePath": "api/Office",
     "HttpMethod": "GET",

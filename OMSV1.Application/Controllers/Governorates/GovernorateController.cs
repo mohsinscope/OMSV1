@@ -1,18 +1,13 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using OMSV1.Application.Queries;
-namespace OMSV1.Application.Controllers
+using OMSV1.Application.Queries.Governorates;
+namespace OMSV1.Application.Controllers.Governorates
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class GovernorateController : ControllerBase
+    public class GovernorateController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public GovernorateController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        private readonly IMediator _mediator = mediator;
 
         [HttpGet]
         public async Task<IActionResult> GetAllGovernorates()
