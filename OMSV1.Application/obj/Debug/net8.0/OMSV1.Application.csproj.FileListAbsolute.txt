@@ -279,3 +279,4 @@ C:\Users\Mohsen Ali\Desktop\OMSV1\OMSV1.Application\bin\Debug\net8.0\MediatR.dll
 C:\Users\Mohsen Ali\Desktop\OMSV1\OMSV1.Application\bin\Debug\net8.0\MediatR.Contracts.dll
 C:\Users\Mohsen Ali\Desktop\OMSV1\OMSV1.Application\bin\Debug\net8.0\MediatR.Extensions.Autofac.DependencyInjection.dll
 >>>>>>> 22733fcdf149a262370cb584dd58055997496c07
+C:\Users\Mohsen Ali\Desktop\OMSV1\OMSV1.Application\bin\Debug\net8.0\Autofac.Extensions.DependencyInjection.dll
