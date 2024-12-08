@@ -21,16 +21,16 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, AppRole, int,
         : base(options)
     {
     }
-        public required DbSet<DamagedDevice> DamagedDevices { get; set; }
-        public required  DbSet<DamagedPassport> DamagedPassports { get; set; }
-        public required  DbSet<DamagedType> DamagedTypes { get; set; }
-        public required  DbSet<DamagedDeviceType> DamagedDeviceTypes { get; set; }
-        public required  DbSet<DeviceType> DeviceTypes { get; set; }
-        public required DbSet<AttachmentCU> AttachmentCUs { get; set; }
-        public required DbSet<Office> Offices { get; set; }
-        public required DbSet<Governorate> Governorates { get; set; }
+        public  DbSet<DamagedDevice> DamagedDevices { get; set; }
+        public   DbSet<DamagedPassport> DamagedPassports { get; set; }
+        public   DbSet<DamagedType> DamagedTypes { get; set; }
+        public   DbSet<DamagedDeviceType> DamagedDeviceTypes { get; set; }
+        public   DbSet<DeviceType> DeviceTypes { get; set; }
+        public  DbSet<AttachmentCU> AttachmentCUs { get; set; }
+        public  DbSet<Office> Offices { get; set; }
+        public  DbSet<Governorate> Governorates { get; set; }
 
-        public required DbSet<ApplicationUser> ApplicationUser { get; set; }
+        public  DbSet<ApplicationUser> ApplicationUser { get; set; } 
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
