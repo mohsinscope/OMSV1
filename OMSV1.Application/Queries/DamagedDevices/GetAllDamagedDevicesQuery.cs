@@ -4,7 +4,5 @@ using System.Collections.Generic;
 
 namespace OMSV1.Application.Queries.DamagedDevices
 {
-    public class GetAllDamagedDevicesQuery : IRequest<IReadOnlyList<DamagedDevice>>
-    {
-    }
+    public class GetAllDamagedDevicesQuery : IRequest<IReadOnlyList<DamagedDevice>> { }
 }

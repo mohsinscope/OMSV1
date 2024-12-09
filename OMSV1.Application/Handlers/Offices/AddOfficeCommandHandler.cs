@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using OMSV1.Application.Commands.Office;
+using OMSV1.Application.Commands.Offices;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
 using System.Threading;

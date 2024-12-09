@@ -34,8 +34,8 @@ namespace OMSV1.Application.Controllers.User;
 
             var user = new ApplicationUser
             {
-                UserName ="mohsin",
-                Email = "mohsin@test.com",
+                UserName = userDto.UserName,
+                Email = userDto.Email,
                 Created = DateTime.UtcNow,
                 LastActive = DateTime.UtcNow
             };

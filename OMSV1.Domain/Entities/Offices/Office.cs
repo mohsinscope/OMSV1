@@ -23,4 +23,18 @@ public class Office(string name,
     public int GovernorateId { get; private set; } = GovernorateId;
     public Governorate? Governorate { get; private set; }
 
+    public void UpdateCode(int code)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateName(string name)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateStaff(int receivingStaff, int accountStaff, int printingStaff, int qualityStaff, int deliveryStaff)
+    {
+        throw new NotImplementedException();
+    }
 }

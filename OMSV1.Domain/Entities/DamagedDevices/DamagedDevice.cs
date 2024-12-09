@@ -46,7 +46,9 @@ public class DamagedDevice(
         _attachments.Add(attachment);
     }
 
-
-
+    public void UpdateDeviceDetails(string serialNumber, DateTime date, int damagedDeviceTypeId, int deviceTypeId, int officeId, int governorateId, int profileId)
+    {
+        throw new NotImplementedException();
+    }
 }
 
