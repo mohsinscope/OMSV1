@@ -27,6 +27,9 @@ public class LectureConfiguration : IEntityTypeConfiguration<Lecture>
         builder.Property(l => l.GovernorateId)
             .IsRequired();
 
+        builder.Property(l => l.ProfileId)
+            .IsRequired();
+
         builder.HasOne(l => l.Governorate) 
             .WithMany()  
             .HasForeignKey(l => l.GovernorateId)
@@ -35,6 +38,11 @@ public class LectureConfiguration : IEntityTypeConfiguration<Lecture>
         builder.HasOne(l => l.Office)  
             .WithMany()  
             .HasForeignKey(l => l.OfficeId)
+            .OnDelete(DeleteBehavior.Restrict); 
+
+        builder.HasOne(l => l.Profile)  
+            .WithMany()  
+            .HasForeignKey(l => l.ProfileId)
             .OnDelete(DeleteBehavior.Restrict); 
 
                 // Configure Attachments

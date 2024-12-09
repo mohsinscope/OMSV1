@@ -13,15 +13,11 @@ using OMSV1.Infrastructure.Identity;
 namespace OMSV1.Infrastructure.Persistence;
 
 
-public class AppDbContext : IdentityDbContext<ApplicationUser, AppRole, int,
+public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<ApplicationUser, AppRole, int,
     IdentityUserClaim<int>, AppUserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>,
-    IdentityUserToken<int>>
+    IdentityUserToken<int>>(options)
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) 
-        : base(options)
-    {
-    }
-        public  DbSet<DamagedDevice> DamagedDevices { get; set; }
+    public DbSet<DamagedDevice> DamagedDevices { get; set; }
         public   DbSet<DamagedPassport> DamagedPassports { get; set; }
         public   DbSet<DamagedType> DamagedTypes { get; set; }
         public   DbSet<DamagedDeviceType> DamagedDeviceTypes { get; set; }

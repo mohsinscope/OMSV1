@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace OMSV1.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreateAuth4 : Migration
+    public partial class AddProfile : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -116,10 +116,11 @@ namespace OMSV1.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "IdentityUser",
+                name: "IdentityUser<int>",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserName = table.Column<string>(type: "text", nullable: true),
                     NormalizedUserName = table.Column<string>(type: "text", nullable: true),
                     Email = table.Column<string>(type: "text", nullable: true),
@@ -137,7 +138,7 @@ namespace OMSV1.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_IdentityUser", x => x.Id);
+                    table.PrimaryKey("PK_IdentityUser<int>", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -277,21 +278,36 @@ namespace OMSV1.Infrastructure.Migrations
                 name: "Profiles",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FullName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Position = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    OfficeId = table.Column<int>(type: "integer", nullable: false),
+                    GovernorateId = table.Column<int>(type: "integer", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Profiles", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Profiles_IdentityUser_UserId",
+                        name: "FK_Profiles_Governorates_GovernorateId",
+                        column: x => x.GovernorateId,
+                        principalTable: "Governorates",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Profiles_IdentityUser<int>_UserId",
                         column: x => x.UserId,
-                        principalTable: "IdentityUser",
+                        principalTable: "IdentityUser<int>",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Profiles_Offices_OfficeId",
+                        column: x => x.OfficeId,
+                        principalTable: "Offices",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -311,6 +327,7 @@ namespace OMSV1.Infrastructure.Migrations
                     WorkingHours = table.Column<int>(type: "integer", nullable: false),
                     OfficeId = table.Column<int>(type: "integer", nullable: false),
                     GovernorateId = table.Column<int>(type: "integer", nullable: false),
+                    ProfileId = table.Column<int>(type: "integer", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -326,6 +343,12 @@ namespace OMSV1.Infrastructure.Migrations
                         name: "FK_Attendances_Offices_OfficeId",
                         column: x => x.OfficeId,
                         principalTable: "Offices",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Attendances_Profiles_ProfileId",
+                        column: x => x.ProfileId,
+                        principalTable: "Profiles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -372,6 +395,12 @@ namespace OMSV1.Infrastructure.Migrations
                         principalTable: "Offices",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_DamagedDevices_Profiles_ProfileId",
+                        column: x => x.ProfileId,
+                        principalTable: "Profiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -385,6 +414,7 @@ namespace OMSV1.Infrastructure.Migrations
                     DamagedTypeId = table.Column<int>(type: "integer", nullable: false),
                     OfficeId = table.Column<int>(type: "integer", nullable: false),
                     GovernorateId = table.Column<int>(type: "integer", nullable: false),
+                    ProfileId = table.Column<int>(type: "integer", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -408,6 +438,12 @@ namespace OMSV1.Infrastructure.Migrations
                         principalTable: "Offices",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_DamagedPassports_Profiles_ProfileId",
+                        column: x => x.ProfileId,
+                        principalTable: "Profiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -420,6 +456,7 @@ namespace OMSV1.Infrastructure.Migrations
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     OfficeId = table.Column<int>(type: "integer", nullable: false),
                     GovernorateId = table.Column<int>(type: "integer", nullable: false),
+                    ProfileId = table.Column<int>(type: "integer", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -435,6 +472,12 @@ namespace OMSV1.Infrastructure.Migrations
                         name: "FK_Lectures_Offices_OfficeId",
                         column: x => x.OfficeId,
                         principalTable: "Offices",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Lectures_Profiles_ProfileId",
+                        column: x => x.ProfileId,
+                        principalTable: "Profiles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -561,6 +604,11 @@ namespace OMSV1.Infrastructure.Migrations
                 column: "OfficeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Attendances_ProfileId",
+                table: "Attendances",
+                column: "ProfileId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DamagedDevices_DamagedDeviceTypeId",
                 table: "DamagedDevices",
                 column: "DamagedDeviceTypeId");
@@ -581,6 +629,11 @@ namespace OMSV1.Infrastructure.Migrations
                 column: "OfficeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DamagedDevices_ProfileId",
+                table: "DamagedDevices",
+                column: "ProfileId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DamagedPassports_DamagedTypeId",
                 table: "DamagedPassports",
                 column: "DamagedTypeId");
@@ -596,6 +649,11 @@ namespace OMSV1.Infrastructure.Migrations
                 column: "OfficeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DamagedPassports_ProfileId",
+                table: "DamagedPassports",
+                column: "ProfileId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Lectures_GovernorateId",
                 table: "Lectures",
                 column: "GovernorateId");
@@ -606,9 +664,24 @@ namespace OMSV1.Infrastructure.Migrations
                 column: "OfficeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Lectures_ProfileId",
+                table: "Lectures",
+                column: "ProfileId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Offices_GovernorateId",
                 table: "Offices",
                 column: "GovernorateId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Profiles_GovernorateId",
+                table: "Profiles",
+                column: "GovernorateId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Profiles_OfficeId",
+                table: "Profiles",
+                column: "OfficeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Profiles_UserId",
@@ -642,9 +715,6 @@ namespace OMSV1.Infrastructure.Migrations
                 name: "Attendances");
 
             migrationBuilder.DropTable(
-                name: "Profiles");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
@@ -660,9 +730,6 @@ namespace OMSV1.Infrastructure.Migrations
                 name: "Lectures");
 
             migrationBuilder.DropTable(
-                name: "IdentityUser");
-
-            migrationBuilder.DropTable(
                 name: "DamagedDeviceTypes");
 
             migrationBuilder.DropTable(
@@ -670,6 +737,12 @@ namespace OMSV1.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "DamagedTypes");
+
+            migrationBuilder.DropTable(
+                name: "Profiles");
+
+            migrationBuilder.DropTable(
+                name: "IdentityUser<int>");
 
             migrationBuilder.DropTable(
                 name: "Offices");

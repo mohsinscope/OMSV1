@@ -5,6 +5,7 @@ using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Enums;
+using OMSV1.Domain.Entities.Profiles;
 
 namespace OMSV1.Domain.Entities.DamagedDevices;
 
@@ -28,7 +29,7 @@ public class DamagedDevice(
     public DeviceType? DeviceType { get; private set; }
     public Governorate? Governorate { get; private set; }
     public Office? Office { get; private set; }
-
+    public Profile? Profile { get; private set; }
 
     private readonly List<AttachmentCU> _attachments = new();
     public IReadOnlyCollection<AttachmentCU> Attachments => _attachments.AsReadOnly();

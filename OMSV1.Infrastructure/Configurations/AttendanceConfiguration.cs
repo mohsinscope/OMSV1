@@ -47,18 +47,23 @@ public class AttendanceConfiguration : IEntityTypeConfiguration<Attendance>
 
         builder.Property(a => a.GovernorateId)
             .IsRequired();
+        builder.Property(a => a.ProfileId)
+            .IsRequired();
 
-        // Relationship Configuration: Attendance -> Governorate
-        builder.HasOne(a => a.Governorate)  // Explicitly specify the navigation property here
-            .WithMany()  // Assuming Governorate doesn't have a navigation property back to Attendance
+        builder.HasOne(a => a.Governorate)  
+            .WithMany()  
             .HasForeignKey(a => a.GovernorateId)
-            .OnDelete(DeleteBehavior.Restrict);  // Adjust delete behavior if necessary
+            .OnDelete(DeleteBehavior.Restrict); 
 
-        // Relationship Configuration: Attendance -> Office
-        builder.HasOne(a => a.Office)  // Explicitly specify the navigation property here
-            .WithMany()  // Assuming Office doesn't have a navigation property back to Attendance
+        builder.HasOne(a => a.Office)  
+            .WithMany()  
             .HasForeignKey(a => a.OfficeId)
-            .OnDelete(DeleteBehavior.Restrict);  // Adjust delete behavior if necessary
+            .OnDelete(DeleteBehavior.Restrict);  
+
+        builder.HasOne(a => a.Profile)  
+            .WithMany()  
+            .HasForeignKey(a => a.ProfileId)
+            .OnDelete(DeleteBehavior.Restrict);  
 
         builder.ToTable("Attendances");
     }
