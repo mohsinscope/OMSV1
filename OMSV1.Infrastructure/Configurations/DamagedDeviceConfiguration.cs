@@ -55,6 +55,11 @@ public class DamagedDeviceConfiguration : IEntityTypeConfiguration<DamagedDevice
             .HasForeignKey(dd => dd.OfficeId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(dd => dd.Profile)
+            .WithMany()
+            .HasForeignKey(dd => dd.ProfileId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         // Configure Attachments
         builder.HasMany<AttachmentCU>()
             .WithOne()

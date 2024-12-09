@@ -3,6 +3,7 @@ using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Enums;
+using OMSV1.Domain.Entities.Profiles;
 namespace OMSV1.Domain.Entities.Attendances;
 
 public class Attendance(string name,
@@ -15,8 +16,8 @@ public class Attendance(string name,
                     string note,
                     WorkingHours workingHours,
                     int governorateId,
-                    int officeId
-                   ) : Entity
+                    int officeId,
+                    int profileId) : Entity
 {
     public string Name { get; private set; } = name;
     public int ReceivingStaff { get; private set; } = receivingStaff;
@@ -29,7 +30,12 @@ public class Attendance(string name,
     public WorkingHours WorkingHours { get; private set; } = workingHours;
     public int OfficeId { get; private set; } = officeId;
     public int GovernorateId { get; private set; } = governorateId;
+    public int ProfileId { get; private set; } = profileId;
+
+
     public Governorate? Governorate { get; private set; }
     public Office? Office { get; private set; }
+    public Profile? Profile { get; private set; }
+
 
 }

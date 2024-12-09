@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace OMSV1.Application.Dtos;
 
-    public class AddUserDto
+    public class RegisterDto
     {
         [Required]
         [MinLength(3)]

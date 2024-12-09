@@ -29,6 +29,9 @@ public class DamagedPassportConfiguration : IEntityTypeConfiguration<DamagedPass
         builder.Property(dp => dp.GovernorateId)
             .IsRequired();
 
+        builder.Property(dp => dp.ProfileId)
+            .IsRequired();
+
         // Relationships
         builder.HasOne(dp => dp.Governorate)
             .WithMany() // Adjust navigation property as needed.
@@ -38,6 +41,11 @@ public class DamagedPassportConfiguration : IEntityTypeConfiguration<DamagedPass
         builder.HasOne(dp => dp.Office)
             .WithMany() // Adjust navigation property as needed.
             .HasForeignKey(dp => dp.OfficeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(dp => dp.Profile)
+            .WithMany() // Adjust navigation property as needed.
+            .HasForeignKey(dp => dp.ProfileId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(dp => dp.DamagedType)

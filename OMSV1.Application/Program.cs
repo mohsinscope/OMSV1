@@ -10,6 +10,7 @@ using OMSV1.Application.Handlers.Governorates;
 using OMSV1.Application.Handlers.Offices;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Infrastructure.Extensions;
+using OMSV1.Infrastructure.Identity;
 using OMSV1.Infrastructure.Persistence;
 using OMSV1.Infrastructure.Repositories;
 
@@ -19,21 +20,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
     builder.Services.AddIdentityServices(builder.Configuration);
-    // Add Identity
-    // builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => 
-    // {
-    //     // Configure Identity options
-    //     options.Password.RequireDigit = true;
-    //     options.Password.RequiredLength = 8;
-    //     options.Password.RequireNonAlphanumeric = true;
-    //     options.User.RequireUniqueEmail = true;
-    // })
-    // .AddEntityFrameworkStores<AppDbContext>()
-    // .AddDefaultTokenProviders();
+    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 
 // Add Generic Repository
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
+builder.Services.AddApplicationServices(builder.Configuration);
 
 // Register MediatR
 //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllOfficesQueryHandler).Assembly));
@@ -52,6 +44,7 @@ builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
     containerBuilder.RegisterModule(new SupervisorRoleModule());
     //containerBuilder.RegisterModule(new EmployeeRoleModule());
     containerBuilder.RegisterModule(new ManagerRoleModule());
+    
     //containerBuilder.RegisterModule(new EmployeeOfExpensesRoleModule());
     //containerBuilder.RegisterModule(new EmployeeOfDamagedRoleModule());
 });
@@ -63,6 +56,36 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.MapControllers();
 
+
+
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+
+    // Create roles
+    var roles = new[] { "Admin", "Manager", "Supervisor" };
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new AppRole { Name = role });
+        }
+    }
+
+    // Create an admin user
+    var adminEmail = "admin@example.com";
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    if (adminUser == null)
+    {
+        var user = new ApplicationUser { UserName = adminEmail, Email = adminEmail };
+        await userManager.CreateAsync(user, "Admin@123");
+        await userManager.AddToRoleAsync(user, "Admin");
+    }
+}
 
 
 

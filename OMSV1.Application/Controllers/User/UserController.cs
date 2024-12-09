@@ -1,64 +1,78 @@
 using System;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos;
+using OMSV1.Application.Dtos.User;
 using OMSV1.Infrastructure.Identity;
+using OMSV1.Infrastructure.Interfaces;
 
 namespace OMSV1.Application.Controllers.User;
 
 
+public class AccountController(UserManager<ApplicationUser> userManager,ITokenService tokenService,IMapper mapper) : BaseApiController
+{
 
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UserController : ControllerBase
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("register")]
+    public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<AppRole> _roleManager;
+        if (await ExistUser(registerDto.UserName)) 
+            return BadRequest("Username already taken");
 
-        public UserController(UserManager<ApplicationUser> userManager, RoleManager<AppRole> roleManager)
+        var user = mapper.Map<ApplicationUser>(registerDto);
+
+        var result = await userManager.CreateAsync(user, registerDto.Password);
+        if (!result.Succeeded) 
+            return BadRequest(result.Errors);
+
+        if (registerDto.Roles == null || !registerDto.Roles.Any())
+            return BadRequest("You must assign at least one role to the user");
+
+        // // Check if the roles exist
+        // foreach (var role in registerDto.Roles)
+        // {
+        //     if (!await roleManager.RoleExistsAsync(role))
+        //         return BadRequest($"Role '{role}' does not exist");
+        // }
+
+        var roleResult = await userManager.AddToRolesAsync(user, registerDto.Roles);
+        if (!roleResult.Succeeded) 
+            return BadRequest("Failed to assign roles to the user");
+
+        return new UserDto
         {
-            _userManager = userManager;
-            _roleManager = roleManager;
-        }
+            Username = user.UserName!,
+            Token = await tokenService.CreateToken(user),
+        };
+    }
+    
+    
+    [HttpPost("Login")]
+    public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
+    {
+        var user = await userManager.Users
+            .AsQueryable() // Ensure it's treated as IQueryable for EF Core
+            .FirstOrDefaultAsync(x => x.NormalizedUserName == loginDto.UserName.ToUpper());
 
-        [HttpPost("add-user")]
-        public async Task<IActionResult> AddUser([FromBody] AddUserDto userDto)
+        if(user == null || user.UserName ==null) return Unauthorized("Invalid Username");
+        
+        var result = await userManager.CheckPasswordAsync(user,loginDto.Password);
+
+        if(!result) return Unauthorized();
+
+        return new UserDto
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            Username = user.UserName,
+            Token = await tokenService.CreateToken(user),
+        };
 
-            // Check if username already exists
-            var existingUser = await _userManager.FindByNameAsync(userDto.UserName);
-            if (existingUser != null)
-                return BadRequest($"User with username '{userDto.UserName}' already exists.");
-
-            var user = new ApplicationUser
-            {
-                UserName ="mohsin",
-                Email = "mohsin@test.com",
-                Created = DateTime.UtcNow,
-                LastActive = DateTime.UtcNow
-            };
-
-            var result = await _userManager.CreateAsync(user, userDto.Password);
-
-            if (!result.Succeeded)
-                return BadRequest(result.Errors);
-
-            // Optionally add to roles
-            if (userDto.Roles != null && userDto.Roles.Any())
-            {
-                foreach (var role in userDto.Roles)
-                {
-                    if (!await _roleManager.RoleExistsAsync(role))
-                        return BadRequest($"Role '{role}' does not exist.");
-
-                    await _userManager.AddToRoleAsync(user, role);
-                }
-            }
-
-            return Ok(new { Message = "User created successfully." });
-        }
     }
 
-
+    private async Task<bool> ExistUser(string Username){
+        
+        return await userManager.Users.AnyAsync(x=>x.NormalizedUserName == Username.ToUpper());
+    }
+}

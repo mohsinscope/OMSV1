@@ -12,8 +12,8 @@ using OMSV1.Infrastructure.Persistence;
 namespace OMSV1.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241208112209_InitialCreateAuth4")]
-    partial class InitialCreateAuth4
+    [Migration("20241208164024_AddProfile")]
+    partial class AddProfile
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,10 +49,13 @@ namespace OMSV1.Infrastructure.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser<int>", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
@@ -98,7 +101,7 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("IdentityUser");
+                    b.ToTable("IdentityUser<int>");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
@@ -257,6 +260,9 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Property<int>("PrintingStaff")
                         .HasColumnType("integer");
 
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("QualityStaff")
                         .HasColumnType("integer");
 
@@ -271,6 +277,8 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasIndex("GovernorateId");
 
                     b.HasIndex("OfficeId");
+
+                    b.HasIndex("ProfileId");
 
                     b.ToTable("Attendances", (string)null);
                 });
@@ -318,6 +326,8 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasIndex("GovernorateId");
 
                     b.HasIndex("OfficeId");
+
+                    b.HasIndex("ProfileId");
 
                     b.ToTable("DamagedDevices", (string)null);
                 });
@@ -402,6 +412,9 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DamagedTypeId");
@@ -409,6 +422,8 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasIndex("GovernorateId");
 
                     b.HasIndex("OfficeId");
+
+                    b.HasIndex("ProfileId");
 
                     b.ToTable("DamagedPassports", (string)null);
                 });
@@ -485,6 +500,9 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Property<int>("OfficeId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -495,6 +513,8 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasIndex("GovernorateId");
 
                     b.HasIndex("OfficeId");
+
+                    b.HasIndex("ProfileId");
 
                     b.ToTable("Lectures", (string)null);
                 });
@@ -545,28 +565,37 @@ namespace OMSV1.Infrastructure.Migrations
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Profiles.Profile", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
 
-                    b.Property<DateTime>("DateOfBirth")
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("FirstName")
+                    b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                    b.Property<int>("GovernorateId")
+                        .HasColumnType("integer");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("OfficeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GovernorateId");
+
+                    b.HasIndex("OfficeId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -777,9 +806,17 @@ namespace OMSV1.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("OMSV1.Domain.Entities.Profiles.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Governorate");
 
                     b.Navigation("Office");
+
+                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", b =>
@@ -808,6 +845,12 @@ namespace OMSV1.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("OMSV1.Domain.Entities.Profiles.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("DamagedDeviceTypes");
 
                     b.Navigation("DeviceType");
@@ -815,6 +858,8 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Navigation("Governorate");
 
                     b.Navigation("Office");
+
+                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.DamagedPassport.DamagedPassport", b =>
@@ -837,11 +882,19 @@ namespace OMSV1.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("OMSV1.Domain.Entities.Profiles.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("DamagedType");
 
                     b.Navigation("Governorate");
 
                     b.Navigation("Office");
+
+                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Lectures.Lecture", b =>
@@ -858,9 +911,17 @@ namespace OMSV1.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("OMSV1.Domain.Entities.Profiles.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Governorate");
 
                     b.Navigation("Office");
+
+                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Offices.Office", b =>
@@ -876,11 +937,27 @@ namespace OMSV1.Infrastructure.Migrations
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Profiles.Profile", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("OMSV1.Domain.Entities.Governorates.Governorate", "Governorate")
+                        .WithMany()
+                        .HasForeignKey("GovernorateId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OMSV1.Domain.Entities.Offices.Office", "Office")
+                        .WithMany()
+                        .HasForeignKey("OfficeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser<int>", null)
                         .WithOne()
                         .HasForeignKey("OMSV1.Domain.Entities.Profiles.Profile", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Governorate");
+
+                    b.Navigation("Office");
                 });
 
             modelBuilder.Entity("OMSV1.Infrastructure.Identity.AppUserRole", b =>
