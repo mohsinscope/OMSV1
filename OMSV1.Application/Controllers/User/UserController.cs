@@ -1,9 +1,11 @@
 using System;
 using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OMSV1.Application.Commands.Users;
 using OMSV1.Application.Dtos;
 using OMSV1.Application.Dtos.User;
 using OMSV1.Infrastructure.Identity;
@@ -12,8 +14,16 @@ using OMSV1.Infrastructure.Interfaces;
 namespace OMSV1.Application.Controllers.User;
 
 
-public class AccountController(UserManager<ApplicationUser> userManager,ITokenService tokenService,IMapper mapper) : BaseApiController
+public class AccountController(UserManager<ApplicationUser> userManager,IMediator mediator,ITokenService tokenService,IMapper mapper) : BaseApiController
 {
+
+
+    // private readonly IMediator _mediator;
+
+    // public AccountController(IMediator mediator)
+    // {
+    //     _mediator = mediator;
+    // }
 
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("register")]
@@ -49,7 +59,17 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
         };
     }
     
-    
+
+
+
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("register2")]
+    public async Task<ActionResult<UserDto>> Register2(RegisterUserCommand command)
+    {
+        var userDto = await mediator.Send(command);
+        return Ok(userDto);
+    }
+        
     [HttpPost("Login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {

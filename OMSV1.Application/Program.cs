@@ -1,9 +1,9 @@
+using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using OMSV1.Application.DependencyInjection;
 using OMSV1.Application.Handlers.DamagedDevices;
 using OMSV1.Application.Handlers.DamagedPassports;
 using OMSV1.Application.Handlers.Governorates;
@@ -13,19 +13,24 @@ using OMSV1.Infrastructure.Extensions;
 using OMSV1.Infrastructure.Identity;
 using OMSV1.Infrastructure.Persistence;
 using OMSV1.Infrastructure.Repositories;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-    builder.Services.AddIdentityServices(builder.Configuration);
-    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
-// Add Generic Repository
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+builder.Services.AddIdentityServices(builder.Configuration);
+
 builder.Services.AddApplicationServices(builder.Configuration);
+
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
 
 // Register MediatR
 //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllOfficesQueryHandler).Assembly));
@@ -37,20 +42,20 @@ builder.Services.AddApplicationServices(builder.Configuration);
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
 // Autofac Module Registration
-builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
-{
-    // Register Role-Based Modules
-    containerBuilder.RegisterModule(new AdminRoleModule());
-    containerBuilder.RegisterModule(new SupervisorRoleModule());
-    //containerBuilder.RegisterModule(new EmployeeRoleModule());
-    containerBuilder.RegisterModule(new ManagerRoleModule());
+// builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
+// {
+//     // Register Role-Based Modules
+//     containerBuilder.RegisterModule(new AdminRoleModule());
+//     containerBuilder.RegisterModule(new SupervisorRoleModule());
+//     //containerBuilder.RegisterModule(new EmployeeRoleModule());
+//     containerBuilder.RegisterModule(new ManagerRoleModule());
     
-    //containerBuilder.RegisterModule(new EmployeeOfExpensesRoleModule());
-    //containerBuilder.RegisterModule(new EmployeeOfDamagedRoleModule());
-});
-// Add Controllers
-builder.Services.AddControllers();
+//     //containerBuilder.RegisterModule(new EmployeeOfExpensesRoleModule());
+//     //containerBuilder.RegisterModule(new EmployeeOfDamagedRoleModule());
+// });
 
+
+builder.Services.AddControllers();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
