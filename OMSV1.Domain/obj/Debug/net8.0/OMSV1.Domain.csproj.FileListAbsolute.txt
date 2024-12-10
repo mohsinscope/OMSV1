@@ -22,3 +22,15 @@ C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Domain\obj\Debug\net8.0\OMSV1.Domain.d
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Domain\obj\Debug\net8.0\refint\OMSV1.Domain.dll
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Domain\obj\Debug\net8.0\OMSV1.Domain.pdb
 C:\Users\test\Desktop\OMSV1.0\OMSV1\OMSV1.Domain\obj\Debug\net8.0\ref\OMSV1.Domain.dll
+C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Domain\bin\Debug\net8.0\OMSV1.Domain.deps.json
+C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Domain\bin\Debug\net8.0\OMSV1.Domain.dll
+C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Domain\bin\Debug\net8.0\OMSV1.Domain.pdb
+C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Domain\obj\Debug\net8.0\OMSV1.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Domain\obj\Debug\net8.0\OMSV1.Domain.AssemblyInfoInputs.cache
+C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Domain\obj\Debug\net8.0\OMSV1.Domain.AssemblyInfo.cs
+C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Domain\obj\Debug\net8.0\OMSV1.Domain.csproj.CoreCompileInputs.cache
+C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Domain\obj\Debug\net8.0\OMSV1.Domain.sourcelink.json
+C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Domain\obj\Debug\net8.0\OMSV1.Domain.dll
+C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Domain\obj\Debug\net8.0\refint\OMSV1.Domain.dll
+C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Domain\obj\Debug\net8.0\OMSV1.Domain.pdb
+C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Domain\obj\Debug\net8.0\ref\OMSV1.Domain.dll
