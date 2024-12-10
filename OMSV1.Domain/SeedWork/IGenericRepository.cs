@@ -9,6 +9,7 @@ namespace OMSV1.Domain.SeedWork
 {
     public interface IGenericRepository<T> where T : Entity
     {
+
         Task<T> AddAsync(T entity);
         Task DeleteAsync(T entity); // Return Task, not void
         Task<T?> GetByIdAsync(int id);

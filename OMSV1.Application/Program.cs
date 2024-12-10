@@ -1,3 +1,4 @@
+using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using MediatR;
@@ -12,17 +13,22 @@ using OMSV1.Infrastructure.Extensions;
 using OMSV1.Infrastructure.Identity;
 using OMSV1.Infrastructure.Persistence;
 using OMSV1.Infrastructure.Repositories;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-    builder.Services.AddIdentityServices(builder.Configuration);
-    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
-// Add Generic Repository
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+builder.Services.AddIdentityServices(builder.Configuration);
+
+builder.Services.AddApplicationServices(builder.Configuration);
+
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 
