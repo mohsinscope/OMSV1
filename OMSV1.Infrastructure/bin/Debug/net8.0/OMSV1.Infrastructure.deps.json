@@ -690,7 +690,10 @@
       "System.Threading.Channels/6.0.0": {},
       "OMSV1.Domain/1.0.0": {
         "runtime": {
-          "OMSV1.Domain.dll": {}
+          "OMSV1.Domain.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }

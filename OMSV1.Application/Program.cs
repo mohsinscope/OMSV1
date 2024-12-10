@@ -32,30 +32,15 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 
-// Register MediatR
-//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllOfficesQueryHandler).Assembly));
-//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllGovernoratesQueryHandler).Assembly));
-//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllDamagedPassportsQueryHandler).Assembly));
-//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllDamagedDevicesQueryHandler).Assembly));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+// Add Controllers
+// this is just a temporary method before we implement DTO into our system
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+    });
 
-// Use Autofac as the DI container
-builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
-
-// Autofac Module Registration
-// builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
-// {
-//     // Register Role-Based Modules
-//     containerBuilder.RegisterModule(new AdminRoleModule());
-//     containerBuilder.RegisterModule(new SupervisorRoleModule());
-//     //containerBuilder.RegisterModule(new EmployeeRoleModule());
-//     containerBuilder.RegisterModule(new ManagerRoleModule());
-    
-//     //containerBuilder.RegisterModule(new EmployeeOfExpensesRoleModule());
-//     //containerBuilder.RegisterModule(new EmployeeOfDamagedRoleModule());
-// });
-
-
-builder.Services.AddControllers();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
