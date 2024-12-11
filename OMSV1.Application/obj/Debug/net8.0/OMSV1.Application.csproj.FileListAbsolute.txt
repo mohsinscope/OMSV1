@@ -422,3 +422,4 @@ C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Application\obj\Debug\net8.0\OMSV1.Applica
 C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Application\obj\Debug\net8.0\OMSV1.Application.genruntimeconfig.cache
 C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Application\obj\Debug\net8.0\ref\OMSV1.Application.dll
 C:\Users\test\Desktop\OMS\OMSV1\OMSV1.Application\bin\Debug\net8.0\AutoMapper.dll
+C:\Users\Mohsen Ali\Desktop\OMSV1\OMSV1.Application\bin\Debug\net8.0\AutoMapper.dll

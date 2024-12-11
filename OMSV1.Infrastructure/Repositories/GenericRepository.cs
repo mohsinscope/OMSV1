@@ -40,16 +40,17 @@ namespace OMSV1.Infrastructure.Repositories
 
         // Eager loading method with optional includes
        public async Task<T?> GetByIdWithIncludesAsync(int id, params Expression<Func<T, object>>[] includes)
-{
-    IQueryable<T> query = _context.Set<T>();
+            {
+                IQueryable<T> query = _context.Set<T>();
 
-    // Apply includes for eager loading
-    foreach (var include in includes)
-    {
-        query = query.Include(include);
-    }
+                // Apply includes for eager loading
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
 
-    return await query.FirstOrDefaultAsync(e => e.Id == id);
-}
+                return await query.FirstOrDefaultAsync(e => e.Id == id);
+            }
+            
     }
 }

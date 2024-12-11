@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OMSV1.Domain.Entities.Profiles;
+using OMSV1.Infrastructure.Identity;
 
 namespace OMSV1.Infrastructure.Configurations;
 
@@ -13,7 +14,7 @@ public class ProfileConfiguration : IEntityTypeConfiguration<Profile>
         builder.HasKey(p => p.Id);
 
         // Configure the relationship with IdentityUser
-        builder.HasOne<IdentityUser<int>>() // Specify the integer key type for IdentityUser
+        builder.HasOne<ApplicationUser>() // Specify the integer key type for IdentityUser
                .WithOne()
                .HasForeignKey<Profile>(p => p.UserId)
                .OnDelete(DeleteBehavior.Cascade);
