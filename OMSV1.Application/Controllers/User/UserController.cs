@@ -14,7 +14,7 @@ using OMSV1.Infrastructure.Interfaces;
 namespace OMSV1.Application.Controllers.User;
 
 
-public class AccountController(UserManager<ApplicationUser> userManager,IMediator mediator,ITokenService tokenService,IMapper mapper) : BaseApiController
+public class AccountController(UserManager<ApplicationUser> userManager,ITokenService tokenService,IMapper mapper) : BaseApiController
 {
 
 
@@ -62,13 +62,13 @@ public class AccountController(UserManager<ApplicationUser> userManager,IMediato
 
 
 
-    [Authorize(Policy = "RequireAdminRole")]
-    [HttpPost("register2")]
-    public async Task<ActionResult<UserDto>> Register2(RegisterUserCommand command)
-    {
-        var userDto = await mediator.Send(command);
-        return Ok(userDto);
-    }
+    // [Authorize(Policy = "RequireAdminRole")]
+    // [HttpPost("register2")]
+    // public async Task<ActionResult<UserDto>> Register2(RegisterUserCommand command)
+    // {
+    //     var userDto = await mediator.Send(command);
+    //     return Ok(userDto);
+    // }
         
     [HttpPost("Login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)

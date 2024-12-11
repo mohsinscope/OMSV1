@@ -1,13 +1,5 @@
-using System.Reflection;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using OMSV1.Application.Handlers.DamagedDevices;
-using OMSV1.Application.Handlers.DamagedPassports;
-using OMSV1.Application.Handlers.Governorates;
-using OMSV1.Application.Handlers.Offices;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Infrastructure.Extensions;
 using OMSV1.Infrastructure.Identity;
