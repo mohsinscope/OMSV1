@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OMSV1.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e213927932c18f7934aa9f7d8bd9c932ec2bda05")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d93a28b2af404655ffea92a2abad756b991a637a")]
 [assembly: System.Reflection.AssemblyProductAttribute("OMSV1.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OMSV1.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

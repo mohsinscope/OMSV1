@@ -17,10 +17,7 @@ namespace OMSV1.Application.Controllers.User;
 public class AccountController(UserManager<ApplicationUser> userManager,ITokenService tokenService,IMapper mapper) : BaseApiController
 {
 
-
-
-
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = "RequireAdminRole")] 
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register2(RegisterUserCommand command)
     {
