@@ -27,28 +27,11 @@ builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
-// Register MediatR
-//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllOfficesQueryHandler).Assembly));
-//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllGovernoratesQueryHandler).Assembly));
-//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllDamagedPassportsQueryHandler).Assembly));
-//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllDamagedDevicesQueryHandler).Assembly));
 
-// Use Autofac as the DI container
-builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
-// Autofac Module Registration
-// builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
-// {
-//     // Register Role-Based Modules
-//     containerBuilder.RegisterModule(new AdminRoleModule());
-//     containerBuilder.RegisterModule(new SupervisorRoleModule());
-//     //containerBuilder.RegisterModule(new EmployeeRoleModule());
-//     containerBuilder.RegisterModule(new ManagerRoleModule());
-    
-//     //containerBuilder.RegisterModule(new EmployeeOfExpensesRoleModule());
-//     //containerBuilder.RegisterModule(new EmployeeOfDamagedRoleModule());
-// });
-// Add Controllers
+
+
+
 builder.Services.AddControllers();
 
 var app = builder.Build();

@@ -14,7 +14,7 @@ using OMSV1.Infrastructure.Interfaces;
 namespace OMSV1.Application.Controllers.User;
 
 
-public class AccountController(UserManager<ApplicationUser> userManager,ITokenService tokenService,IMapper mapper) : BaseApiController
+public class AccountController(UserManager<ApplicationUser> userManager,ITokenService tokenService,IMapper mapper , IMediator mediator) : BaseApiController
 {
 
     [Authorize(Policy = "RequireAdminRole")] 
@@ -57,4 +57,5 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
 
 
 
-
+ 
+ 
