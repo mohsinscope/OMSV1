@@ -1,10 +1,13 @@
 using System;
+using System.Net;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos;
 using OMSV1.Application.Dtos.User;
+using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Infrastructure.Identity;
@@ -12,7 +15,7 @@ using OMSV1.Infrastructure.Interfaces;
 
 namespace OMSV1.Application.Commands.Users;
 
-public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, UserDto>
+public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, IActionResult>
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
@@ -37,39 +40,72 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, UserDto>
         _unitOfWork = unitOfWork;
     }
 
-   public async Task<UserDto> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    {
+        // Null and input validation
+        if (request == null)
+            return ResponseHelper.CreateErrorResponse(HttpStatusCode.BadRequest, "Invalid request.");
+
+        if (string.IsNullOrWhiteSpace(request.UserName))
+            return ResponseHelper.CreateErrorResponse(HttpStatusCode.BadRequest, "Username is required.");
+
+        if (string.IsNullOrWhiteSpace(request.Password))
+            return ResponseHelper.CreateErrorResponse(HttpStatusCode.BadRequest, "Password is required.");
+
+        // Ensure roles is a list and not null
+        var roles = request.Roles?.ToList() ?? new List<string>();
+
+        // Check if the username already exists
+        var normalizedUsername = request.UserName.ToUpper();
+        var existingUser = await _userManager.Users.FirstOrDefaultAsync(x => x.NormalizedUserName == normalizedUsername, cancellationToken);
+        if (existingUser != null)
+            return ResponseHelper.CreateErrorResponse(HttpStatusCode.Conflict, $"Username '{request.UserName}' is already taken.");
+
+        // Validate roles
+        if (!roles.Any())
+            return ResponseHelper.CreateErrorResponse(HttpStatusCode.BadRequest, "At least one role must be assigned to the user.");
+
+        // Validate role existence
+        foreach (var roleName in roles)
         {
-            // Check if the username already exists
-            var normalizedUsername = request.UserName.ToUpper();
-            if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == normalizedUsername, cancellationToken))
-            {
-                throw new Exception("This username is already taken.");
-            }
+            if (!await _roleManager.RoleExistsAsync(roleName))
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.BadRequest, $"Role '{roleName}' does not exist.");
+        }
 
-            // Map RegisterUserCommand to RegisterDto
-            var registerDto = new RegisterDto
-            {
-                UserName = request.UserName,
-                Email = $"{request.UserName}@example.com", // Or use a specific logic for email if required
-                Password = request.Password,
-                Roles = request.Roles
-            };
+        // Map RegisterUserCommand to RegisterDto
+        var registerDto = new RegisterDto
+        {
+            UserName = request.UserName,
+            Email = $"{request.UserName}@example.com", // Customize email generation as needed
+            Password = request.Password,
+            Roles = roles
+        };
 
-            // Map RegisterDto to ApplicationUser
-            var user = _mapper.Map<ApplicationUser>(registerDto);
+        // Map RegisterDto to ApplicationUser
+        var user = _mapper.Map<ApplicationUser>(registerDto);
 
-            // Create the user
-            var result = await _userManager.CreateAsync(user, registerDto.Password);
-            if (!result.Succeeded)
-                throw new Exception("Failed to create user");
+        // Create the user
+        var userCreateResult = await _userManager.CreateAsync(user, registerDto.Password);
+        if (!userCreateResult.Succeeded)
+        {
+            // Collect and return detailed error messages
+            var errors = userCreateResult.Errors.Select(e => e.Description);
+            return ResponseHelper.CreateErrorResponse(HttpStatusCode.BadRequest, "User creation failed", errors);
+        }
 
+        try
+        {
             // Assign roles to the user
-            if (request.Roles == null || !request.Roles.Any())
-                throw new Exception("You must assign at least one role to the user");
-
-            var roleResult = await _userManager.AddToRolesAsync(user, request.Roles);
+            var roleResult = await _userManager.AddToRolesAsync(user, roles);
             if (!roleResult.Succeeded)
-                throw new Exception("Failed to assign roles to the user");
+            {
+                // Delete the user if role assignment fails
+                await _userManager.DeleteAsync(user);
+
+                // Collect and return detailed error messages
+                var roleErrors = roleResult.Errors.Select(e => e.Description);
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.BadRequest, "Role assignment failed", roleErrors);
+            }
 
             // Create the profile
             var profile = new OMSV1.Domain.Entities.Profiles.Profile(
@@ -80,23 +116,36 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, UserDto>
                 governorateId: request.GovernorateId
             );
 
-            // Add profile using the generic repository
+            // Add profile
             await _profileRepository.AddAsync(profile);
 
-            // Save all changes using the UnitOfWork
+            // Save changes
             var saveResult = await _unitOfWork.SaveAsync(cancellationToken);
             if (!saveResult)
             {
-                throw new Exception("Failed to save changes to the database.");
+                // Delete user and rollback if save fails
+                await _userManager.DeleteAsync(user);
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "Failed to save user data.");
             }
 
-            // Return UserDto
-            return new UserDto
+            // Return successful response with user details
+            return new ObjectResult(new UserDto
             {
                 Username = user.UserName,
                 Token = await _tokenService.CreateToken(user),
+            })
+            {
+                StatusCode = (int)HttpStatusCode.Created
             };
         }
+        catch (Exception)
+        {
+            // Delete the user if any unexpected error occurs
+            await _userManager.DeleteAsync(user);
+            return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An unexpected error occurred.");
+        }
+    }
+
 
 }
 

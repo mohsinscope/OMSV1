@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using OMSV1.Application.Middleware;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Infrastructure.Extensions;
 using OMSV1.Infrastructure.Identity;
@@ -39,7 +40,7 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.MapControllers();
 
-
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:5173","https://localhost:5173"));
 
 using (var scope = app.Services.CreateScope())

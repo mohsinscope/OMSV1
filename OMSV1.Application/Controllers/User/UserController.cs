@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Commands.Users;
+using OMSV1.Application.CQRS.Queries.Profiles;
 using OMSV1.Application.Dtos;
+using OMSV1.Application.Dtos.Profiles;
 using OMSV1.Application.Dtos.User;
 using OMSV1.Infrastructure.Identity;
 using OMSV1.Infrastructure.Interfaces;
@@ -19,12 +21,13 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
 
     [Authorize(Policy = "RequireAdminRole")] 
     [HttpPost("register")]
-    public async Task<ActionResult<UserDto>> Register(RegisterUserCommand command)
+    public async Task<IActionResult> Register(RegisterUserCommand command)
     {
-        var userDto = await mediator.Send(command);
-        return Ok(userDto);
+        var result = await mediator.Send(command);
+        return result;
     }
         
+
 
     [HttpPost("Login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
@@ -47,10 +50,39 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
 
     }
 
-    private async Task<bool> ExistUser(string Username){
-        
-        return await userManager.Users.AnyAsync(x=>x.NormalizedUserName == Username.ToUpper());
+
+
+
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet("profiles-with-users-and-roles")]
+    public async Task<ActionResult> GetProfilesWithUsersAndRoles()
+    {
+        var profiles = await mediator.Send(new GetProfilesWithUsersAndRolesQuery());
+        return Ok(profiles);
     }
+
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ProfileDto>> UpdateProfile(int id, [FromBody] UpdateProfileCommand command)
+    {
+        if (id != command.ProfileId)
+            return BadRequest("Profile ID mismatch.");
+
+        try
+        {
+            var updatedProfile = await mediator.Send(command);
+            return Ok(updatedProfile);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
 }
 
 

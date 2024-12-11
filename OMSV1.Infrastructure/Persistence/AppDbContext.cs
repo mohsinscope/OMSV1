@@ -8,6 +8,7 @@ using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.DamagedPassport;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Offices;
+using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Infrastructure.Identity;
 
 namespace OMSV1.Infrastructure.Persistence;
@@ -25,6 +26,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         public  DbSet<AttachmentCU> AttachmentCUs { get; set; }
         public  DbSet<Office> Offices { get; set; }
         public  DbSet<Governorate> Governorates { get; set; }
+        public  DbSet<Profile> Profiles { get; set; }
+
+
 
         public  DbSet<ApplicationUser> ApplicationUser { get; set; } 
 

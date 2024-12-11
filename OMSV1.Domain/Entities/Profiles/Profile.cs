@@ -31,10 +31,13 @@ namespace OMSV1.Domain.Entities.Profiles;
 
 
 
-    public void UpdateName(string fullName)
-        {
-            FullName = fullName;
-        }
+    public void UpdateProfile(string fullName, Position position, int officeId, int governorateId)
+    {
+        FullName = fullName;
+        Position = position;
+        OfficeId = officeId;
+        GovernorateId = governorateId;
+    }
 
 
     }
