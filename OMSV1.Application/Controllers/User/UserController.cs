@@ -46,7 +46,7 @@ public class AccountController(UserManager<ApplicationUser> userManager,IMediato
         {
             Username = user.UserName,
             Token = await tokenService.CreateToken(user),
-        };
+        }; 
 
     }
 
