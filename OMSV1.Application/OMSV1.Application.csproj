@@ -26,4 +26,8 @@
     <ProjectReference Include="..\OMSV1.Infrastructure\OMSV1.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Commands\Users\" />
+  </ItemGroup>
+
 </Project>

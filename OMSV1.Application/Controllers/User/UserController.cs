@@ -19,7 +19,7 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
 
     [Authorize(Policy = "RequireAdminRole")] 
     [HttpPost("register")]
-    public async Task<ActionResult<UserDto>> Register2(RegisterUserCommand command)
+    public async Task<ActionResult<UserDto>> Register(RegisterUserCommand command)
     {
         var userDto = await mediator.Send(command);
         return Ok(userDto);
