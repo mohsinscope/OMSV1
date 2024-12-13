@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace OMSV1.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddProfile : Migration
+    public partial class UpdateAspNetRoles : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -113,32 +113,6 @@ namespace OMSV1.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Governorates", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "IdentityUser<int>",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserName = table.Column<string>(type: "text", nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "text", nullable: true),
-                    Email = table.Column<string>(type: "text", nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "text", nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false),
-                    PasswordHash = table.Column<string>(type: "text", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "text", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "boolean", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "boolean", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "boolean", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_IdentityUser<int>", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -291,17 +265,17 @@ namespace OMSV1.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Profiles", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Profiles_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Profiles_Governorates_GovernorateId",
                         column: x => x.GovernorateId,
                         principalTable: "Governorates",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Profiles_IdentityUser<int>_UserId",
-                        column: x => x.UserId,
-                        principalTable: "IdentityUser<int>",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Profiles_Offices_OfficeId",
                         column: x => x.OfficeId,
@@ -494,8 +468,8 @@ namespace OMSV1.Infrastructure.Migrations
                     EntityId = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DamagedDeviceId = table.Column<int>(type: "integer", nullable: true),
-                    DamagedPassportId = table.Column<int>(type: "integer", nullable: true),
                     LectureId = table.Column<int>(type: "integer", nullable: true),
+                    DamagedPassportId = table.Column<int>(type: "integer", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -515,23 +489,12 @@ namespace OMSV1.Infrastructure.Migrations
                         name: "FK_AttachmentCUs_Lectures_LectureId",
                         column: x => x.LectureId,
                         principalTable: "Lectures",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_DamagedDevice_Attachments",
                         column: x => x.EntityId,
                         principalTable: "DamagedDevices",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_DamagedPassport_Attachments",
-                        column: x => x.EntityId,
-                        principalTable: "DamagedPassports",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Lecture_Attachments",
-                        column: x => x.EntityId,
-                        principalTable: "Lectures",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -718,9 +681,6 @@ namespace OMSV1.Infrastructure.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "DamagedDevices");
 
             migrationBuilder.DropTable(
@@ -742,7 +702,7 @@ namespace OMSV1.Infrastructure.Migrations
                 name: "Profiles");
 
             migrationBuilder.DropTable(
-                name: "IdentityUser<int>");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Offices");

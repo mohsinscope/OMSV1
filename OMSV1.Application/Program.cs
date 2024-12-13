@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using OMSV1.Application.Helpers;
 using OMSV1.Application.Middleware;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Infrastructure.Extensions;
@@ -26,7 +27,6 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddApplicationServices(builder.Configuration);
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
 
 
 
@@ -60,7 +60,7 @@ using (var scope = app.Services.CreateScope())
     }
 
     // Create an admin user
-    var adminEmail = "admin@example.com";
+    var adminEmail = "admin";
     var adminUser = await userManager.FindByEmailAsync(adminEmail);
     if (adminUser == null)
     {

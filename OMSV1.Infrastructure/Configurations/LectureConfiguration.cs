@@ -45,13 +45,16 @@ public class LectureConfiguration : IEntityTypeConfiguration<Lecture>
             .HasForeignKey(l => l.ProfileId)
             .OnDelete(DeleteBehavior.Restrict); 
 
-                // Configure Attachments
-        builder.HasMany<AttachmentCU>()
-            .WithOne()
-            .HasForeignKey(a => a.EntityId)
-            .HasPrincipalKey(dd => dd.Id)
-            .OnDelete(DeleteBehavior.Cascade)
-            .HasConstraintName("FK_Lecture_Attachments");
+
+
+        // builder.HasMany(a => a.Attachments)
+        //     .WithOne()
+        //     .HasForeignKey(a => a.EntityId)
+        //     .HasPrincipalKey(dd => dd.Id)
+        //     .OnDelete(DeleteBehavior.Cascade)
+        //     .HasConstraintName("FK_Lecture_Attachments")
+        //     .IsRequired(false)
+        //     .HasAnnotation("EntityType", OMSV1.Domain.Enums.EntityType.DamagedDevice);
 
         builder.ToTable("Lectures");
     }

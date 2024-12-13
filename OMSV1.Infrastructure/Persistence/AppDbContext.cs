@@ -18,12 +18,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     IdentityUserClaim<int>, AppUserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>,
     IdentityUserToken<int>>(options)
 {
-    public DbSet<DamagedDevice> DamagedDevices { get; set; }
+        public DbSet<DamagedDevice> DamagedDevices { get; set; }
         public   DbSet<DamagedPassport> DamagedPassports { get; set; }
         public   DbSet<DamagedType> DamagedTypes { get; set; }
         public   DbSet<DamagedDeviceType> DamagedDeviceTypes { get; set; }
         public   DbSet<DeviceType> DeviceTypes { get; set; }
         public  DbSet<AttachmentCU> AttachmentCUs { get; set; }
+        
         public  DbSet<Office> Offices { get; set; }
         public  DbSet<Governorate> Governorates { get; set; }
         public  DbSet<Profile> Profiles { get; set; }

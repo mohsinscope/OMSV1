@@ -5,18 +5,21 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using OMSV1.Application.Commands.Users;
 using OMSV1.Application.CQRS.Queries.Profiles;
 using OMSV1.Application.Dtos;
 using OMSV1.Application.Dtos.Profiles;
 using OMSV1.Application.Dtos.User;
+using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Infrastructure.Identity;
 using OMSV1.Infrastructure.Interfaces;
-
+using OMSV1.Domain.Enums;
+using OMSV1.Infrastructure.Persistence;
 namespace OMSV1.Application.Controllers.User;
 
 
-public class AccountController(UserManager<ApplicationUser> userManager,ITokenService tokenService,IMapper mapper , IMediator mediator) : BaseApiController
+public class AccountController(UserManager<ApplicationUser> userManager,ITokenService tokenService,IMapper mapper , IMediator mediator,IPhotoService photoService,AppDbContext appDbContext) : BaseApiController
 {
 
     [Authorize(Policy = "RequireAdminRole")] 
@@ -51,7 +54,7 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
     }
 
 
-
+ 
 
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("profiles-with-users-and-roles")]
@@ -82,6 +85,47 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+
+
+[HttpPost("add-attachment")]
+public async Task<ActionResult<AttachmentDto>> AddAttachment(IFormFile file, OMSV1.Domain.Enums.EntityType entityType1, int entityId)
+{
+    // Validate the incoming file
+    if (file == null || file.Length == 0) 
+        return BadRequest("No file was uploaded.");
+
+    // Upload the file to Cloudinary
+    var result = await photoService.AddPhotoAsync(file);
+    // Check if the DamagedDevice exists
+    var damagedDeviceExists = await appDbContext.DamagedDevices.AnyAsync(dd => dd.Id == 1);
+
+    if (!damagedDeviceExists)
+    {
+        return BadRequest($"No damaged device found with ID {entityId}.");
+    }
+    // Create the attachment entity
+    var attachmentcu = new AttachmentCU(
+        fileName: file.FileName,
+        filePath: result.SecureUrl.AbsoluteUri,
+        entityType: OMSV1.Domain.Enums.EntityType.DamagedDevice, 
+        entityId: 1,
+        damagedDeviceId :1
+    );
+
+    // Save to the database
+    appDbContext.AttachmentCUs.Add(attachmentcu);
+
+    if (await appDbContext.SaveChangesAsync() > 0)
+    {
+        // Map the entity to a DTO for the response
+
+
+        return Ok("Added Successfully");
+    }
+
+    return BadRequest("Problem adding the attachment.");
+}
 
 }
 

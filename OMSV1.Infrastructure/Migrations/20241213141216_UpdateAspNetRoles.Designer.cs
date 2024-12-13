@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using OMSV1.Domain.Enums;
 using OMSV1.Infrastructure.Persistence;
 
 #nullable disable
@@ -12,8 +13,8 @@ using OMSV1.Infrastructure.Persistence;
 namespace OMSV1.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241208164024_AddProfile")]
-    partial class AddProfile
+    [Migration("20241213141216_UpdateAspNetRoles")]
+    partial class UpdateAspNetRoles
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,61 +48,6 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser<int>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasColumnType("text");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("UserName")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("IdentityUser<int>");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
@@ -758,8 +704,8 @@ namespace OMSV1.Infrastructure.Migrations
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Attachments.AttachmentCU", b =>
                 {
-                    b.HasOne("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", null)
-                        .WithMany("Attachments")
+                    b.HasOne("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", "DamagedDevice")
+                        .WithMany()
                         .HasForeignKey("DamagedDeviceId");
 
                     b.HasOne("OMSV1.Domain.Entities.DamagedPassport.DamagedPassport", null)
@@ -767,29 +713,20 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasForeignKey("DamagedPassportId");
 
                     b.HasOne("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", null)
-                        .WithMany()
-                        .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_DamagedDevice_Attachments");
-
-                    b.HasOne("OMSV1.Domain.Entities.DamagedPassport.DamagedPassport", null)
-                        .WithMany()
-                        .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_DamagedPassport_Attachments");
-
-                    b.HasOne("OMSV1.Domain.Entities.Lectures.Lecture", null)
-                        .WithMany()
-                        .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_Lecture_Attachments");
-
-                    b.HasOne("OMSV1.Domain.Entities.Lectures.Lecture", null)
                         .WithMany("Attachments")
-                        .HasForeignKey("LectureId");
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("FK_DamagedDevice_Attachments")
+                        .HasAnnotation("EntityType", EntityType.DamagedDevice);
+
+                    b.HasOne("OMSV1.Domain.Entities.Lectures.Lecture", "Lecture")
+                        .WithMany("Attachments")
+                        .HasForeignKey("LectureId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DamagedDevice");
+
+                    b.Navigation("Lecture");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Attendances.Attendance", b =>
@@ -949,7 +886,7 @@ namespace OMSV1.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser<int>", null)
+                    b.HasOne("OMSV1.Infrastructure.Identity.ApplicationUser", null)
                         .WithOne()
                         .HasForeignKey("OMSV1.Domain.Entities.Profiles.Profile", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
