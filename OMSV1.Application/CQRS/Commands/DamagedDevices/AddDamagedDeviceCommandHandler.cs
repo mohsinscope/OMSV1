@@ -19,8 +19,8 @@ namespace OMSV1.Application.Handlers.DamagedDevices
             var damagedDevice = new DamagedDevice(
                 serialNumber: request.SerialNumber,
                 date: request.Date,
-                damagedDeviceTypeId: request.DamagedDeviceTypeId,
-                deviceTypeId: request.DeviceTypeId,
+                damagedDeviceTypeId: 1,
+                deviceTypeId: 1,
                 officeId: request.OfficeId,
                 governorateId: request.GovernorateId,
                 profileId: request.ProfileId

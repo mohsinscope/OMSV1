@@ -1,8 +1,10 @@
 using System;
 using AutoMapper;
+using OMSV1.Application.Commands.DamagedDevices;
 using OMSV1.Application.Commands.Governorates;
 using OMSV1.Application.Commands.Offices;
 using OMSV1.Application.Dtos;
+using OMSV1.Application.Dtos.DamagedDevices;
 using OMSV1.Application.Dtos.DamagedDevices;
 using OMSV1.Application.Dtos.Governorates;
 using OMSV1.Application.Dtos.Offices;
@@ -10,6 +12,7 @@ using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Infrastructure.Identity;
+using DomainProfile = OMSV1.Domain.Entities.Profiles.Profile;
 
 namespace OMSV1.Application.Helpers{
 
@@ -34,10 +37,10 @@ public class AutoMapperProfiles : Profile
             CreateMap<CreateGovernorateDto, Governorate>();
             CreateMap<AddGovernorateCommand, Governorate>();
             CreateMap<UpdateGovernorateCommand, Governorate>();
-            // Other mappings
+     // Other mappings
 
        CreateMap<Governorate, GovernorateWithOfficesDto>()
-            .ForMember(dest => dest.Offices, opt => opt.MapFrom(src => src.Offices));
+        .ForMember(dest => dest.Offices, opt => opt.MapFrom(src => src.Offices));
         CreateMap<Office, OfficeDto>();
 
 
