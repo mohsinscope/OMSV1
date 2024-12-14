@@ -31,7 +31,7 @@ namespace OMSV1.Application.Controllers.DamagedDevices
     [HttpGet("governorate/{governorateId}")]
     public async Task<ActionResult<List<DamagedDeviceDto>>> GetByGovernorate(
         int governorateId, 
-        [FromQuery] DateTime? startDate, 
+        [FromQuery] DateTime? startDate,  
         [FromQuery] DateTime? endDate,
         [FromQuery] int pageNumber = 1, 
         [FromQuery] int pageSize = 10)

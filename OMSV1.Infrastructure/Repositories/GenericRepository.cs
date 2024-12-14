@@ -66,9 +66,9 @@ namespace OMSV1.Infrastructure.Repositories
         }
         //Profile by Id
         public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
-{
-    return await _context.Set<T>().FirstOrDefaultAsync(predicate);
-}
+            {
+                return await _context.Set<T>().FirstOrDefaultAsync(predicate);
+            }
 
 
         // Eager loading method with optional includes
