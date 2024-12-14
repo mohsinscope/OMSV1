@@ -25,6 +25,7 @@ public class GetProfilesWithUsersAndRolesQueryHandler : IRequestHandler<GetProfi
                 user => user.Id,
                 (profile, user) => new ProfileWithUserAndRolesDto
                 {
+                    Id=profile.Id,
                     FullName = profile.FullName,
                     Position = profile.Position.ToString(),
                     GovernorateId = profile.GovernorateId,

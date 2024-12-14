@@ -9,6 +9,8 @@ namespace OMSV1.Infrastructure.Repositories
     {
         private readonly AppDbContext _context = context;
 
+        public object Profiles => throw new NotImplementedException();
+
         public async Task<T> AddAsync(T entity)
         {
             var addedEntity = await _context.Set<T>().AddAsync(entity);
@@ -37,6 +39,12 @@ namespace OMSV1.Infrastructure.Repositories
             _context.Set<T>().Update(entity);
             await _context.SaveChangesAsync();
         }
+        //Profile by Id
+        public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
+{
+    return await _context.Set<T>().FirstOrDefaultAsync(predicate);
+}
+
 
         // Eager loading method with optional includes
        public async Task<T?> GetByIdWithIncludesAsync(int id, params Expression<Func<T, object>>[] includes)
