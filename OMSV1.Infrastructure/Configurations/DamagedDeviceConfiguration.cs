@@ -58,16 +58,18 @@ public class DamagedDeviceConfiguration : IEntityTypeConfiguration<DamagedDevice
 
         builder.HasOne(dd => dd.Profile)
             .WithMany()
-            .HasForeignKey(dd => dd.ProfileId)
+            .HasForeignKey(dd => dd.ProfileId) 
             .OnDelete(DeleteBehavior.Restrict);
 
         // Configure Attachments
-        builder.HasMany<AttachmentCU>()
+        builder.HasMany(a => a.Attachments)
             .WithOne()
             .HasForeignKey(a => a.EntityId)
             .HasPrincipalKey(dd => dd.Id)
             .OnDelete(DeleteBehavior.Cascade)
-            .HasConstraintName("FK_DamagedDevice_Attachments");
+            .HasConstraintName("FK_DamagedDevice_Attachments")
+            .IsRequired(false)
+            .HasAnnotation("EntityType", OMSV1.Domain.Enums.EntityType.DamagedDevice);
 
         // Table Mapping
         builder.ToTable("DamagedDevices");

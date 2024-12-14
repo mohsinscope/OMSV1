@@ -35,7 +35,7 @@ public class DamagedPassportConfiguration : IEntityTypeConfiguration<DamagedPass
         // Relationships
         builder.HasOne(dp => dp.Governorate)
             .WithMany() // Adjust navigation property as needed.
-            .HasForeignKey(dp => dp.GovernorateId)
+            .HasForeignKey(dp => dp.GovernorateId) 
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(dp => dp.Office)
@@ -53,12 +53,14 @@ public class DamagedPassportConfiguration : IEntityTypeConfiguration<DamagedPass
             .HasForeignKey(dp => dp.DamagedTypeId)
             .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasMany<AttachmentCU>()
-            .WithOne()
-            .HasForeignKey(a => a.EntityId)
-            .HasPrincipalKey(dd => dd.Id)
-            .OnDelete(DeleteBehavior.Cascade)
-            .HasConstraintName("FK_DamagedPassport_Attachments");
+        // builder.HasMany(a => a.Attachments)
+        //     .WithOne()
+        //     .HasForeignKey(a => a.EntityId)
+        //     .HasPrincipalKey(dp => dp.Id)
+        //     .OnDelete(DeleteBehavior.Cascade)
+        //     .HasConstraintName("FK_DamagedPassport_Attachments")
+        //     .IsRequired(false)
+        //     .HasAnnotation("EntityType", OMSV1.Domain.Enums.EntityType.DamagedPassport);
 
 
         // Table Mapping

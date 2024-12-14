@@ -35,18 +35,6 @@ public class DamagedDevice(
     public IReadOnlyCollection<AttachmentCU> Attachments => _attachments.AsReadOnly();
 
 
-    public void AddAttachment(string fileName, string filePath)
-    {
-        var attachment = new AttachmentCU(
-            fileName: fileName,
-            filePath: filePath,
-            entityType: EntityType.DamagedDevice,
-            entityId: Id 
-        );
-
-        _attachments.Add(attachment);
-    }
-
     public void UpdateDeviceDetails(string serialNumber, DateTime date, int damagedDeviceTypeId, int deviceTypeId, int officeId, int governorateId, int profileId)
     {
         throw new NotImplementedException();

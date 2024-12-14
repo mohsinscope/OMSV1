@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using OMSV1.Domain.Enums;
 using OMSV1.Infrastructure.Persistence;
 
 #nullable disable
@@ -700,8 +701,8 @@ namespace OMSV1.Infrastructure.Migrations
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Attachments.AttachmentCU", b =>
                 {
-                    b.HasOne("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", null)
-                        .WithMany("Attachments")
+                    b.HasOne("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", "DamagedDevice")
+                        .WithMany()
                         .HasForeignKey("DamagedDeviceId");
 
                     b.HasOne("OMSV1.Domain.Entities.DamagedPassport.DamagedPassport", null)
@@ -709,29 +710,20 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasForeignKey("DamagedPassportId");
 
                     b.HasOne("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", null)
-                        .WithMany()
-                        .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_DamagedDevice_Attachments");
-
-                    b.HasOne("OMSV1.Domain.Entities.DamagedPassport.DamagedPassport", null)
-                        .WithMany()
-                        .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_DamagedPassport_Attachments");
-
-                    b.HasOne("OMSV1.Domain.Entities.Lectures.Lecture", null)
-                        .WithMany()
-                        .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_Lecture_Attachments");
-
-                    b.HasOne("OMSV1.Domain.Entities.Lectures.Lecture", null)
                         .WithMany("Attachments")
-                        .HasForeignKey("LectureId");
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("FK_DamagedDevice_Attachments")
+                        .HasAnnotation("EntityType", EntityType.DamagedDevice);
+
+                    b.HasOne("OMSV1.Domain.Entities.Lectures.Lecture", "Lecture")
+                        .WithMany("Attachments")
+                        .HasForeignKey("LectureId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DamagedDevice");
+
+                    b.Navigation("Lecture");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Attendances.Attendance", b =>

@@ -29,16 +29,5 @@ public class Lecture(string title,
 
 
 
-    public void AddAttachment(string fileName, string filePath)
-    {
-        var attachment = new AttachmentCU(
-            fileName: fileName,
-            filePath: filePath,
-            entityType: Enums.EntityType.Lecture,
-            entityId: Id
-        );
-
-        _attachments.Add(attachment);
-    }
 
 }
