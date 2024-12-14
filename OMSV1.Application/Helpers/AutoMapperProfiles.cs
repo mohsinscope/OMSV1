@@ -3,8 +3,10 @@ using AutoMapper;
 using OMSV1.Application.Commands.Governorates;
 using OMSV1.Application.Commands.Offices;
 using OMSV1.Application.Dtos;
+using OMSV1.Application.Dtos.DamagedDevices;
 using OMSV1.Application.Dtos.Governorates;
 using OMSV1.Application.Dtos.Offices;
+using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Infrastructure.Identity;
@@ -37,6 +39,15 @@ public class AutoMapperProfiles : Profile
        CreateMap<Governorate, GovernorateWithOfficesDto>()
             .ForMember(dest => dest.Offices, opt => opt.MapFrom(src => src.Offices));
         CreateMap<Office, OfficeDto>();
+
+
+
+
+        CreateMap<DamagedDevice, DamagedDeviceDto>()
+            .ForMember(dest => dest.DeviceTypeName, 
+                opt => opt.MapFrom(src => src.DeviceType.Name))
+            .ForMember(dest => dest.GovernorateName, 
+                opt => opt.MapFrom(src => src.Governorate.Name));
             
     }
     }

@@ -27,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\Users\" />
     <Folder Include="Dtos\Attachments\" />
   </ItemGroup>
 
