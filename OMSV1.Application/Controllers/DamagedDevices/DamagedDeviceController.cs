@@ -50,6 +50,26 @@ namespace OMSV1.Application.Controllers.DamagedDevices
         var result = await _mediator.Send(query);
         return Ok(result);
     }
+[HttpGet("office/{officeId}")]
+public async Task<ActionResult<List<DamagedDeviceDto>>> GetByOffice(
+    int officeId, 
+    [FromQuery] DateTime? startDate,  
+    [FromQuery] DateTime? endDate,
+    [FromQuery] int pageNumber = 1, 
+    [FromQuery] int pageSize = 10)
+{
+    var query = new GetDamagedDevicesByOfficeQuery
+    {
+        OfficeId = officeId,
+        StartDate = startDate,
+        EndDate = endDate,
+        PageNumber = pageNumber,
+        PageSize = pageSize
+    };
+
+    var result = await _mediator.Send(query);
+    return Ok(result);
+}
 
     [HttpGet("serial/{serialNumber}")]
     public async Task<ActionResult<DamagedDeviceDto>> GetBySerialNumber(string serialNumber)

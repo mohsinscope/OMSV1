@@ -39,14 +39,14 @@ namespace OMSV1.Infrastructure.Repositories
         public async Task<T> AddAsync(T entity)
         {
             var addedEntity = await _context.Set<T>().AddAsync(entity);
-            await _context.SaveChangesAsync();
+            
             return addedEntity.Entity;
         }
 
         public async Task DeleteAsync(T entity)
         {
             _context.Set<T>().Remove(entity);
-            await _context.SaveChangesAsync(); // Persist deletion to the database
+           
         }
 
         public async Task<T?> GetByIdAsync(int id)
@@ -62,7 +62,7 @@ namespace OMSV1.Infrastructure.Repositories
         public async Task UpdateAsync(T entity)
         {
             _context.Set<T>().Update(entity);
-            await _context.SaveChangesAsync();
+            
         }
         //Profile by Id
         public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
