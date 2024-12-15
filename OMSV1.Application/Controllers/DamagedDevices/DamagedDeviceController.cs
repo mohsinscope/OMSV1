@@ -1,6 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.DamagedDevices;
+using OMSV1.Application.CQRS.Commands.DamagedDevices;
+using OMSV1.Application.CQRS.Queries.DamagedDevices;
+using OMSV1.Application.Dtos.DamagedDevices;
 using OMSV1.Application.Queries.DamagedDevices;
 
 namespace OMSV1.Application.Controllers.DamagedDevices
@@ -24,6 +27,41 @@ namespace OMSV1.Application.Controllers.DamagedDevices
             var devices = await _mediator.Send(new GetAllDamagedDevicesQuery());
             return Ok(devices);
         }
+
+
+        
+    [HttpGet("governorate/{governorateId}")]
+    public async Task<ActionResult<List<DamagedDeviceDto>>> GetByGovernorate(
+        int governorateId, 
+        [FromQuery] DateTime? startDate,  
+        [FromQuery] DateTime? endDate,
+        [FromQuery] int pageNumber = 1, 
+        [FromQuery] int pageSize = 10)
+    {
+        var query = new GetDamagedDevicesByGovernorateQuery
+        {
+            GovernorateId = governorateId,
+            StartDate = startDate,
+            EndDate = endDate,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
+
+    [HttpGet("serial/{serialNumber}")]
+    public async Task<ActionResult<DamagedDeviceDto>> GetBySerialNumber(string serialNumber)
+    {
+        var query = new GetDamagedDeviceBySerialNumberQuery
+        {
+            SerialNumber = serialNumber
+        };
+
+        var result = await _mediator.Send(query);
+        return result != null ? Ok(result) : NotFound();
+    }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDamagedDeviceById(int id)
@@ -65,5 +103,7 @@ public async Task<IActionResult> AddDamagedDevice([FromBody] AddDamagedDeviceCom
             if (!isDeleted) return NotFound();
             return NoContent();
         }
+
+
     }
 }

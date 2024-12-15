@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OMSV1.Domain.SeedWork;
+using OMSV1.Domain.Specifications;
 using OMSV1.Infrastructure.Persistence;
 using System.Linq.Expressions;
 
@@ -7,10 +8,34 @@ namespace OMSV1.Infrastructure.Repositories
 {
     public class GenericRepository<T>(AppDbContext context) : IGenericRepository<T> where T : Entity
     {
-        private readonly AppDbContext _context = context;
+    private readonly AppDbContext _context = context;
+    private readonly DbSet<T> _dbSet = context.Set<T>(); 
 
-        public object Profiles => throw new NotImplementedException();
+        public async Task<IReadOnlyList<T>> ListAllAsync()
+        {
+            return await _dbSet.ToListAsync();
+        }
+        private IQueryable<T> ApplySpecification(ISpecification<T> spec)
+        {
+            return SpecificationEvaluator<T>.GetQuery(_dbSet, spec);
+        }
+        public async Task<IReadOnlyList<T>> ListAsync(ISpecification<T> spec)
+        {
+            return await ApplySpecification(spec).ToListAsync();
+        }
 
+        public async Task<T> SingleOrDefaultAsync(ISpecification<T> spec)
+        {
+            return await ApplySpecification(spec).FirstOrDefaultAsync();
+        }
+   
+
+        public async Task<int> CountAsync(ISpecification<T> spec)
+        {
+            return await ApplySpecification(spec).CountAsync();
+        }
+
+        
         public async Task<T> AddAsync(T entity)
         {
             var addedEntity = await _context.Set<T>().AddAsync(entity);
@@ -41,9 +66,9 @@ namespace OMSV1.Infrastructure.Repositories
         }
         //Profile by Id
         public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
-{
-    return await _context.Set<T>().FirstOrDefaultAsync(predicate);
-}
+            {
+                return await _context.Set<T>().FirstOrDefaultAsync(predicate);
+            }
 
 
         // Eager loading method with optional includes
@@ -59,6 +84,27 @@ namespace OMSV1.Infrastructure.Repositories
 
                 return await query.FirstOrDefaultAsync(e => e.Id == id);
             }
-            
+
+
+
+
+        // private IQueryable<T> ApplySpecification(ISpecification<T> spec)
+        //     {
+        //         var query = _context.Set<T>().AsQueryable();
+
+        //         if (spec.Criteria != null)
+        //             query = query.Where(spec.Criteria);
+
+        //         if (spec.Includes != null)
+        //             query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
+
+        //         return query;
+        //     }
+
     }
+
+
+    
 }
+
+

@@ -5,9 +5,9 @@ using OMSV1.Application.Commands.Governorates;
 using OMSV1.Application.Commands.Offices;
 using OMSV1.Application.Dtos;
 using OMSV1.Application.Dtos.DamagedDevices;
+using OMSV1.Application.Dtos.DamagedDevices;
 using OMSV1.Application.Dtos.Governorates;
 using OMSV1.Application.Dtos.Offices;
-using OMSV1.Application.Dtos.Profiles;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Offices;
@@ -42,24 +42,15 @@ public class AutoMapperProfiles : Profile
        CreateMap<Governorate, GovernorateWithOfficesDto>()
         .ForMember(dest => dest.Offices, opt => opt.MapFrom(src => src.Offices));
         CreateMap<Office, OfficeDto>();
-    //Damaged Devices
-    CreateMap<AddDamagedDeviceCommand, DamagedDevice>()
-    .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date)); // Bypassing any UTC conversion
-   //  CreateMap<AddDamagedDeviceCommand, DamagedDevice>()
-    //.ForMember(dest => dest.Date, opt => opt.MapFrom(src => UtcDateTime.From(src.Date)));
 
-    //CreateMap<DamagedDevice, DamagedDeviceDto>()
-    //.ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date.Value)); // Map UtcDateTime to DateTime
-    
-    //Profile mapping
-      CreateMap<DomainProfile, ProfileDto>()
-                .ForMember(dest => dest.GovernorateName, 
-                           opt => opt.MapFrom(src => src.Governorate != null ? src.Governorate.Name : string.Empty))
-                .ForMember(dest => dest.OfficeName, 
-                           opt => opt.MapFrom(src => src.Office != null ? src.Office.Name : string.Empty))
-                .ForMember(dest => dest.UserId, 
-                           opt => opt.MapFrom(src => src.UserId)); // Map UserId
 
+
+
+        CreateMap<DamagedDevice, DamagedDeviceDto>()
+            .ForMember(dest => dest.DeviceTypeName, 
+                opt => opt.MapFrom(src => src.DeviceType.Name))
+            .ForMember(dest => dest.GovernorateName, 
+                opt => opt.MapFrom(src => src.Governorate.Name));
             
     }
     }

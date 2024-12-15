@@ -6,6 +6,7 @@ using OMSV1.Application.Dtos.Profiles;
 // Alias the domain profile
 using DomainProfile = OMSV1.Domain.Entities.Profiles.Profile;
 using OMSV1.Application.Queries.Profiles;
+using OMSV1.Domain.Specifications.Profiles;
 
 namespace OMSV1.Application.CQRS.Queries.Profiles
 {
@@ -22,7 +23,8 @@ namespace OMSV1.Application.CQRS.Queries.Profiles
 
         public async Task<ProfileDto> Handle(GetProfileByUserIdQuery request, CancellationToken cancellationToken)
         {
-            var profile = await _repository.FirstOrDefaultAsync(p => p.UserId == request.UserId);
+            var spec = new ProfileByUserIdSpecification(request.UserId);
+            var profile = await _repository.SingleOrDefaultAsync(spec);
 
             if (profile == null)
             {
