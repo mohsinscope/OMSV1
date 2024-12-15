@@ -98,9 +98,10 @@ public async Task<ActionResult<AttachmentDto>> AddAttachment(IFormFile file, OMS
     // Upload the file to Cloudinary
     var result = await photoService.AddPhotoAsync(file);
     // Check if the DamagedDevice exists
-    var damagedDeviceExists = await appDbContext.DamagedDevices.AnyAsync(dd => dd.Id == 1);
+    var damagedDeviceExists = await appDbContext.DamagedDevices
+    .FirstOrDefaultAsync(dd => dd.Id == 6);
 
-    if (!damagedDeviceExists)
+    if (damagedDeviceExists==null)
     {
         return BadRequest($"No damaged device found with ID {entityId}.");
     }
@@ -108,9 +109,9 @@ public async Task<ActionResult<AttachmentDto>> AddAttachment(IFormFile file, OMS
     var attachmentcu = new AttachmentCU(
         fileName: file.FileName,
         filePath: result.SecureUrl.AbsoluteUri,
-        entityType: OMSV1.Domain.Enums.EntityType.DamagedDevice, 
-        entityId: 1,
-        damagedDeviceId :1
+        entityType: entityType1, 
+        entityId: 6,
+        damagedDeviceId :6
     );
 
     // Save to the database

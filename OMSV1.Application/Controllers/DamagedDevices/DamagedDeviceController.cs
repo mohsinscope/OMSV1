@@ -8,7 +8,9 @@ namespace OMSV1.Application.Controllers.DamagedDevices
     [ApiController]
     [Route("api/[controller]")]
     public class DamagedDeviceController : ControllerBase
+    
     {
+        
         private readonly IMediator _mediator;
 
         public DamagedDeviceController(IMediator mediator)
@@ -31,12 +33,20 @@ namespace OMSV1.Application.Controllers.DamagedDevices
             return Ok(device);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddDamagedDevice([FromBody] AddDamagedDeviceCommand command)
-        {
-            var id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetDamagedDeviceById), new { id }, id);
-        }
+      [HttpPost]
+public async Task<IActionResult> AddDamagedDevice([FromBody] AddDamagedDeviceCommand command)
+{
+    try
+    {
+        // Use MediatR to handle the logic
+        var id = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetDamagedDeviceById), new { id }, id);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+    }
+}
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDamagedDevice(int id, [FromBody] UpdateDamagedDeviceCommand command)
