@@ -12,8 +12,8 @@ using OMSV1.Infrastructure.Persistence;
 namespace OMSV1.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241214053804_InitialDbAttache")]
-    partial class InitialDbAttache
+    [Migration("20241216065654_Changeattachment")]
+    partial class Changeattachment
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -121,12 +121,6 @@ namespace OMSV1.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("DamagedDeviceId")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("DamagedPassportId")
                         .HasColumnType("integer");
 
@@ -150,18 +144,9 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<int?>("LectureId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("DamagedDeviceId");
-
                     b.HasIndex("DamagedPassportId");
-
-                    b.HasIndex("EntityId");
-
-                    b.HasIndex("LectureId");
 
                     b.ToTable("AttachmentCUs", (string)null);
                 });
@@ -703,38 +688,9 @@ namespace OMSV1.Infrastructure.Migrations
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Attachments.AttachmentCU", b =>
                 {
-                    b.HasOne("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", null)
-                        .WithMany("Attachments")
-                        .HasForeignKey("DamagedDeviceId");
-
                     b.HasOne("OMSV1.Domain.Entities.DamagedPassport.DamagedPassport", null)
                         .WithMany("Attachments")
                         .HasForeignKey("DamagedPassportId");
-
-                    b.HasOne("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", null)
-                        .WithMany()
-                        .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_DamagedDevice_Attachments");
-
-                    b.HasOne("OMSV1.Domain.Entities.DamagedPassport.DamagedPassport", null)
-                        .WithMany()
-                        .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_DamagedPassport_Attachments");
-
-                    b.HasOne("OMSV1.Domain.Entities.Lectures.Lecture", null)
-                        .WithMany()
-                        .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_Lecture_Attachments");
-
-                    b.HasOne("OMSV1.Domain.Entities.Lectures.Lecture", null)
-                        .WithMany("Attachments")
-                        .HasForeignKey("LectureId");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Attendances.Attendance", b =>
@@ -924,11 +880,6 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", b =>
-                {
-                    b.Navigation("Attachments");
-                });
-
             modelBuilder.Entity("OMSV1.Domain.Entities.DamagedPassport.DamagedPassport", b =>
                 {
                     b.Navigation("Attachments");
@@ -937,11 +888,6 @@ namespace OMSV1.Infrastructure.Migrations
             modelBuilder.Entity("OMSV1.Domain.Entities.Governorates.Governorate", b =>
                 {
                     b.Navigation("Offices");
-                });
-
-            modelBuilder.Entity("OMSV1.Domain.Entities.Lectures.Lecture", b =>
-                {
-                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("OMSV1.Infrastructure.Identity.AppRole", b =>

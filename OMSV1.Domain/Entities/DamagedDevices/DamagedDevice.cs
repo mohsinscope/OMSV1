@@ -31,8 +31,6 @@ public class DamagedDevice(
     public Office? Office { get; private set; }
     public Profile? Profile { get; private set; }
 
-    private readonly List<AttachmentCU> _attachments = new();
-    public IReadOnlyCollection<AttachmentCU> Attachments => _attachments.AsReadOnly();
 
 
     public void UpdateDeviceDetails(string serialNumber, DateTime date, int damagedDeviceTypeId, int deviceTypeId, int officeId, int governorateId, int profileId)

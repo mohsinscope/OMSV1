@@ -23,10 +23,6 @@ public class Lecture(string title,
     public Profile? Profile { get; private set; }
 
 
-    private readonly List<AttachmentCU> _attachments = new();
-    public IReadOnlyCollection<AttachmentCU> Attachments => _attachments.AsReadOnly();
-
-
 
 
 

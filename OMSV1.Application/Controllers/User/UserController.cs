@@ -106,11 +106,10 @@ public async Task<ActionResult<AttachmentDto>> AddAttachment(IFormFile file, OMS
     }
     // Create the attachment entity
     var attachmentcu = new AttachmentCU(
-        fileName: file.FileName,
+        fileName: file.FileName, 
         filePath: result.SecureUrl.AbsoluteUri,
-        entityType: OMSV1.Domain.Enums.EntityType.DamagedDevice, 
-        entityId: 1,
-        damagedDeviceId :1
+        entityType: OMSV1.Domain.Enums.EntityType.DamagedDevice,  
+        entityId: 1
     );
 
     // Save to the database

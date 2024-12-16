@@ -1,9 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.DamagedDevices;
-
 namespace OMSV1.Infrastructure.Configurations;
 
 public class DamagedDeviceConfiguration : IEntityTypeConfiguration<DamagedDevice>
@@ -62,14 +60,14 @@ public class DamagedDeviceConfiguration : IEntityTypeConfiguration<DamagedDevice
             .OnDelete(DeleteBehavior.Restrict);
 
         // Configure Attachments
-        builder.HasMany(a => a.Attachments)
-            .WithOne()
-            .HasForeignKey(a => a.EntityId)
-            .HasPrincipalKey(dd => dd.Id)
-            .OnDelete(DeleteBehavior.Cascade)
-            .HasConstraintName("FK_DamagedDevice_Attachments")
-            .IsRequired(false)
-            .HasAnnotation("EntityType", OMSV1.Domain.Enums.EntityType.DamagedDevice);
+        // builder.HasMany(a => a.Attachments)
+        //     .WithOne()
+        //     .HasForeignKey(a => a.EntityId)
+        //     .HasPrincipalKey(dd => dd.Id)
+        //     .OnDelete(DeleteBehavior.Cascade)
+        //     .HasConstraintName("FK_DamagedDevice_Attachments")
+        //     .IsRequired(false)
+        //     .HasAnnotation("EntityType", OMSV1.Domain.Enums.EntityType.DamagedDevice);
 
         // Table Mapping
         builder.ToTable("DamagedDevices");

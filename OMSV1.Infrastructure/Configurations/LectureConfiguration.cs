@@ -1,7 +1,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.Lectures;
 
 namespace OMSV1.Infrastructure.Configurations;

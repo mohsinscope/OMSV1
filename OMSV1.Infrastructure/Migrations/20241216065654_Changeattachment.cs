@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace OMSV1.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateAspNetRoles : Migration
+    public partial class Changeattachment : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -334,7 +334,7 @@ namespace OMSV1.Infrastructure.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     SerialNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp", nullable: false),
                     DamagedDeviceTypeId = table.Column<int>(type: "integer", nullable: false),
                     DeviceTypeId = table.Column<int>(type: "integer", nullable: false),
                     OfficeId = table.Column<int>(type: "integer", nullable: false),
@@ -466,9 +466,6 @@ namespace OMSV1.Infrastructure.Migrations
                     FilePath = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     EntityType = table.Column<string>(type: "text", nullable: false),
                     EntityId = table.Column<int>(type: "integer", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DamagedDeviceId = table.Column<int>(type: "integer", nullable: true),
-                    LectureId = table.Column<int>(type: "integer", nullable: true),
                     DamagedPassportId = table.Column<int>(type: "integer", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -476,27 +473,10 @@ namespace OMSV1.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_AttachmentCUs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AttachmentCUs_DamagedDevices_DamagedDeviceId",
-                        column: x => x.DamagedDeviceId,
-                        principalTable: "DamagedDevices",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_AttachmentCUs_DamagedPassports_DamagedPassportId",
                         column: x => x.DamagedPassportId,
                         principalTable: "DamagedPassports",
                         principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_AttachmentCUs_Lectures_LectureId",
-                        column: x => x.LectureId,
-                        principalTable: "Lectures",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_DamagedDevice_Attachments",
-                        column: x => x.EntityId,
-                        principalTable: "DamagedDevices",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -537,24 +517,9 @@ namespace OMSV1.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_AttachmentCUs_DamagedDeviceId",
-                table: "AttachmentCUs",
-                column: "DamagedDeviceId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AttachmentCUs_DamagedPassportId",
                 table: "AttachmentCUs",
                 column: "DamagedPassportId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AttachmentCUs_EntityId",
-                table: "AttachmentCUs",
-                column: "EntityId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AttachmentCUs_LectureId",
-                table: "AttachmentCUs",
-                column: "LectureId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Attendances_GovernorateId",
@@ -678,16 +643,16 @@ namespace OMSV1.Infrastructure.Migrations
                 name: "Attendances");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
-
-            migrationBuilder.DropTable(
                 name: "DamagedDevices");
 
             migrationBuilder.DropTable(
-                name: "DamagedPassports");
+                name: "Lectures");
 
             migrationBuilder.DropTable(
-                name: "Lectures");
+                name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "DamagedPassports");
 
             migrationBuilder.DropTable(
                 name: "DamagedDeviceTypes");
