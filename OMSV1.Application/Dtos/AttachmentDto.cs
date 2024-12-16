@@ -1,5 +1,5 @@
 using System;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using OMSV1.Domain.Enums;
 
 namespace OMSV1.Application.Dtos;
 

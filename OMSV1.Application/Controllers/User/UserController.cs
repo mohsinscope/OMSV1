@@ -16,6 +16,7 @@ using OMSV1.Infrastructure.Identity;
 using OMSV1.Infrastructure.Interfaces;
 using OMSV1.Domain.Enums;
 using OMSV1.Infrastructure.Persistence;
+using OMSV1.Application.Commands.Attachment;
 namespace OMSV1.Application.Controllers.User;
 
 
@@ -88,44 +89,72 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
 
 
 
-[HttpPost("add-attachment")]
-public async Task<ActionResult<AttachmentDto>> AddAttachment(IFormFile file, OMSV1.Domain.Enums.EntityType entityType1, int entityId)
-{
-    // Validate the incoming file
-    if (file == null || file.Length == 0) 
-        return BadRequest("No file was uploaded.");
+// [HttpPost("add-attachment")]
+// public async Task<ActionResult<AttachmentDto>> AddAttachment(
+//     [FromForm] IFormFile file, 
+//     [FromForm] int entityId, 
+//     [FromForm] OMSV1.Domain.Enums.EntityType entityType)
+// {
+//     // Validate the incoming file and request
+//     if (file == null || file.Length == 0)
+//         return BadRequest("No file was uploaded.");
 
-    // Upload the file to Cloudinary
-    var result = await photoService.AddPhotoAsync(file);
-    // Check if the DamagedDevice exists
-    var damagedDeviceExists = await appDbContext.DamagedDevices
-    .FirstOrDefaultAsync(dd => dd.Id == 6);
+//     // Upload the file to Cloudinary
+//     var result = await photoService.AddPhotoAsync(file);
 
-    if (damagedDeviceExists==null)
-    {
-        return BadRequest($"No damaged device found with ID {entityId}.");
-    }
-    // Create the attachment entity
-    var attachmentcu = new AttachmentCU(
-        fileName: file.FileName, 
-        filePath: result.SecureUrl.AbsoluteUri,
-        entityType: OMSV1.Domain.Enums.EntityType.DamagedDevice,  
-        entityId: 1
-    );
+//     // Validate the entity based on type
+//     switch (entityType)
+//     {
+//         case OMSV1.Domain.Enums.EntityType.DamagedDevice:
+//             var damagedDeviceExists = await appDbContext.DamagedDevices
+//                 .FirstOrDefaultAsync(dd => dd.Id == entityId);
 
-    // Save to the database
-    appDbContext.AttachmentCUs.Add(attachmentcu);
+//             if (damagedDeviceExists == null)
+//             {
+//                 return BadRequest($"No damaged device found with ID {entityId}.");
+//             }
+//             break;
 
-    if (await appDbContext.SaveChangesAsync() > 0)
-    {
-        // Map the entity to a DTO for the response
+//         case OMSV1.Domain.Enums.EntityType.DamagedPassport:
+//             var damagedPassportExists = await appDbContext.DamagedPassports
+//                 .FirstOrDefaultAsync(dp => dp.Id == entityId);
 
+//             if (damagedPassportExists == null)
+//             {
+//                 return BadRequest($"No damaged passport found with ID {entityId}.");
+//             }
+//             break;
 
-        return Ok("Added Successfully");
-    }
+//         // Add more cases for other entity types as needed
+//         default:
+//             return BadRequest("Unsupported entity type.");
+//     }
 
-    return BadRequest("Problem adding the attachment.");
-}
+//     // Create the attachment entity
+//     var attachmentcu = new AttachmentCU(
+//         fileName: file.FileName,
+//         filePath: result.SecureUrl.AbsoluteUri,
+//         entityType: entityType,
+//         entityId: entityId
+//     );
+
+//     // Save to the database
+//     appDbContext.AttachmentCUs.Add(attachmentcu);
+
+//     if (await appDbContext.SaveChangesAsync() > 0)
+//     {
+//         // Return a success response
+//         return Ok("Added Successfully");
+//     }
+
+//     return BadRequest("Problem adding the attachment.");
+// }
+// // Data transfer object to receive request body
+// public class AttachmentRequest
+// {
+//     public int EntityId { get; set; }
+//     public OMSV1.Domain.Enums.EntityType EntityType { get; set; }
+// }
 
 }
 
