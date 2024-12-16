@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.Offices;
 using OMSV1.Application.Dtos.Offices;
+using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Offices;
+using OMSV1.Infrastructure.Extensions;
 
 namespace OMSV1.Application.Controllers.Offices
 {
@@ -12,13 +14,14 @@ namespace OMSV1.Application.Controllers.Offices
     {
         private readonly IMediator _mediator = mediator;
 
-        // GET: api/Office
-        [HttpGet]
-        public async Task<IActionResult> GetAllOffices()
-        {
-            var offices = await _mediator.Send(new GetAllOfficesQuery());
-            return Ok(offices); // Returns List<OfficeDto>
-        }
+    // GET: api/Office
+    [HttpGet]
+    public async Task<IActionResult> GetAllOffices([FromQuery] PaginationParams paginationParams)
+    {
+        var offices = await _mediator.Send(new GetAllOfficesQuery(paginationParams));
+        Response.AddPaginationHeader(offices);
+        return Ok(offices); // Returns PagedList<OfficeDto>
+    }
 
         // GET: api/Office/{id}
         [HttpGet("{id:int}")]

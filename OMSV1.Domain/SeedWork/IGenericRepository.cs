@@ -13,6 +13,7 @@ namespace OMSV1.Domain.SeedWork
 
         Task<IReadOnlyList<T>> ListAllAsync();
         Task<IReadOnlyList<T>> ListAsync(ISpecification<T> spec);
+        IQueryable<T> GetAllAsQueryable();
         Task<T> SingleOrDefaultAsync(ISpecification<T> spec);
         Task<int> CountAsync(ISpecification<T> spec);
         Task<T> AddAsync(T entity);
