@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.DamagedPassport;
+using OMSV1.Domain.Entities.Expenses;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.Entities.Profiles;
@@ -28,6 +29,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         public  DbSet<Office> Offices { get; set; }
         public  DbSet<Governorate> Governorates { get; set; }
         public  DbSet<Profile> Profiles { get; set; }
+        public DbSet<OMSV1.Domain.Entities.Expenses.Action> Actions { get; set; }
+        public DbSet<DailyExpenses> DailyExpenses { get; set; }
+        public DbSet<ExpenseType> ExpenseTypes { get; set; }
+        public DbSet<MonthlyExpenses> MonthlyExpenses { get; set; }
+
+
 
 
 
