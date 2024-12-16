@@ -11,7 +11,9 @@ namespace OMSV1.Application.Controllers.DamagedDevices
     [ApiController]
     [Route("api/[controller]")]
     public class DamagedDeviceController : ControllerBase
+    
     {
+        
         private readonly IMediator _mediator;
 
         public DamagedDeviceController(IMediator mediator)
@@ -48,6 +50,26 @@ namespace OMSV1.Application.Controllers.DamagedDevices
         var result = await _mediator.Send(query);
         return Ok(result);
     }
+[HttpGet("office/{officeId}")]
+public async Task<ActionResult<List<DamagedDeviceDto>>> GetByOffice(
+    int officeId, 
+    [FromQuery] DateTime? startDate,  
+    [FromQuery] DateTime? endDate,
+    [FromQuery] int pageNumber = 1, 
+    [FromQuery] int pageSize = 10)
+{
+    var query = new GetDamagedDevicesByOfficeQuery
+    {
+        OfficeId = officeId,
+        StartDate = startDate,
+        EndDate = endDate,
+        PageNumber = pageNumber,
+        PageSize = pageSize
+    };
+
+    var result = await _mediator.Send(query);
+    return Ok(result);
+}
 
     [HttpGet("serial/{serialNumber}")]
     public async Task<ActionResult<DamagedDeviceDto>> GetBySerialNumber(string serialNumber)
@@ -69,12 +91,20 @@ namespace OMSV1.Application.Controllers.DamagedDevices
             return Ok(device);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddDamagedDevice([FromBody] AddDamagedDeviceCommand command)
-        {
-            var id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetDamagedDeviceById), new { id }, id);
-        }
+      [HttpPost]
+public async Task<IActionResult> AddDamagedDevice([FromBody] AddDamagedDeviceCommand command)
+{
+    try
+    {
+        // Use MediatR to handle the logic
+        var id = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetDamagedDeviceById), new { id }, id);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+    }
+}
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDamagedDevice(int id, [FromBody] UpdateDamagedDeviceCommand command)

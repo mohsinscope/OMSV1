@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq.Expressions;
 
 using OMSV1.Domain.Entities.Governorates;
@@ -24,4 +23,3 @@ namespace OMSV1.Domain.SeedWork
         Task<T?> GetByIdWithIncludesAsync(int id, params Expression<Func<T, object>>[] includes);
     }
 }
-
