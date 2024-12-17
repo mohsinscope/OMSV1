@@ -24,6 +24,11 @@ namespace OMSV1.Infrastructure.Repositories
             return await ApplySpecification(spec).ToListAsync();
         }
 
+        public IQueryable<T> GetAllAsQueryable()
+            {
+                return _dbSet.AsNoTracking(); // Returns the data as IQueryable for further processing
+            }
+
         public async Task<T> SingleOrDefaultAsync(ISpecification<T> spec)
         {
             return await ApplySpecification(spec).FirstOrDefaultAsync();
@@ -56,6 +61,7 @@ namespace OMSV1.Infrastructure.Repositories
 
         public async Task<IReadOnlyList<T>> GetAllAsync()
         {
+            
             return await _context.Set<T>().ToListAsync();
         }
 

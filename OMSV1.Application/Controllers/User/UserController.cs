@@ -14,7 +14,6 @@ using OMSV1.Application.Dtos.User;
 using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Infrastructure.Identity;
 using OMSV1.Infrastructure.Interfaces;
-using OMSV1.Domain.Enums;
 using OMSV1.Infrastructure.Persistence;
 using OMSV1.Application.Commands.Attachment;
 namespace OMSV1.Application.Controllers.User;

@@ -14,5 +14,6 @@ public class AttachmentCU(string fileName, string filePath, EntityType entityTyp
     public EntityType EntityType { get; private set; } = entityType;
     public int EntityId { get; private set; } = entityId;
 
+
 }
  
