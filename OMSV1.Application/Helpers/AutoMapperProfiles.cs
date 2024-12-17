@@ -6,9 +6,9 @@ using OMSV1.Application.Commands.Governorates;
 using OMSV1.Application.Commands.Offices;
 using OMSV1.Application.Dtos;
 using OMSV1.Application.Dtos.DamagedDevices;
-using OMSV1.Application.Dtos.DamagedDevices;
 using OMSV1.Application.Dtos.Governorates;
 using OMSV1.Application.Dtos.Offices;
+using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.DamagedPassport;
 using OMSV1.Domain.Entities.Governorates;
@@ -44,6 +44,8 @@ public class AutoMapperProfiles : Profile
             //Mapping for adding a new damaged paspport
             CreateMap<AddDamagedPassportCommand, DamagedPassport>();
             CreateMap<UpdateDamagedPassportCommand, DamagedPassport>();
+            CreateMap<DamagedPassport, DamagedPassportDto>();
+             CreateMap<AttachmentCU, DamagedPassportAttachmentDto>();
              // Mapping for adding a new DamagedDevice
         CreateMap<AddDamagedDeviceCommand, DamagedDevice>();
      // Other mappings

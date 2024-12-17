@@ -17,6 +17,8 @@ namespace OMSV1.Domain.SeedWork
         Task<T> SingleOrDefaultAsync(ISpecification<T> spec);
         Task<int> CountAsync(ISpecification<T> spec);
         Task<T> AddAsync(T entity);
+          // Add this method for first or default functionality
+        Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
         Task DeleteAsync(T entity); // Return Task, not void
         Task<T?> GetByIdAsync(int id);
         Task<IReadOnlyList<T>> GetAllAsync();

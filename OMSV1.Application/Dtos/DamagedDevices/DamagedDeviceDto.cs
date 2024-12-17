@@ -13,4 +13,6 @@ public class DamagedDeviceDto
     public string GovernorateName { get; set; }
     public string officeId {get;set;}
     public string OfficeName {get;set;}
+    public string ProfileId { get; set; }  
+    public string ProfileFullName{ get; set; }  
 }

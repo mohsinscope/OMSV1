@@ -1,11 +1,23 @@
 using System;
 using OMSV1.Domain.SeedWork;
 
-namespace OMSV1.Domain.Entities.DamagedPassport;
-
-public class DamagedType(string name, string description) : Entity
+namespace OMSV1.Domain.Entities.DamagedPassport
 {
-    public string Name { get; private set; } = name;
-    public string Description { get; private set; } = description;
+    public class DamagedType : Entity
+    {
+        public string Name { get; private set; }
+        public string Description { get; private set; }
 
+        public DamagedType(string name, string description)
+        {
+            Name = name;
+            Description = description;
+        }
+            // Update method to modify the properties
+        public void Update(string name, string description)
+        {
+            Name = name;
+            Description = description;
+        }
+    }
 }

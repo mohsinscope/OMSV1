@@ -4,7 +4,9 @@ using OMSV1.Application.Commands.DamagedDevices;
 using OMSV1.Application.CQRS.Commands.DamagedDevices;
 using OMSV1.Application.CQRS.Queries.DamagedDevices;
 using OMSV1.Application.Dtos.DamagedDevices;
+using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.DamagedDevices;
+using OMSV1.Infrastructure.Extensions;
 
 namespace OMSV1.Application.Controllers.DamagedDevices
 {
@@ -21,14 +23,19 @@ namespace OMSV1.Application.Controllers.DamagedDevices
             _mediator = mediator;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllDamagedDevices()
-        {
-            var devices = await _mediator.Send(new GetAllDamagedDevicesQuery());
-            return Ok(devices);
-        }
+         // Get All Damaged Devices with Pagination
+       [HttpGet]
+public async Task<IActionResult> GetAllDamagedDevices([FromQuery] PaginationParams paginationParams)
+{
+    // Send the pagination parameters to the query handler
+    var damagedDevices = await _mediator.Send(new GetAllDamagedDevicesQuery(paginationParams));
 
+    // Add pagination headers to the response
+    Response.AddPaginationHeader(damagedDevices);
 
+    // Return the paginated result
+    return Ok(damagedDevices);  // Returns PagedList<DamagedDeviceDto>
+}
         
     [HttpGet("governorate/{governorateId}")]
     public async Task<ActionResult<List<DamagedDeviceDto>>> GetByGovernorate(
@@ -83,13 +90,19 @@ public async Task<ActionResult<List<DamagedDeviceDto>>> GetByOffice(
         return result != null ? Ok(result) : NotFound();
     }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetDamagedDeviceById(int id)
-        {
-            var device = await _mediator.Send(new GetDamagedDeviceByIdQuery(id));
-            if (device == null) return NotFound();
-            return Ok(device);
-        }
+[HttpGet("{id}")]
+public async Task<IActionResult> GetDamagedDeviceById(int id)
+{
+    var query = new GetDamagedDeviceByIdQuery(id);
+    var damagedDeviceDto = await _mediator.Send(query);
+
+    if (damagedDeviceDto == null)
+    {
+        return NotFound();
+    }
+
+    return Ok(damagedDeviceDto);  // Return the DamagedDeviceDto
+}
 
       [HttpPost]
 public async Task<IActionResult> AddDamagedDevice([FromBody] AddDamagedDeviceCommand command)

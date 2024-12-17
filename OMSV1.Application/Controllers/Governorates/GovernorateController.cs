@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.Governorates;
 using OMSV1.Application.Dtos.Governorates;
+using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Governorates;
+using OMSV1.Infrastructure.Extensions;
 
 namespace OMSV1.Application.Controllers.Governorates
 {
@@ -12,12 +14,14 @@ public class GovernorateController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
 
-    [HttpGet]
-    public async Task<IActionResult> GetAllGovernorates()
-    {
-        var governorates = await _mediator.Send(new GetAllGovernoratesQuery());
-        return Ok(governorates); // Returns List<GovernorateDto>
-    }
+// GET: api/Governorate
+[HttpGet]
+public async Task<IActionResult> GetAllGovernorates([FromQuery] PaginationParams paginationParams)
+{
+    var governorates = await _mediator.Send(new GetAllGovernoratesQuery(paginationParams));
+    Response.AddPaginationHeader(governorates);
+    return Ok(governorates); // Returns PagedList<GovernorateDto>
+}
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetGovernorateById(int id)
