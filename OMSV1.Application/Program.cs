@@ -38,10 +38,17 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
-app.MapControllers();
+
+
 
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:5173","https://localhost:5173"));
+
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+
 
 using (var scope = app.Services.CreateScope())
 {

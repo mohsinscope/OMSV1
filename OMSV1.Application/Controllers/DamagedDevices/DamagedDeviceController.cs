@@ -25,17 +25,18 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
          // Get All Damaged Devices with Pagination
        [HttpGet]
-public async Task<IActionResult> GetAllDamagedDevices([FromQuery] PaginationParams paginationParams)
-{
-    // Send the pagination parameters to the query handler
-    var damagedDevices = await _mediator.Send(new GetAllDamagedDevicesQuery(paginationParams));
+    public async Task<IActionResult> GetAllDamagedDevices([FromQuery] PaginationParams paginationParams)
+    {
+        // Send the pagination parameters to the query handler
+        var damagedDevices = await _mediator.Send(new GetAllDamagedDevicesQuery(paginationParams));
 
-    // Add pagination headers to the response
-    Response.AddPaginationHeader(damagedDevices);
+        // Add pagination headers to the response
+        Response.AddPaginationHeader(damagedDevices);
 
-    // Return the paginated result
-    return Ok(damagedDevices);  // Returns PagedList<DamagedDeviceDto>
-}
+        // Return the paginated result
+        return Ok(damagedDevices);  // Returns PagedList<DamagedDeviceDto>
+    }
+
         
     [HttpGet("governorate/{governorateId}")]
     public async Task<ActionResult<List<DamagedDeviceDto>>> GetByGovernorate(
@@ -57,26 +58,28 @@ public async Task<IActionResult> GetAllDamagedDevices([FromQuery] PaginationPara
         var result = await _mediator.Send(query);
         return Ok(result);
     }
-[HttpGet("office/{officeId}")]
-public async Task<ActionResult<List<DamagedDeviceDto>>> GetByOffice(
-    int officeId, 
-    [FromQuery] DateTime? startDate,  
-    [FromQuery] DateTime? endDate,
-    [FromQuery] int pageNumber = 1, 
-    [FromQuery] int pageSize = 10)
-{
-    var query = new GetDamagedDevicesByOfficeQuery
-    {
-        OfficeId = officeId,
-        StartDate = startDate,
-        EndDate = endDate,
-        PageNumber = pageNumber,
-        PageSize = pageSize
-    };
 
-    var result = await _mediator.Send(query);
-    return Ok(result);
-}
+
+    [HttpGet("office/{officeId}")]
+    public async Task<ActionResult<List<DamagedDeviceDto>>> GetByOffice(
+        int officeId, 
+        [FromQuery] DateTime? startDate,  
+        [FromQuery] DateTime? endDate,
+        [FromQuery] int pageNumber = 1, 
+        [FromQuery] int pageSize = 10)
+    {
+        var query = new GetDamagedDevicesByOfficeQuery
+        {
+            OfficeId = officeId,
+            StartDate = startDate,
+            EndDate = endDate,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
 
     [HttpGet("serial/{serialNumber}")]
     public async Task<ActionResult<DamagedDeviceDto>> GetBySerialNumber(string serialNumber)
@@ -90,54 +93,54 @@ public async Task<ActionResult<List<DamagedDeviceDto>>> GetByOffice(
         return result != null ? Ok(result) : NotFound();
     }
 
-[HttpGet("{id}")]
-public async Task<IActionResult> GetDamagedDeviceById(int id)
-{
-    var query = new GetDamagedDeviceByIdQuery(id);
-    var damagedDeviceDto = await _mediator.Send(query);
-
-    if (damagedDeviceDto == null)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetDamagedDeviceById(int id)
     {
-        return NotFound();
+        var query = new GetDamagedDeviceByIdQuery(id);
+        var damagedDeviceDto = await _mediator.Send(query);
+
+        if (damagedDeviceDto == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(damagedDeviceDto);  // Return the DamagedDeviceDto
     }
 
-    return Ok(damagedDeviceDto);  // Return the DamagedDeviceDto
-}
-
-        [HttpPost]
-        public async Task<IActionResult> AddDamagedDevice([FromBody] AddDamagedDeviceCommand command)
+    [HttpPost]
+    public async Task<IActionResult> AddDamagedDevice([FromBody] AddDamagedDeviceCommand command)
+    {
+        try
         {
-            try
-            {
-                var userName = User.GetUserName(); 
-                command.UserName = userName;
-                // Use MediatR to handle the logic
-                var id = await _mediator.Send(command);
-                return CreatedAtAction(nameof(GetDamagedDeviceById), new { id }, id);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+            var userId = User.GetUserId(); 
+            command.UserId = userId;
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDamagedDevice(int id, [FromBody] UpdateDamagedDeviceCommand command)
+            var id = await _mediator.Send(command);
+            return CreatedAtAction(nameof(GetDamagedDeviceById), new { id }, id);
+        }
+        catch (Exception ex)
         {
-            if (id != command.Id) return BadRequest("Mismatched DamagedDevice ID.");
-
-            var isUpdated = await _mediator.Send(command);
-            if (!isUpdated) return NotFound();
-            return NoContent();
+            return StatusCode(500, $"Internal server error: {ex.Message}");
         }
+    }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDamagedDevice(int id)
-        {
-            var isDeleted = await _mediator.Send(new DeleteDamagedDeviceCommand(id));
-            if (!isDeleted) return NotFound();
-            return NoContent();
-        }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateDamagedDevice(int id, [FromBody] UpdateDamagedDeviceCommand command)
+    {
+        if (id != command.Id) return BadRequest("Mismatched DamagedDevice ID.");
+
+        var isUpdated = await _mediator.Send(command);
+        if (!isUpdated) return NotFound();
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteDamagedDevice(int id)
+    {
+        var isDeleted = await _mediator.Send(new DeleteDamagedDeviceCommand(id));
+        if (!isDeleted) return NotFound();
+        return NoContent();
+    }
 
 
     }

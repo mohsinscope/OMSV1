@@ -3,10 +3,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Commands.DamagedDevices;
 using OMSV1.Application.Queries.Profiles;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.SeedWork;
+using OMSV1.Infrastructure.Persistence;
 
 namespace OMSV1.Application.Handlers.DamagedDevices
 {
@@ -15,8 +17,9 @@ namespace OMSV1.Application.Handlers.DamagedDevices
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
+        private readonly AppDbContext _context;
 
-        public AddDamagedDeviceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper,IMediator mediator)
+        public AddDamagedDeviceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper,IMediator mediator, AppDbContext context)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -24,26 +27,27 @@ namespace OMSV1.Application.Handlers.DamagedDevices
         }
 
         public async Task<int> Handle(AddDamagedDeviceCommand request, CancellationToken cancellationToken)
-{
-    // Assuming you pass the UserId in the command
-    var profileId = await _mediator.Send(new GetProfileIdByUserIdQuery(request.UserName));
-    request.ProfileId = profileId;
+        {
+            // Assuming you pass the UserId in the command
+            var profile = await _unitOfWork.Repository<OMSV1.Domain.Entities.Profiles.Profile>().FirstOrDefaultAsync(p => p.UserId == request.UserId);
+            
+            request.ProfileId = profile.Id;
 
-    var damagedDevice = _mapper.Map<DamagedDevice>(request);
+            var damagedDevice = _mapper.Map<DamagedDevice>(request);
 
-    // Convert UTC to local (remove Kind)
-damagedDevice.UpdateDate(DateTime.SpecifyKind(request.Date, DateTimeKind.Unspecified));
+            // Convert UTC to local (remove Kind)
+            damagedDevice.UpdateDate(DateTime.SpecifyKind(request.Date, DateTimeKind.Unspecified));
 
 
-    await _unitOfWork.Repository<DamagedDevice>().AddAsync(damagedDevice);
+            await _unitOfWork.Repository<DamagedDevice>().AddAsync(damagedDevice);
 
-    if (!await _unitOfWork.SaveAsync(cancellationToken))
-    {
-        throw new Exception("Failed to save the damaged device to the database.");
-    }
+            if (!await _unitOfWork.SaveAsync(cancellationToken))
+            {
+                throw new Exception("Failed to save the damaged device to the database.");
+            }
 
-    return damagedDevice.Id;
-}
+            return damagedDevice.Id;
+        }
 
     }
 }

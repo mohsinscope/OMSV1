@@ -16,6 +16,7 @@ using OMSV1.Infrastructure.Identity;
 using OMSV1.Infrastructure.Interfaces;
 using OMSV1.Domain.Enums;
 using OMSV1.Infrastructure.Persistence;
+using OMSV1.Application.Helpers;
 namespace OMSV1.Application.Controllers.User;
 
 
@@ -35,6 +36,8 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
     [HttpPost("Login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
+
+
         var user = await userManager.Users
             .AsQueryable() // Ensure it's treated as IQueryable for EF Core
             .FirstOrDefaultAsync(x => x.NormalizedUserName == loginDto.UserName.ToUpper());

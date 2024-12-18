@@ -12,7 +12,7 @@ namespace OMSV1.Application.Commands.DamagedDevices
         public int OfficeId { get; set; }
         public int GovernorateId { get; set; }
         public int ProfileId { get; set; }
-        public string? UserName { get; set; }  // Add this property to pass the UserId
+        public int UserId { get; set; }  // Add this property to pass the UserId
 
     }
 }
