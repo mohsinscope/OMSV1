@@ -1,14 +1,18 @@
-using System.Data.Common;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos.DamagedDevices;
 using OMSV1.Application.Queries.DamagedDevices;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.SeedWork;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OMSV1.Application.Handlers.DamagedDevices
 {
-    public class GetDamagedDeviceByIdQueryHandler : IRequestHandler<GetDamagedDeviceByIdQuery, DamagedDeviceDto?>  // Return DamagedDeviceDto
+    public class GetDamagedDeviceByIdQueryHandler : IRequestHandler<GetDamagedDeviceByIdQuery, DamagedDeviceDto?>
     {
         private readonly IGenericRepository<DamagedDevice> _repository;
         private readonly IMapper _mapper;
@@ -21,24 +25,16 @@ namespace OMSV1.Application.Handlers.DamagedDevices
 
         public async Task<DamagedDeviceDto?> Handle(GetDamagedDeviceByIdQuery request, CancellationToken cancellationToken)
         {
-            // Fetch the DamagedDevice with related entities
-            var damagedDevice = await _repository.GetByIdWithIncludesAsync(
-                request.Id,
-                dd => dd.DeviceType,     // Include DeviceType
-                dd => dd.Governorate,    // Include Governorate
-                dd => dd.Office,         // Include Office
-                dd => dd.Profile  // Include Profile
-            );
+            // Retrieve the specific damaged device as an IQueryable
+            var damagedDeviceQuery = _repository.GetAllAsQueryable()
+                .Where(dd => dd.Id == request.Id); // Filter by the given ID
 
-            if (damagedDevice == null)
-            {
-                return null;  // Return null if no DamagedDevice is found
-            }
+            // Map to DamagedDeviceDto using AutoMapper's ProjectTo
+            var damagedDeviceDto = await damagedDeviceQuery
+                .ProjectTo<DamagedDeviceDto>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(cancellationToken); // Fetch the first result or null
 
-            // Map the entity to DamagedDeviceDto using AutoMapper
-            var damagedDeviceDto = _mapper.Map<DamagedDeviceDto>(damagedDevice);
-
-            return damagedDeviceDto;
+            return damagedDeviceDto; // Return the mapped DTO
         }
     }
 }

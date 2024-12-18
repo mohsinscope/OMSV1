@@ -6,7 +6,7 @@ namespace OMSV1.Application.Commands.DamagedDevices
     public class UpdateDamagedDeviceCommand : IRequest<bool>
     {
         public int Id { get; set; }
-        public string SerialNumber { get; set; }
+        public string? SerialNumber { get; set; }
         public DateTime Date { get; set; }
         public int DamagedDeviceTypeId { get; set; }
         public int DeviceTypeId { get; set; }

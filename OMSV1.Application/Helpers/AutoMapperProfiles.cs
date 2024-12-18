@@ -8,14 +8,13 @@ using OMSV1.Application.Dtos;
 using OMSV1.Application.Dtos.DamagedDevices;
 using OMSV1.Application.Dtos.Governorates;
 using OMSV1.Application.Dtos.Offices;
+using OMSV1.Application.Dtos.Profiles;
 using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.DamagedPassport;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Infrastructure.Identity;
-using DomainProfile = OMSV1.Domain.Entities.Profiles.Profile;
-
 namespace OMSV1.Application.Helpers{
 
 public class AutoMapperProfiles : Profile
@@ -48,18 +47,18 @@ public class AutoMapperProfiles : Profile
              CreateMap<AttachmentCU, DamagedPassportAttachmentDto>();
              // Mapping for adding a new DamagedDevice
         CreateMap<AddDamagedDeviceCommand, DamagedDevice>();
+        CreateMap<DamagedDevice, DamagedDeviceDto>();
      // Other mappings
+                 CreateMap<Profile, ProfileDto>();
+
 
     
 
 
 
 
-        CreateMap<DamagedDevice, DamagedDeviceDto>()
-            .ForMember(dest => dest.DeviceTypeName, 
-                opt => opt.MapFrom(src => src.DeviceType.Name))
-            .ForMember(dest => dest.GovernorateName, 
-                opt => opt.MapFrom(src => src.Governorate.Name));
+        CreateMap<DamagedDevice, DamagedDeviceDto>();
+           
             
     }
     }
