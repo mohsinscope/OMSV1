@@ -28,10 +28,7 @@ namespace OMSV1.Application.Handlers.DamagedDevices
 
         public async Task<int> Handle(AddDamagedDeviceCommand request, CancellationToken cancellationToken)
         {
-            // Assuming you pass the UserId in the command
-            var profile = await _unitOfWork.Repository<OMSV1.Domain.Entities.Profiles.Profile>().FirstOrDefaultAsync(p => p.UserId == request.UserId);
-            
-            request.ProfileId = profile.Id;
+
 
             var damagedDevice = _mapper.Map<DamagedDevice>(request);
 
