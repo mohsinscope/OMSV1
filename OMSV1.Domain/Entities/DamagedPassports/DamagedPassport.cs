@@ -38,16 +38,16 @@ public class DamagedPassport : Entity
         ProfileId = profileId;
     }
 
-    // Constructor with default values (optional parameters)
-    public DamagedPassport(string passportNumber, DateTime date)
-        : this(passportNumber, date, default, default, default, default)
-    {
-    }
+        // Constructor with default values (optional parameters)
+        public DamagedPassport(string passportNumber, DateTime date)
+            : this(passportNumber, date, default, default, default, default)
+        {
+        }
 
-  public void UpdateDate(DateTime date)
-{
-    // Ensure the Date is set with UTC Kind
-    Date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
-}
+    public void UpdateDate(DateTime date)
+    {
+        // Ensure the Date is set with UTC Kind
+        Date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
+    }
 
 }
