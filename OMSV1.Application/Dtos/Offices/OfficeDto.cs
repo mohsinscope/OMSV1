@@ -11,5 +11,7 @@ namespace OMSV1.Application.Dtos.Offices
         public int QualityStaff { get; set; }
         public int DeliveryStaff { get; set; }
         public int GovernorateId { get; set; }
+        public string? GovernorateName { get; set; } // New property
+
     }
 }

@@ -26,6 +26,7 @@ namespace OMSV1.Domain.Entities.Profiles;
         public int GovernorateId { get; private set; } 
         public Office? Office { get; private set; }      
         public Governorate? Governorate { get; private set; }
+        
   
 
 

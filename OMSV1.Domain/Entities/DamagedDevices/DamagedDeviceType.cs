@@ -1,8 +1,8 @@
 using System;
 using OMSV1.Domain.SeedWork;
 
-namespace OMSV1.Domain.Entities.DamagedDevices
-{
+namespace OMSV1.Domain.Entities.DamagedDevices;
+
     public class DamagedDeviceType : Entity
     {
         public string Name { get; private set; }
@@ -23,4 +23,4 @@ namespace OMSV1.Domain.Entities.DamagedDevices
             Description = description;
         }
     }
-}
+

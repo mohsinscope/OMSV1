@@ -1,14 +1,14 @@
-// using MediatR;
+using MediatR;
 
-// namespace OMSV1.Application.Queries.Profiles
-// {
-//     public class GetProfileIdByUserIdQuery : IRequest<int>
-//     {
-//         public int UserId { get; }
+namespace OMSV1.Application.Queries.Profiles
+{
+    public class GetProfileIdByUserIdQuery : IRequest<int>
+    {
+        public string UserName { get; }
 
-//         public GetProfileIdByUserIdQuery(int userId)
-//         {
-//             UserId = userId;
-//         }
-//     }
-// }
+        public GetProfileIdByUserIdQuery(string userName)
+        {
+            userName = UserName;
+        }
+    }
+}
