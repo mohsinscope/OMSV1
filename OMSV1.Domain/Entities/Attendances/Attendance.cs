@@ -6,7 +6,7 @@ using OMSV1.Domain.Enums;
 using OMSV1.Domain.Entities.Profiles;
 namespace OMSV1.Domain.Entities.Attendances;
 
-public class Attendance(string name,
+public class Attendance(
                     int receivingStaff,
                     int accountStaff,
                     int printingStaff,
@@ -19,7 +19,6 @@ public class Attendance(string name,
                     int officeId,
                     int profileId) : Entity
 {
-    public string Name { get; private set; } = name;
     public int ReceivingStaff { get; private set; } = receivingStaff;
     public int AccountStaff { get; private set; } = accountStaff;
     public int PrintingStaff { get; private set; } = printingStaff;

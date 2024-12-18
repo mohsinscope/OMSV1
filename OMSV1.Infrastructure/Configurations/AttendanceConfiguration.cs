@@ -13,9 +13,6 @@ public class AttendanceConfiguration : IEntityTypeConfiguration<Attendance>
     {
         builder.HasKey(a => a.Id); 
 
-        builder.Property(a => a.Name)
-            .IsRequired()
-            .HasMaxLength(100);
 
         builder.Property(a => a.ReceivingStaff)
             .IsRequired();

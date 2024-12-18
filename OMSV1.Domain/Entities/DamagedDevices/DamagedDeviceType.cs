@@ -16,7 +16,7 @@ namespace OMSV1.Domain.Entities.DamagedDevices
         }
 
         // You can add more methods or validation logic here as needed.
-            // Update method to modify the properties
+        // Update method to modify the properties
         public void Update(string name, string description)
         {
             Name = name;
