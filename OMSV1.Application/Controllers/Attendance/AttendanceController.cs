@@ -3,6 +3,7 @@ using MediatR;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Commands.Attendances;
 using OMSV1.Application.Queries.Attendances;
+using OMSV1.Infrastructure.Extensions;
 
 namespace OMSV1.API.Controllers
 {
@@ -17,13 +18,18 @@ namespace OMSV1.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAttendances([FromQuery] PaginationParams paginationParams)
-        {
-            var query = new GetAllAttendancesQuery(paginationParams);
-            var result = await _mediator.Send(query);
-            return Ok(result);
-        }
+    [HttpGet]
+    public async Task<IActionResult> GetAllAttendances([FromQuery] PaginationParams paginationParams)
+    {
+        // Send the pagination parameters to the query handler
+        var attendance = await _mediator.Send(new GetAllAttendancesQuery(paginationParams));
+
+        // Add pagination headers to the response
+        Response.AddPaginationHeader(attendance);
+
+        // Return the paginated result
+        return Ok(attendance);  // Returns PagedList<DamagedDeviceDto>
+    }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAttendanceById(int id)

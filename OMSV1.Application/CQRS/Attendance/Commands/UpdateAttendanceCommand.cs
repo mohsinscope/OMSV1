@@ -13,7 +13,10 @@ namespace OMSV1.Application.Commands.Attendances
         public int DeliveryStaff { get; set; }
         public DateTime Date { get; set; }
         public string? Note { get; set; }
-        public WorkingHours WorkingHours { get; set; } // Updated to use enum
+        
+        // Change to integer, as it is stored as integer in the entity
+        public int WorkingHours { get; set; } // Using integer instead of enum
+        
         public int GovernorateId { get; set; }
         public int OfficeId { get; set; }
         public int ProfileId { get; set; }
