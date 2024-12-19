@@ -4,12 +4,12 @@ using OMSV1.Application.Helpers;
 using OMSV1.Application.Commands.Attendances;
 using OMSV1.Application.Queries.Attendances;
 using OMSV1.Infrastructure.Extensions;
+using OMSV1.Application.Controllers;
 
 namespace OMSV1.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AttendanceController : ControllerBase
+    
+    public class AttendanceController : BaseApiController
     {
         private readonly IMediator _mediator;
 

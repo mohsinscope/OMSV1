@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 
 namespace OMSV1.Application.Controllers.LOV
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class DeviceTypeController : ControllerBase
+    public class DeviceTypeController : BaseApiController
     {
         private readonly IMediator _mediator;
 

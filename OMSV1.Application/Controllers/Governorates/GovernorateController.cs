@@ -8,9 +8,7 @@ using OMSV1.Infrastructure.Extensions;
 
 namespace OMSV1.Application.Controllers.Governorates
 {
-    [ApiController]
-[Route("api/[controller]")]
-public class GovernorateController(IMediator mediator) : ControllerBase
+public class GovernorateController(IMediator mediator) : BaseApiController
 {
     private readonly IMediator _mediator = mediator;
 

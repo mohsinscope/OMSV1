@@ -6,9 +6,7 @@ using OMSV1.Application.Queries.Profiles;
 
 namespace OMSV1.Application.Controllers.Profiles
 {
-[ApiController]
-[Route("api/profiles")]
-public class ProfileController : ControllerBase
+public class ProfileController : BaseApiController
 {
     private readonly IMediator _mediator;
 

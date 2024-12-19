@@ -69,7 +69,6 @@ public class AutoMapperProfiles : Profile
 
 
 
-        CreateMap<DamagedDevice, DamagedDeviceDto>();
            
             
     }

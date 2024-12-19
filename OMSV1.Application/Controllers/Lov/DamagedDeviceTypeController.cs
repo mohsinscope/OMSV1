@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 using OMSV1.Application.CQRS.Lov.DamagedDevice;
 namespace OMSV1.Application.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class DamagedDeviceTypeController : ControllerBase
+ 
+    public class DamagedDeviceTypeController : BaseApiController
     {
         private readonly IMediator _mediator;
 

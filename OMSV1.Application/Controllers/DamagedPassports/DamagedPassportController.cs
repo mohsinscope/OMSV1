@@ -9,9 +9,8 @@ using OMSV1.Application.Helpers; // Assuming the DeleteDamagedPassportCommand ex
 
 namespace OMSV1.Application.Controllers.DamagedPassports
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class DamagedPassportController : ControllerBase
+ 
+    public class DamagedPassportController : BaseApiController
     {
         private readonly IMediator _mediator;
 

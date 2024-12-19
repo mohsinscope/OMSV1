@@ -10,9 +10,8 @@ using OMSV1.Infrastructure.Extensions;
 
 namespace OMSV1.Application.Controllers.DamagedDevices
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class DamagedDeviceController : ControllerBase
+
+    public class DamagedDeviceController : BaseApiController
     
     {
         

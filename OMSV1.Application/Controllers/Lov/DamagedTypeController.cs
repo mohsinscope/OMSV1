@@ -7,9 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 namespace OMSV1.Application.Controllers.LOV
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class DamagedTypeController : ControllerBase
+    public class DamagedTypeController : BaseApiController
     {
         private readonly IMediator _mediator;
 

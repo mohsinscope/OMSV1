@@ -12,9 +12,8 @@ using OMSV1.Application.Queries.Attachments;
 
 namespace OMSV1.Application.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AttachmentController : ControllerBase
+   
+    public class AttachmentController : BaseApiController
     {
         private readonly IPhotoService photoService;
         private readonly AppDbContext appDbContext;

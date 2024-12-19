@@ -11,9 +11,7 @@ using System.Threading.Tasks;
 
 namespace OMSV1.Application.Controllers.Lectures
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class LectureController : ControllerBase
+    public class LectureController : BaseApiController
     {
         private readonly IMediator _mediator;
 
