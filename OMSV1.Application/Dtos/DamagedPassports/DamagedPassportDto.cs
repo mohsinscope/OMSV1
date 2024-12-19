@@ -6,7 +6,7 @@ namespace OMSV1.Application.Dtos
 {
     public class DamagedPassportDto
     {
-         public int Id { get; set; }
+        public int Id { get; set; }
         public string PassportNumber { get; set; }
         public DateTime Date { get; set; }
         public int DamagedTypeId { get; set; }
