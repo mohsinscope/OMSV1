@@ -44,7 +44,22 @@ public class DamagedPassport : Entity
             : this(passportNumber, date, default, default, default, default)
         {
         }
-
+        public void UpdateDeviceDetails(
+            string passportNumber,
+            DateTime date,
+            int damagedTypeId,
+            int officeId,
+            int governorateId,
+            int profileId)
+        {
+            // Update the properties of the DamagedPassport entity with the new values
+            PassportNumber = passportNumber;
+            Date = date;
+            DamagedTypeId = damagedTypeId;
+            OfficeId = officeId;
+            GovernorateId = governorateId;
+            ProfileId = profileId;
+        }
     public void UpdateDate(DateTime date)
     {
         // Ensure the Date is set with UTC Kind

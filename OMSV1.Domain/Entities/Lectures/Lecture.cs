@@ -22,7 +22,14 @@ public class Lecture(string title,
     public Office? Office { get; private set; }
     public Profile? Profile { get; private set; }
 
-
+   public void UpdateLectureDetails(string title, DateTime date, int officeId, int governorateId, int profileId)
+    {
+        Title = title;
+        Date = date;
+        OfficeId = officeId;
+        GovernorateId = governorateId;
+        ProfileId = profileId;
+    }
 
 
 
