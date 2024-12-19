@@ -73,6 +73,15 @@ public async Task<IActionResult> GetAttachmentsById(int id, string entityType)
                         return BadRequest($"No damaged device found with ID {entityId}.");
                     }
                     break;
+                    case OMSV1.Domain.Enums.EntityType.Lecture:
+                    var lectureExists = await appDbContext.Lectures
+                        .FirstOrDefaultAsync(dd => dd.Id == entityId);
+
+                    if (lectureExists == null)
+                    {
+                        return BadRequest($"No Lecture found with ID {entityId}.");
+                    }
+                    break;
 
                 case OMSV1.Domain.Enums.EntityType.DamagedPassport:
                     var damagedPassportExists = await appDbContext.DamagedPassports

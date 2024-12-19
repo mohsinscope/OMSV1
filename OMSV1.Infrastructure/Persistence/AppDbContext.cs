@@ -8,6 +8,7 @@ using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.DamagedPassport;
 using OMSV1.Domain.Entities.Expenses;
 using OMSV1.Domain.Entities.Governorates;
+using OMSV1.Domain.Entities.Lectures;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Infrastructure.Identity;
@@ -20,6 +21,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     IdentityUserToken<int>>(options)
 {
         public DbSet<DamagedDevice> DamagedDevices { get; set; }
+        public DbSet<Lecture> Lectures { get; set; }
+
         public   DbSet<DamagedPassport> DamagedPassports { get; set; }
         public   DbSet<DamagedType> DamagedTypes { get; set; }
         public   DbSet<DamagedDeviceType> DamagedDeviceTypes { get; set; }
