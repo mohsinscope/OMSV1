@@ -36,7 +36,9 @@ namespace OMSV1.Application.CQRS.Queries.Profiles
                 Position = profile.Position.ToString(),
                 GovernorateName = profile.Governorate.Name,
                 OfficeName = profile.Office.Name,
-                UserId = request.UserId
+                UserId = request.UserId,
+                GovernorateId= profile.Governorate.Id,
+                OfficeId=profile.Office.Id
             };
 
             return profileDto;

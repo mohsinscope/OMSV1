@@ -3,16 +3,19 @@ using System;
 
 namespace OMSV1.Application.Commands.Lectures
 {
-    public class AddLectureCommand : IRequest<int> // Returns the ID of the newly created Lecture
+    public class UpdateLectureCommand : IRequest<bool> // Returns a boolean indicating success
     {
+        public int Id { get; set; }
         public string Title { get; set; }
         public DateTime Date { get; set; }
         public int OfficeId { get; set; }
         public int GovernorateId { get; set; }
         public int ProfileId { get; set; }
 
-        public AddLectureCommand(string title, DateTime date, int officeId, int governorateId, int profileId)
+        // Constructor to initialize the properties
+        public UpdateLectureCommand(int id, string title, DateTime date, int officeId, int governorateId, int profileId)
         {
+            Id = id;
             Title = title;
             Date = date;
             OfficeId = officeId;

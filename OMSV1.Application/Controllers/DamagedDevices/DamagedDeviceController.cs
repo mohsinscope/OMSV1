@@ -11,9 +11,8 @@ using OMSV1.Infrastructure.Extensions;
 
 namespace OMSV1.Application.Controllers.DamagedDevices
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class DamagedDeviceController : ControllerBase
+
+    public class DamagedDeviceController : BaseApiController
     
     {
         
@@ -136,14 +135,19 @@ namespace OMSV1.Application.Controllers.DamagedDevices
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteDamagedDevice(int id)
-    {
-        var isDeleted = await _mediator.Send(new DeleteDamagedDeviceCommand(id));
-        if (!isDeleted) return NotFound();
-        return NoContent();
-    }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteDamagedDevice(int id)
+        {
+            var command = new DeleteDamagedDeviceCommand(id);
+            var result = await _mediator.Send(command);
 
+            if (!result)
+            {
+                return NotFound("Damaged device not found.");
+            }
+
+            return NoContent(); // Successfully deleted
+        }
 
 
 

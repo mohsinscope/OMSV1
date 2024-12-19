@@ -33,14 +33,28 @@ public class DamagedDevice(
 
 
 
-    public void UpdateDeviceDetails(string serialNumber, DateTime date, int damagedDeviceTypeId, int deviceTypeId, int officeId, int governorateId, int profileId)
+        // Method to update the device details
+    public void UpdateDeviceDetails(
+        string serialNumber,
+        DateTime date,
+        int damagedDeviceTypeId,
+        int deviceTypeId,
+        int officeId,
+        int governorateId,
+        int profileId)
     {
-        throw new NotImplementedException();
+        SerialNumber = serialNumber;
+        Date = date;
+        DamagedDeviceTypeId = damagedDeviceTypeId;
+        DeviceTypeId = deviceTypeId;
+        OfficeId = officeId;
+        GovernorateId = governorateId;
+        ProfileId = profileId;
     }
-     public DamagedDevice(string serialNumber, DateTime date)
-    : this(serialNumber, date, default, default, default, default, default)
-{
-}
+            public DamagedDevice(string serialNumber, DateTime date)
+            : this(serialNumber, date, default, default, default, default, default)
+        {
+        }
 
      public void UpdateDate(DateTime date)
     {

@@ -10,6 +10,7 @@ namespace OMSV1.Domain.Entities.DamagedPassport;
 
 public class DamagedPassport : Entity
 {
+    public int Id { get; set; }
     public string PassportNumber { get; private set; }
     public DateTime Date { get; private set; }
     public int DamagedTypeId { get; private set; }
@@ -38,16 +39,31 @@ public class DamagedPassport : Entity
         ProfileId = profileId;
     }
 
-    // Constructor with default values (optional parameters)
-    public DamagedPassport(string passportNumber, DateTime date)
-        : this(passportNumber, date, default, default, default, default)
+        // Constructor with default values (optional parameters)
+        public DamagedPassport(string passportNumber, DateTime date)
+            : this(passportNumber, date, default, default, default, default)
+        {
+        }
+        public void UpdateDeviceDetails(
+            string passportNumber,
+            DateTime date,
+            int damagedTypeId,
+            int officeId,
+            int governorateId,
+            int profileId)
+        {
+            // Update the properties of the DamagedPassport entity with the new values
+            PassportNumber = passportNumber;
+            Date = date;
+            DamagedTypeId = damagedTypeId;
+            OfficeId = officeId;
+            GovernorateId = governorateId;
+            ProfileId = profileId;
+        }
+    public void UpdateDate(DateTime date)
     {
+        // Ensure the Date is set with UTC Kind
+        Date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
     }
-
-  public void UpdateDate(DateTime date)
-{
-    // Ensure the Date is set with UTC Kind
-    Date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
-}
 
 }

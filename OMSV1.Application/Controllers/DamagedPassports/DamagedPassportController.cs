@@ -9,9 +9,8 @@ using OMSV1.Application.Helpers; // Assuming the DeleteDamagedPassportCommand ex
 
 namespace OMSV1.Application.Controllers.DamagedPassports
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class DamagedPassportController : ControllerBase
+ 
+    public class DamagedPassportController : BaseApiController
     {
         private readonly IMediator _mediator;
 
@@ -20,19 +19,19 @@ namespace OMSV1.Application.Controllers.DamagedPassports
             _mediator = mediator;
         }
 
-          // Get All Damaged Devices with Pagination
+       // Get All Damaged Devices with Pagination
        [HttpGet]
-public async Task<IActionResult> GetAllDamagedPassport([FromQuery] PaginationParams paginationParams)
-{
-    // Send the pagination parameters to the query handler
-    var damagedDevices = await _mediator.Send(new GetAllDamagedPassportsQuery(paginationParams));
+        public async Task<IActionResult> GetAllDamagedPassport([FromQuery] PaginationParams paginationParams)
+        {
+            // Send the pagination parameters to the query handler
+            var damagedDevices = await _mediator.Send(new GetAllDamagedPassportsQuery(paginationParams));
 
-    // Add pagination headers to the response
-    Response.AddPaginationHeader(damagedDevices);
+            // Add pagination headers to the response
+            Response.AddPaginationHeader(damagedDevices);
 
-    // Return the paginated result
-    return Ok(damagedDevices);  // Returns PagedList<DamagedDeviceDto>
-}
+            // Return the paginated result
+            return Ok(damagedDevices);  // Returns PagedList<DamagedDeviceDto>
+        }
 
         // GET method to retrieve a damaged passport by ID
         [HttpGet("{id}")]
