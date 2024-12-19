@@ -2,26 +2,38 @@ using MediatR;
 using OMSV1.Application.Commands.DamagedDevices;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.SeedWork;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OMSV1.Application.Handlers.DamagedDevices
 {
     public class DeleteDamagedDeviceCommandHandler : IRequestHandler<DeleteDamagedDeviceCommand, bool>
     {
-        private readonly IGenericRepository<DamagedDevice> _repository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public DeleteDamagedDeviceCommandHandler(IGenericRepository<DamagedDevice> repository)
+        public DeleteDamagedDeviceCommandHandler(IUnitOfWork unitOfWork)
         {
-            _repository = repository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<bool> Handle(DeleteDamagedDeviceCommand request, CancellationToken cancellationToken)
         {
-            var damagedDevice = await _repository.GetByIdAsync(request.Id);
+            // Fetch the damaged device entity
+            var damagedDevice = await _unitOfWork.Repository<DamagedDevice>().GetByIdAsync(request.Id);
 
-            if (damagedDevice == null) return false; // Device not found
+            if (damagedDevice == null)
+                return false; // If not found, return false
 
-            await _repository.DeleteAsync(damagedDevice);
-            return true;
+            // Perform the delete operation
+            await _unitOfWork.Repository<DamagedDevice>().DeleteAsync(damagedDevice);
+
+            // Save the changes to the database
+            if (await _unitOfWork.SaveAsync(cancellationToken))
+            {
+                return true; // Successfully deleted
+            }
+
+            return false; // Failed to save the changes
         }
     }
 }

@@ -10,6 +10,7 @@ namespace OMSV1.Domain.Entities.DamagedPassport;
 
 public class DamagedPassport : Entity
 {
+    public int Id { get; set; }
     public string PassportNumber { get; private set; }
     public DateTime Date { get; private set; }
     public int DamagedTypeId { get; private set; }

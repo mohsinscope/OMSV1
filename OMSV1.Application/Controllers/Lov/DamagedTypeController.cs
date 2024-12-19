@@ -65,11 +65,11 @@ namespace OMSV1.Application.Controllers.LOV
             return BadRequest("Failed to update Damaged Type");
         }
 
-        // Delete Damaged Type
-        [HttpDelete("delete/{id}")]
-        public async Task<ActionResult> DeleteDamagedType(int id)
+                // Delete Damaged Type
+                [HttpDelete("delete/{id}")]
+            public async Task<ActionResult> DeleteDamagedType(int id)
         {
-            var result = await _mediator.Send(new DeleteDamagedTypeCommand { Id = id });
+            var result = await _mediator.Send(new DeleteDamagedTypeCommand(id)); // Pass the id to the constructor
             if (result)
             {
                 return Ok("Damaged Type deleted successfully");
