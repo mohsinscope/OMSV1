@@ -12,8 +12,8 @@ using OMSV1.Infrastructure.Persistence;
 namespace OMSV1.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241216071103_AttachementAdded")]
-    partial class AttachementAdded
+    [Migration("20241219094436_InitialExpenses3")]
+    partial class InitialExpenses3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -173,11 +173,6 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.Property<int>("GovernorateId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Note")
                         .IsRequired()
@@ -382,6 +377,147 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DamagedTypes", (string)null);
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.Action", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActionType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MonthlyExpensesId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MonthlyExpensesId");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("Actions", (string)null);
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.DailyExpenses", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpenseDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ExpenseTypeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MonthlyExpensesId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpenseTypeId");
+
+                    b.HasIndex("MonthlyExpensesId");
+
+                    b.ToTable("DailyExpenses", (string)null);
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.ExpenseType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExpenseTypes", (string)null);
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.MonthlyExpenses", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("GovernorateId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("OfficeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GovernorateId");
+
+                    b.HasIndex("OfficeId");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("MonthlyExpenses", (string)null);
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Governorates.Governorate", b =>
@@ -798,6 +934,71 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Navigation("Profile");
                 });
 
+            modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.Action", b =>
+                {
+                    b.HasOne("OMSV1.Domain.Entities.Expenses.MonthlyExpenses", "MonthlyExpenses")
+                        .WithMany("actions")
+                        .HasForeignKey("MonthlyExpensesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OMSV1.Domain.Entities.Profiles.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MonthlyExpenses");
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.DailyExpenses", b =>
+                {
+                    b.HasOne("OMSV1.Domain.Entities.Expenses.ExpenseType", "ExpenseType")
+                        .WithMany()
+                        .HasForeignKey("ExpenseTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OMSV1.Domain.Entities.Expenses.MonthlyExpenses", "MonthlyExpenses")
+                        .WithMany("dailyExpenses")
+                        .HasForeignKey("MonthlyExpensesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ExpenseType");
+
+                    b.Navigation("MonthlyExpenses");
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.MonthlyExpenses", b =>
+                {
+                    b.HasOne("OMSV1.Domain.Entities.Governorates.Governorate", "Governorate")
+                        .WithMany()
+                        .HasForeignKey("GovernorateId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OMSV1.Domain.Entities.Offices.Office", "Office")
+                        .WithMany()
+                        .HasForeignKey("OfficeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OMSV1.Domain.Entities.Profiles.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Governorate");
+
+                    b.Navigation("Office");
+
+                    b.Navigation("Profile");
+                });
+
             modelBuilder.Entity("OMSV1.Domain.Entities.Lectures.Lecture", b =>
                 {
                     b.HasOne("OMSV1.Domain.Entities.Governorates.Governorate", "Governorate")
@@ -883,6 +1084,13 @@ namespace OMSV1.Infrastructure.Migrations
             modelBuilder.Entity("OMSV1.Domain.Entities.DamagedPassport.DamagedPassport", b =>
                 {
                     b.Navigation("Attachments");
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.MonthlyExpenses", b =>
+                {
+                    b.Navigation("actions");
+
+                    b.Navigation("dailyExpenses");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Governorates.Governorate", b =>

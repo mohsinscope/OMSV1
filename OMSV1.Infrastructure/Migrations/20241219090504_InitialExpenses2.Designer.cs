@@ -12,8 +12,8 @@ using OMSV1.Infrastructure.Persistence;
 namespace OMSV1.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241216113322_InitialExpenses")]
-    partial class InitialExpenses
+    [Migration("20241219090504_InitialExpenses2")]
+    partial class InitialExpenses2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -173,11 +173,6 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.Property<int>("GovernorateId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Note")
                         .IsRequired()

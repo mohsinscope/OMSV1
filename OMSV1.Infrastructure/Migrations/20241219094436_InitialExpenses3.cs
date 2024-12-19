@@ -5,7 +5,7 @@
 namespace OMSV1.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialATTACHESe : Migration
+    public partial class InitialExpenses3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

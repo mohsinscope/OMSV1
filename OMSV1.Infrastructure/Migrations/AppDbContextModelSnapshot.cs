@@ -171,11 +171,6 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Property<int>("GovernorateId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasMaxLength(500)

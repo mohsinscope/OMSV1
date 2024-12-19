@@ -14,6 +14,9 @@ public class PagedList<T> :List<T>
         AddRange(items);
     }
 
+
+
+
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }
     public int PageSize { get; set; }

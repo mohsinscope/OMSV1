@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.DamagedDevices;
 using OMSV1.Application.CQRS.Commands.DamagedDevices;
+using OMSV1.Application.CQRS.DamagedDevices.Queries;
 using OMSV1.Application.CQRS.Queries.DamagedDevices;
 using OMSV1.Application.Dtos.DamagedDevices;
 using OMSV1.Application.Helpers;
@@ -17,14 +18,15 @@ namespace OMSV1.Application.Controllers.DamagedDevices
     {
         
         private readonly IMediator _mediator;
-
         public DamagedDeviceController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
-         // Get All Damaged Devices with Pagination
-       [HttpGet]
+
+
+
+    [HttpGet]
     public async Task<IActionResult> GetAllDamagedDevices([FromQuery] PaginationParams paginationParams)
     {
         // Send the pagination parameters to the query handler
@@ -141,6 +143,26 @@ namespace OMSV1.Application.Controllers.DamagedDevices
         if (!isDeleted) return NotFound();
         return NoContent();
     }
+
+
+
+
+
+        [HttpPost("search")]
+        public async Task<IActionResult> GetDamagedDevices([FromBody] GetDamagedDevicesQuery query)
+        {
+            try
+            {
+                var result = await _mediator.Send(query);
+                Response.AddPaginationHeader(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Log the error here (if necessary)
+                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+            }
+        }
 
 
     }

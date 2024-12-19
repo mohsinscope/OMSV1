@@ -8,9 +8,8 @@ using OMSV1.Infrastructure.Extensions;
 
 namespace OMSV1.Application.Controllers.Offices
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class OfficeController(IMediator mediator) : ControllerBase
+
+    public class OfficeController(IMediator mediator) : BaseApiController
     {
         private readonly IMediator _mediator = mediator;
 

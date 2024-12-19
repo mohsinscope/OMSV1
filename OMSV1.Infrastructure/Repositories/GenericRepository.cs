@@ -11,65 +11,72 @@ namespace OMSV1.Infrastructure.Repositories
     private readonly AppDbContext _context = context;
     private readonly DbSet<T> _dbSet = context.Set<T>(); 
 
+
         public async Task<IReadOnlyList<T>> ListAllAsync()
         {
             return await _dbSet.ToListAsync();
         }
-        private IQueryable<T> ApplySpecification(ISpecification<T> spec)
-        {
-            return SpecificationEvaluator<T>.GetQuery(_dbSet, spec);
-        }
+
+
         public async Task<IReadOnlyList<T>> ListAsync(ISpecification<T> spec)
         {
             return await ApplySpecification(spec).ToListAsync();
         }
+
+
+        public IQueryable<T> ListAsQueryable(ISpecification<T> spec)
+            {
+                return ApplySpecification(spec);
+            }
+
 
         public IQueryable<T> GetAllAsQueryable()
             {
                 return _dbSet.AsNoTracking(); // Returns the data as IQueryable for further processing
             }
 
+
         public async Task<T> SingleOrDefaultAsync(ISpecification<T> spec)
-        {
-            return await ApplySpecification(spec).FirstOrDefaultAsync();
-        }
+            {
+                return await ApplySpecification(spec).FirstOrDefaultAsync();
+            }
    
 
         public async Task<int> CountAsync(ISpecification<T> spec)
-        {
-            return await ApplySpecification(spec).CountAsync();
-        }
+            {
+                return await ApplySpecification(spec).CountAsync();
+            }
 
         
         public async Task<T> AddAsync(T entity)
-        {
-            var addedEntity = await _context.Set<T>().AddAsync(entity);
-            
-            return addedEntity.Entity;
-        }
+            {
+                var addedEntity = await _context.Set<T>().AddAsync(entity);
+                
+                return addedEntity.Entity;
+            }
 
         public async Task DeleteAsync(T entity)
-        {
-            _context.Set<T>().Remove(entity);
-           
-        }
+            {
+                _context.Set<T>().Remove(entity);
+            
+            }
 
         public async Task<T?> GetByIdAsync(int id)
-        {
-            return await _context.Set<T>().FindAsync(id); // Lazy loading
-        }
+            {
+                return await _context.Set<T>().FindAsync(id); // Lazy loading
+            }
 
         public async Task<IReadOnlyList<T>> GetAllAsync()
-        {
-            
-            return await _context.Set<T>().ToListAsync();
-        }
+            {
+                
+                return await _context.Set<T>().ToListAsync();
+            }
 
         public async Task UpdateAsync(T entity)
-        {
-            _context.Set<T>().Update(entity);
-            
-        }
+            {
+                _context.Set<T>().Update(entity);
+                
+            }
         //Profile by Id
         public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
             {
@@ -92,6 +99,30 @@ namespace OMSV1.Infrastructure.Repositories
             }
 
 
+
+        private IQueryable<T> ApplySpecification(ISpecification<T> spec)
+            {
+                var query = _context.Set<T>().AsQueryable();
+
+                if (spec.Criteria != null)
+                {
+                    query = query.Where(spec.Criteria);
+                }
+
+                if (spec.OrderBy != null)
+                {
+                    query = query.OrderBy(spec.OrderBy);
+                }
+
+                if (spec.OrderByDescending != null)
+                {
+                    query = query.OrderByDescending(spec.OrderByDescending);
+                }
+
+                query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
+
+                return query;
+            }
 
 
         // private IQueryable<T> ApplySpecification(ISpecification<T> spec)
