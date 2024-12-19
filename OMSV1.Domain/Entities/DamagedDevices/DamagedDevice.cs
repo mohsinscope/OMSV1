@@ -37,10 +37,10 @@ public class DamagedDevice(
     {
         throw new NotImplementedException();
     }
-     public DamagedDevice(string serialNumber, DateTime date)
-    : this(serialNumber, date, default, default, default, default, default)
-{
-}
+            public DamagedDevice(string serialNumber, DateTime date)
+            : this(serialNumber, date, default, default, default, default, default)
+        {
+        }
 
      public void UpdateDate(DateTime date)
     {

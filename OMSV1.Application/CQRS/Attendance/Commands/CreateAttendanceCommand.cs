@@ -2,18 +2,25 @@ using MediatR;
 
 namespace OMSV1.Application.Commands.Attendances
 {
- public class CreateAttendanceCommand : IRequest<int>
-{
-    public int ReceivingStaff { get; set; }  // Default value
-    public int AccountStaff { get; set; } 
-    public int PrintingStaff { get; set; }
-    public int QualityStaff { get; set; } 
-    public int DeliveryStaff { get; set; } 
-    public DateTime Date { get; set; } // Default to current time
-    public string? Note { get; set; } 
-    public int GovernorateId { get; set; }// Assume a default governorate
-    public int OfficeId { get; set; }// Assume a default office
-    public int ProfileId { get; set; } // Assume a default profile
-    public int WorkingHours { get; set; } // Default working hours
-}
+    public class CreateAttendanceCommand : IRequest<int>
+    {
+        // Staff details (all integers representing IDs)
+        public int ReceivingStaff { get; set; } // ID for receiving staff
+        public int AccountStaff { get; set; }   // ID for account staff
+        public int PrintingStaff { get; set; }  // ID for printing staff
+        public int QualityStaff { get; set; }   // ID for quality staff
+        public int DeliveryStaff { get; set; }  // ID for delivery staff
+
+        // Date and note (the same as in the entity)
+        public DateTime Date { get; set; } // Use DateTime, default can be set in handler or on the client side
+        public string Note { get; set; } = ""; // Default value for Note if not provided
+
+        // Foreign key relations to Governorate, Office, Profile
+        public int GovernorateId { get; set; } // FK to Governorate
+        public int OfficeId { get; set; }      // FK to Office
+        public int ProfileId { get; set; }     // FK to Profile
+
+        // Working hours (use an integer, matching how it's stored in the entity)
+        public int WorkingHours { get; set; }  // Integer value for WorkingHours (enum mapped as int)
+    }
 }
