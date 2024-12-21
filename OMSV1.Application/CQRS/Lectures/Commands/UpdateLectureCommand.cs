@@ -7,16 +7,19 @@ namespace OMSV1.Application.Commands.Lectures
     {
         public int Id { get; set; }
         public string Title { get; set; }
+        public string? Note { get; set; }
+
         public DateTime Date { get; set; }
         public int OfficeId { get; set; }
         public int GovernorateId { get; set; }
         public int ProfileId { get; set; }
 
         // Constructor to initialize the properties
-        public UpdateLectureCommand(int id, string title, DateTime date, int officeId, int governorateId, int profileId)
+        public UpdateLectureCommand(int id, string title, DateTime date,string note, int officeId, int governorateId, int profileId)
         {
             Id = id;
             Title = title;
+            Note= note;
             Date = date;
             OfficeId = officeId;
             GovernorateId = governorateId;

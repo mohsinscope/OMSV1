@@ -36,7 +36,8 @@ namespace OMSV1.Application.Handlers.DamagedPassports
                     damagedPassport.PassportNumber,
                     damagedPassport.Date,
                     damagedPassport.DamagedTypeId,
-                    damagedPassport.DamagedType?.Name,  // Safely access related DamagedType
+                    damagedPassport.DamagedType?.Name,
+                    damagedPassport.Note,  // Safely access related DamagedType
                     damagedPassport.OfficeId,
                     damagedPassport.Office?.Name,        // Safely access related Office
                     damagedPassport.GovernorateId,

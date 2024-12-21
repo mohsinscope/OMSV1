@@ -6,6 +6,7 @@ namespace OMSV1.Application.Commands.DamagedPassports
     {
         public string PassportNumber { get; set; }
         public DateTime Date { get; set; }
+        public string Note { get; set; } = ""; // Default value for Note if not provided
         public int OfficeId { get; set; }
         public int GovernorateId { get; set; }
         public int DamagedTypeId { get; set; }

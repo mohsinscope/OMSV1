@@ -23,6 +23,9 @@ public class DamagedDeviceConfiguration : IEntityTypeConfiguration<DamagedDevice
 
         builder.Property(dd => dd.DeviceTypeId)
             .IsRequired();
+            
+        builder.Property(a => a.Note)
+            .HasMaxLength(500); 
 
         builder.Property(dd => dd.OfficeId)
             .IsRequired();

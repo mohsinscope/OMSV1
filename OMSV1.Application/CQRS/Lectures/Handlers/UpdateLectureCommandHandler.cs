@@ -25,6 +25,7 @@ namespace OMSV1.Application.Handlers.Lectures
             lecture.UpdateLectureDetails(
                 request.Title,
                 request.Date,
+                request.Note,
                 request.OfficeId,
                 request.GovernorateId,
                 request.ProfileId

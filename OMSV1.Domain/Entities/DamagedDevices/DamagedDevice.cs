@@ -13,6 +13,7 @@ public class DamagedDevice(
                              string serialNumber,
                              DateTime date,
                              int damagedDeviceTypeId,
+                             string note,
                              int deviceTypeId,
                              int officeId,
                              int governorateId,
@@ -27,6 +28,7 @@ public class DamagedDevice(
     public int ProfileId { get; private set; } = profileId;
     public DamagedDeviceType? DamagedDeviceTypes { get; private set; }
     public DeviceType? DeviceType { get; private set; }
+    public string Note { get; private set; } = note;
     public Governorate? Governorate { get; private set; }
     public Office? Office { get; private set; }
     public Profile? Profile { get; private set; }
@@ -40,6 +42,7 @@ public class DamagedDevice(
         int damagedDeviceTypeId,
         int deviceTypeId,
         int officeId,
+        string note,
         int governorateId,
         int profileId)
     {
@@ -48,11 +51,12 @@ public class DamagedDevice(
         DamagedDeviceTypeId = damagedDeviceTypeId;
         DeviceTypeId = deviceTypeId;
         OfficeId = officeId;
+        Note = note;
         GovernorateId = governorateId;
         ProfileId = profileId;
     }
             public DamagedDevice(string serialNumber, DateTime date)
-            : this(serialNumber, date, default, default, default, default, default)
+            : this(serialNumber, date, default, default, default, default, default,default)
         {
         }
 
