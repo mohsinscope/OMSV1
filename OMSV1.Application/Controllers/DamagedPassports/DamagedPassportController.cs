@@ -6,7 +6,7 @@ using OMSV1.Application.Dtos; // Import DTOs namespace
 using OMSV1.Application.Commands.DamagedDevices;
 using OMSV1.Infrastructure.Extensions;
 using OMSV1.Application.Helpers; // Assuming the DeleteDamagedPassportCommand exists here.
-
+using OMSV1.Application.CQRS.DamagedDevices.Queries;
 namespace OMSV1.Application.Controllers.DamagedPassports
 {
  
@@ -90,5 +90,21 @@ namespace OMSV1.Application.Controllers.DamagedPassports
 
             return NoContent(); // 204 No Content, as the passport has been deleted successfully
         }
+                [HttpPost("search")]
+        public async Task<IActionResult> GetDamagedDevices([FromBody] GetDamagedPassportQuery query)
+        {
+            try
+            {
+                var result = await _mediator.Send(query);
+                Response.AddPaginationHeader(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Log the error here (if necessary)
+                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+            }
+        }
+
     }
 }

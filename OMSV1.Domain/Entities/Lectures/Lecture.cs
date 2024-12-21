@@ -1,5 +1,3 @@
-using System;
-using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.Entities.Profiles;
