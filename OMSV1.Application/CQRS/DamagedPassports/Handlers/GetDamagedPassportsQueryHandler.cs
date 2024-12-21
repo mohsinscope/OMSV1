@@ -1,4 +1,3 @@
-using System;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
@@ -7,7 +6,7 @@ using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.DamagedPassport;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Specifications.DamagedPassports;
-using OMSV1.Application.CQRS.DamagedPassports;
+using OMSV1.Application.CQRS.DamagedPassports.Queries;
 
 namespace OMSV1.Application.CQRS.DamagedPassports.Handlers;
 

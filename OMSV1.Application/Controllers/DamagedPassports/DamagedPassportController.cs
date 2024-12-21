@@ -7,6 +7,7 @@ using OMSV1.Application.Commands.DamagedDevices;
 using OMSV1.Infrastructure.Extensions;
 using OMSV1.Application.Helpers; // Assuming the DeleteDamagedPassportCommand exists here.
 using OMSV1.Application.CQRS.DamagedDevices.Queries;
+using OMSV1.Application.CQRS.DamagedPassports.Queries;
 namespace OMSV1.Application.Controllers.DamagedPassports
 {
  
