@@ -14,7 +14,6 @@ public class FilterAttendanceSpecification : BaseSpecification<Attendance>
         int? governorateId = null,
         int? profileId = null)
         : base(x =>
-            //(string.IsNullOrEmpty(workingHours) || x.WorkingHours.Contains(workingHours)) &&
             x.WorkingHours == (WorkingHours)workingHours.Value  &&
             (!startDate.HasValue || x.Date >= startDate.Value) &&
             (!endDate.HasValue || x.Date <= endDate.Value) &&
@@ -23,7 +22,6 @@ public class FilterAttendanceSpecification : BaseSpecification<Attendance>
             (!profileId.HasValue || x.ProfileId == profileId.Value))
     {
         AddInclude(x => x.Governorate);
-        //AddInclude(x => x.WorkingHours); // Remove this line
         AddInclude(x => x.Office);
         AddInclude(x => x.Profile);
     }
