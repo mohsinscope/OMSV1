@@ -28,8 +28,10 @@ namespace OMSV1.Application.Handlers.DamagedDevices
                 request.DamagedDeviceTypeId,
                 request.DeviceTypeId,
                 request.OfficeId,
-                request.GovernorateId,
-                request.ProfileId
+                request.Note,
+                request.ProfileId,
+                request.GovernorateId
+
             );
 
             // Update the entity using the repository inside unit of work

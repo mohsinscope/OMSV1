@@ -16,60 +16,60 @@ namespace OMSV1.Domain.Entities.Attendances;
 
 public class Attendance(
 
-                    int receivingStaff,
+                     int receivingStaff,
 
-                    int accountStaff,
+                     int accountStaff,
 
-                    int printingStaff,
+                     int printingStaff,
+                     
+                     int qualityStaff,
 
-                    int qualityStaff,
+                     int deliveryStaff,
 
-                    int deliveryStaff,
+                     DateTime date,
 
-                    DateTime date,
+                     string note,
 
-                    string note,
+                     WorkingHours workingHours,
 
-                    WorkingHours workingHours,
+                     int governorateId,
 
-                    int governorateId,
+                     int officeId,
 
-                    int officeId,
-
-                    int profileId) : Entity
+                     int profileId) : Entity
 
 {
 
-    public int ReceivingStaff { get; private set; } = receivingStaff;
+     public int ReceivingStaff { get; private set; } = receivingStaff;
 
-    public int AccountStaff { get; private set; } = accountStaff;
+     public int AccountStaff { get; private set; } = accountStaff;
 
-    public int PrintingStaff { get; private set; } = printingStaff;
+    public int PrintingStaff { get; private set; } = printingStaff;
 
-    public int QualityStaff { get; private set; } = qualityStaff;
+     public int QualityStaff { get; private set; } = qualityStaff;
 
-    public int DeliveryStaff { get; private set; } = deliveryStaff;
+     public int DeliveryStaff { get; private set; } = deliveryStaff;
 
-    public DateTime Date { get; private set; } = date;
+     public DateTime Date { get; private set; } = date;
 
-    public string Note { get; private set; } = note;
+     public string Note { get; private set; } = note;
 
-    public WorkingHours WorkingHours { get; private set; } = workingHours;
+     public WorkingHours WorkingHours { get; private set; } = workingHours;
 
-    public int OfficeId { get; private set; } = officeId;
+    public int OfficeId { get; private set; } = officeId;
 
-    public int GovernorateId { get; private set; } = governorateId;
+     public int GovernorateId { get; private set; } = governorateId;
 
-    public int ProfileId { get; private set; } = profileId;
+     public int ProfileId { get; private set; } = profileId;
 
   
   
 
-    public Governorate? Governorate { get; private set; }
+     public Governorate? Governorate { get; private set; }
 
-    public Office? Office { get; private set; }
+     public Office? Office { get; private set; }
 
-    public Profile? Profile { get; private set; }
+     public Profile? Profile { get; private set; }
 
        // Method to update attendance details
 

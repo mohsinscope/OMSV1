@@ -19,6 +19,9 @@ public class LectureConfiguration : IEntityTypeConfiguration<Lecture>
 
         builder.Property(l => l.Date)
             .IsRequired();
+            
+        builder.Property(a => a.Note)
+            .HasMaxLength(500); 
 
         builder.Property(l => l.OfficeId)
             .IsRequired();

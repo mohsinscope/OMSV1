@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.Lectures;
+using OMSV1.Application.CQRS.Lectures.Queries;
 using OMSV1.Application.Dtos.Lectures;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Lectures;
@@ -85,6 +86,21 @@ namespace OMSV1.Application.Controllers.Lectures
             }
 
             return NoContent(); // Successfully deleted
+        }
+        [HttpPost("search")]
+        public async Task<IActionResult> GetDamagedDevices([FromBody] GetLectureQuery query)
+        {
+            try
+            {
+                var result = await _mediator.Send(query);
+                Response.AddPaginationHeader(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Log the error here (if necessary)
+                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+            }
         }
     }
 }

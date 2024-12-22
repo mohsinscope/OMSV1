@@ -1,32 +1,26 @@
 using System;
-using OMSV1.Domain.Entities.DamagedDevices;
+using OMSV1.Domain.Entities.Lectures;
 
-namespace OMSV1.Domain.Specifications.DamagedDevices;
+namespace OMSV1.Domain.Specifications.Lectures;
 
-public class FilterDamagedDevicesSpecification : BaseSpecification<DamagedDevice>
+public class FilterLecturesSpecification : BaseSpecification<Lecture>
 {
-    public FilterDamagedDevicesSpecification(
-        string? serialNumber = null,
+    public FilterLecturesSpecification(
+        string? title = null,
         DateTime? startDate = null,
         DateTime? endDate = null,
-        int? damagedDeviceTypeId = null,
-        int? deviceTypeId = null,
         int? officeId = null,
         int? governorateId = null,
         int? profileId = null)
         : base(x =>
-            (string.IsNullOrEmpty(serialNumber) || x.SerialNumber.Contains(serialNumber)) &&
+            (string.IsNullOrEmpty(title) || x.Title.Contains(title)) &&
             (!startDate.HasValue || x.Date >= startDate.Value) &&
             (!endDate.HasValue || x.Date <= endDate.Value) &&
-            (!damagedDeviceTypeId.HasValue || x.DamagedDeviceTypeId == damagedDeviceTypeId.Value) &&
-            (!deviceTypeId.HasValue || x.DeviceTypeId == deviceTypeId.Value) &&
             (!officeId.HasValue || x.OfficeId == officeId.Value) &&
             (!governorateId.HasValue || x.GovernorateId == governorateId.Value) &&
             (!profileId.HasValue || x.ProfileId == profileId.Value))
     {
         AddInclude(x => x.Governorate);
-        AddInclude(x => x.DeviceType);
-        AddInclude(x => x.DamagedDeviceTypes);
         AddInclude(x => x.Office);
         AddInclude(x => x.Profile);
                    // Apply ordering

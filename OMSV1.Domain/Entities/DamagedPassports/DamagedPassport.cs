@@ -1,9 +1,6 @@
-using System;
-using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.Entities.Profiles;
-using OMSV1.Domain.Enums;
 using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Domain.Entities.DamagedPassport;
@@ -14,6 +11,8 @@ public class DamagedPassport : Entity
     public string PassportNumber { get; private set; }
     public DateTime Date { get; private set; }
     public int DamagedTypeId { get; private set; }
+    public string Note { get; private set; }
+
     public int OfficeId { get; private set; }
     public int GovernorateId { get; private set; }
     public int ProfileId { get; private set; }
@@ -23,16 +22,14 @@ public class DamagedPassport : Entity
     public Office? Office { get; private set; }
     public DamagedType? DamagedType { get; private set; }
 
-    private readonly List<AttachmentCU> _attachments = new();
-    public IReadOnlyCollection<AttachmentCU> Attachments => _attachments.AsReadOnly();
-
     // Main constructor that handles all properties
-    public DamagedPassport(string passportNumber, DateTime date, 
+    public DamagedPassport(string passportNumber, DateTime date, string note,
                             int officeId, int governorateId, 
                             int damagedTypeId, int profileId) : base()
     {
         PassportNumber = passportNumber;
         Date = date;
+        Note = note;
         OfficeId = officeId;
         GovernorateId = governorateId;
         DamagedTypeId = damagedTypeId;
@@ -41,13 +38,14 @@ public class DamagedPassport : Entity
 
         // Constructor with default values (optional parameters)
         public DamagedPassport(string passportNumber, DateTime date)
-            : this(passportNumber, date, default, default, default, default)
+            : this(passportNumber, date, default, default, default, default,default)
         {
         }
         public void UpdateDeviceDetails(
             string passportNumber,
             DateTime date,
             int damagedTypeId,
+            string note,
             int officeId,
             int governorateId,
             int profileId)
@@ -56,6 +54,7 @@ public class DamagedPassport : Entity
             PassportNumber = passportNumber;
             Date = date;
             DamagedTypeId = damagedTypeId;
+            Note = note;
             OfficeId = officeId;
             GovernorateId = governorateId;
             ProfileId = profileId;

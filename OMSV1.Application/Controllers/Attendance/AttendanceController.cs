@@ -5,6 +5,7 @@ using OMSV1.Application.Commands.Attendances;
 using OMSV1.Application.Queries.Attendances;
 using OMSV1.Infrastructure.Extensions;
 using OMSV1.Application.Controllers;
+using OMSV1.Application.CQRS.Attendances;
 
 namespace OMSV1.API.Controllers
 {
@@ -74,6 +75,22 @@ namespace OMSV1.API.Controllers
             var command = new DeleteAttendanceCommand(id);
             await _mediator.Send(command);
             return NoContent();
+        }
+
+        [HttpPost("search")]
+        public async Task<IActionResult> GetDamagedDevices([FromBody] GetAttendanceQuery query)
+        {
+            try
+            {
+                var result = await _mediator.Send(query);
+                Response.AddPaginationHeader(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Log the error here (if necessary)
+                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+            }
         }
     }
 }

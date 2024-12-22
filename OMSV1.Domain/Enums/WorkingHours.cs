@@ -1,7 +1,10 @@
 namespace OMSV1.Domain.Enums;
+[Flags]
 
     public enum WorkingHours
     {
-        Morning = 1,
-        Evening = 2
+    None = 0,
+    Morning = 1,
+    Evening = 2,
+    Both = Morning | Evening // Represents both Morning and Evening
     }

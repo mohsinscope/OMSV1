@@ -15,7 +15,6 @@ public class DamagedDeviceConfiguration : IEntityTypeConfiguration<DamagedDevice
             .HasMaxLength(100); // Adjust length as needed.
 
           builder.Property(d => d.Date)
-            .HasColumnType("timestamp") // Temporarily disabling time zone enforcement
             .IsRequired(); // Ensures the column is not nullable
 
         builder.Property(dd => dd.DamagedDeviceTypeId)
@@ -23,6 +22,9 @@ public class DamagedDeviceConfiguration : IEntityTypeConfiguration<DamagedDevice
 
         builder.Property(dd => dd.DeviceTypeId)
             .IsRequired();
+            
+        builder.Property(a => a.Note)
+            .HasMaxLength(500); 
 
         builder.Property(dd => dd.OfficeId)
             .IsRequired();

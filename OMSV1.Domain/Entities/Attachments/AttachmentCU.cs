@@ -1,8 +1,5 @@
-using System;
-using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Enums;
-using OMSV1.Domain.Entities.Lectures;
 
 namespace OMSV1.Domain.Entities.Attachments;
 
