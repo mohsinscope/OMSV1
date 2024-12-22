@@ -18,7 +18,6 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Progr
 
 builder.Services.AddIdentityServices(builder.Configuration);
 
-builder.Services.AddApplicationServices(builder.Configuration);
 
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
