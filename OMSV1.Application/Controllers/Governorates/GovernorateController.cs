@@ -4,6 +4,7 @@ using OMSV1.Application.Commands.Governorates;
 using OMSV1.Application.Dtos.Governorates;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Governorates;
+using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Infrastructure.Extensions;
 
 namespace OMSV1.Application.Controllers.Governorates
@@ -30,6 +31,14 @@ public async Task<IActionResult> GetAllGovernorates([FromQuery] PaginationParams
 
         return Ok(governorate); // Returns GovernorateDto
     }
+          // GET: api/Governorate/dropdown
+        [HttpGet("dropdown")]
+        public async Task<IActionResult> GetGovernoratesForDropdown()
+        {
+            var governorates = await _mediator.Send(new GetGovernoratesForDropdownQuery());
+            return Ok(governorates); // Returns List<GovernDropdownDto>
+        }
+
 
     [HttpPost]
     public async Task<IActionResult> CreateGovernorate([FromBody] CreateGovernorateDto governorateDto)
