@@ -58,6 +58,15 @@ namespace OMSV1.Application.Controllers.Offices
             var officeId = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetOfficeById), new { id = officeId }, officeId);
         }
+        // GET: api/Office/dropdown
+        [HttpGet("dropdown")]
+        public async Task<IActionResult> GetOfficesForDropdown()
+        {
+            var offices = await _mediator.Send(new GetOfficesForDropdownQuery());
+            return Ok(offices); // Returns List<OfficeDropdownDto>
+        }
+
+                
 
         // PUT: api/Office/{id}
         [HttpPut("{id:int}")]
