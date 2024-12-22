@@ -14,7 +14,11 @@ public class FilterAttendanceSpecification : BaseSpecification<Attendance>
         int? governorateId = null,
         int? profileId = null)
         : base(x =>
-            x.WorkingHours == (WorkingHours)workingHours.Value  &&
+        
+            (workingHours == null || 
+            (workingHours.Value == (int)WorkingHours.Both) ||
+            x.WorkingHours == (WorkingHours)workingHours.Value) &&
+
             (!startDate.HasValue || x.Date >= startDate.Value) &&
             (!endDate.HasValue || x.Date <= endDate.Value) &&
             (!officeId.HasValue || x.OfficeId == officeId.Value) &&
