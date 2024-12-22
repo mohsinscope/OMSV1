@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using OMSV1.Domain.Entities.Attachments;
-
 namespace OMSV1.Application.Dtos
 {
     public class DamagedPassportDto
@@ -18,11 +14,10 @@ namespace OMSV1.Application.Dtos
         public string GovernorateName { get; set; }  // Assuming this is populated from the Governorate entity
         public int ProfileId { get; set; }
         public string ProfileFullName { get; set; }  // Assuming this is populated from the Profile entity
-        public IReadOnlyCollection<DamagedPassportAttachmentDto> Attachments { get; set; }
 
         public DamagedPassportDto(string passportNumber, DateTime date, int damagedTypeId, string damagedTypeName,string note,
                                   int officeId, string officeName, int governorateId, string governorateName,
-                                  int profileId, string profileFullName, IReadOnlyCollection<DamagedPassportAttachmentDto> attachments)
+                                  int profileId, string profileFullName)
         {
             PassportNumber = passportNumber;
             Date = date;
@@ -35,14 +30,6 @@ namespace OMSV1.Application.Dtos
             GovernorateName = governorateName;
             ProfileId = profileId;
             ProfileFullName = profileFullName;
-            Attachments = attachments;
         }
-    }
-
-    // Renamed DTO for Attachment to avoid conflict
-    public class DamagedPassportAttachmentDto
-    {
-        public string FileName { get; set; }
-        public string FilePath  { get; set; }  // Assuming URL is needed
     }
 }

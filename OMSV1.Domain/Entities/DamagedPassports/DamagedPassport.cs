@@ -1,9 +1,6 @@
-using System;
-using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.Entities.Profiles;
-using OMSV1.Domain.Enums;
 using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Domain.Entities.DamagedPassport;
@@ -24,9 +21,6 @@ public class DamagedPassport : Entity
     public Profile? Profile { get; private set; }
     public Office? Office { get; private set; }
     public DamagedType? DamagedType { get; private set; }
-
-    private readonly List<AttachmentCU> _attachments = new();
-    public IReadOnlyCollection<AttachmentCU> Attachments => _attachments.AsReadOnly();
 
     // Main constructor that handles all properties
     public DamagedPassport(string passportNumber, DateTime date, string note,

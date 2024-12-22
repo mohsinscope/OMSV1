@@ -49,7 +49,6 @@ public class AutoMapperProfiles : Profile
             CreateMap<AddDamagedPassportCommand, DamagedPassport>();
             CreateMap<UpdateDamagedPassportCommand, DamagedPassport>();
             CreateMap<DamagedPassport, DamagedPassportDto>();
-            CreateMap<AttachmentCU, DamagedPassportAttachmentDto>();
             // Mapping for adding a new DamagedDevice
             CreateMap<AddDamagedDeviceCommand, DamagedDevice>();
             CreateMap<DamagedDevice, DamagedDeviceDto>();
