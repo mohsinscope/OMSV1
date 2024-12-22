@@ -29,5 +29,7 @@ public class FilterDamagedDevicesSpecification : BaseSpecification<DamagedDevice
         AddInclude(x => x.DamagedDeviceTypes);
         AddInclude(x => x.Office);
         AddInclude(x => x.Profile);
+                   // Apply ordering
+         ApplyOrderByDescending(x => x.Date);
     }
 }

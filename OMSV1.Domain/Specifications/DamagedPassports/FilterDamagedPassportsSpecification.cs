@@ -26,5 +26,8 @@ public class FilterDamagedPassportsSpecification : BaseSpecification<DamagedPass
         AddInclude(x => x.DamagedType);
         AddInclude(x => x.Office);
         AddInclude(x => x.Profile);
+
+           // Apply ordering
+         ApplyOrderByDescending(x => x.Date);
     }
 }
