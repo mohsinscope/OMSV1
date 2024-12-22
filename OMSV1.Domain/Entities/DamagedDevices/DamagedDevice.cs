@@ -62,7 +62,7 @@ public class DamagedDevice(
 
      public void UpdateDate(DateTime date)
     {
-        Date = date;
+        Date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
     }
 }
 

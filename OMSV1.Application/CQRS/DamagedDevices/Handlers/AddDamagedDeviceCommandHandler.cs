@@ -32,8 +32,8 @@ namespace OMSV1.Application.Handlers.DamagedDevices
 
             var damagedDevice = _mapper.Map<DamagedDevice>(request);
 
-            // Convert UTC to local (remove Kind)
-            damagedDevice.UpdateDate(DateTime.SpecifyKind(request.Date, DateTimeKind.Unspecified));
+             // Convert Date to UTC before saving
+             damagedDevice.UpdateDate(DateTime.SpecifyKind(request.Date, DateTimeKind.Utc));
 
 
             await _unitOfWork.Repository<DamagedDevice>().AddAsync(damagedDevice);
