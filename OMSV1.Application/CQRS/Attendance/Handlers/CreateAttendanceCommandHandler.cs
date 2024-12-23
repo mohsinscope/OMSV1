@@ -31,7 +31,7 @@ public class CreateAttendanceCommandHandler : IRequestHandler<CreateAttendanceCo
         // Ensure WorkingHours has a default value if not set
         if (request.WorkingHours <= 0)
         {
-            request.WorkingHours = 8;  // Default working hours if not specified
+            request.WorkingHours = 3;  // Default working hours if not specified
         }
 
         // Map the command to the entity

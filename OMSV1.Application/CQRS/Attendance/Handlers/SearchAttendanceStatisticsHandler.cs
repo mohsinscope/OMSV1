@@ -32,8 +32,7 @@ namespace OMSV1.Application.Queries.Attendances
                 officeId: request.OfficeId,
                 governorateId: request.GovernorateId,
                 workingHours: request.WorkingHours,
-                startDate: request.Date,
-                endDate: request.Date
+                date: request.Date
             ))
             .Select(a => new
             {
