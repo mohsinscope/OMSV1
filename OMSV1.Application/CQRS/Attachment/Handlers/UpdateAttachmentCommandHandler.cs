@@ -32,17 +32,27 @@ namespace OMSV1.Application.Commands.Attachment
                 return null;
             }
 
-            // If a new file is uploaded, update the file and file path
+            // If a new file is uploaded, handle the replacement process
             if (request.File != null)
             {
+                // Delete the old image from storage (only if the file path is available)
+                if (!string.IsNullOrEmpty(attachment.FilePath))
+                {
+                    // Extract the public ID of the old image from the FilePath (assuming the file path contains the public ID)
+                    var oldFilePublicId = GetFilePublicIdFromUrl(attachment.FilePath);
+
+                    // Remove the old image from storage
+                    await _photoService.DeletePhotoAsync(oldFilePublicId); // You will need to implement this method in your IPhotoService
+                }
+
                 // Upload the new file and get the URL
                 var result = await _photoService.AddPhotoAsync(request.File);
 
-                // Update the attachment's file path
+                // Update the attachment's file path with the new URL
                 attachment.UpdateFilePath(result.SecureUrl.AbsoluteUri);
             }
 
-            // Update other properties
+            // Update other properties of the attachment
             attachment.Update(request.FileName, attachment.FilePath, request.EntityType, request.EntityId);
 
             // Save changes to the database
@@ -62,6 +72,16 @@ namespace OMSV1.Application.Commands.Attachment
             }
 
             return null;
+        }
+
+        // Helper method to extract the public ID from the URL
+        private string GetFilePublicIdFromUrl(string fileUrl)
+        {
+            // Assuming the file URL is from Cloudinary, you would extract the public ID like so:
+            var uri = new Uri(fileUrl);
+            var segments = uri.AbsolutePath.Split('/');
+            var publicId = segments[segments.Length - 1].Split('.')[0]; // Remove file extension
+            return publicId;
         }
     }
 }
