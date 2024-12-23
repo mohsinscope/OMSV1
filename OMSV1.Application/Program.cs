@@ -41,8 +41,16 @@ app.UseHttpsRedirection();
 
 
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://https://oms.scopesky.org","https://https://oms.scopesky.org"));
-
+app.UseCors(x => x
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()
+    .WithOrigins(
+        "https://oms.scopesky.org",
+        "http://oms.scopesky.org",
+        "http://localhost:5173"
+    )
+);
 // builder.Services.AddCors(options =>
 // {
 //     options.AddPolicy("AllowSpecificOrigins", policy =>
@@ -54,7 +62,9 @@ app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrig
 //     });
 // });
 
-app.UseCors("AllowSpecificOrigins");
+// app.UseCors("AllowSpecificOrigins");
+
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
