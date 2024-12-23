@@ -92,5 +92,20 @@ namespace OMSV1.API.Controllers
                 return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
             }
         }
+            [HttpPost("search/statistics")]
+            public async Task<IActionResult> GetAttendanceStatistics([FromBody] SearchAttendanceStatisticsQuery query)
+            {
+                try
+                {
+                    var result = await _mediator.Send(query);
+                    return Ok(result);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+                }
+            }
+
+
     }
 }
