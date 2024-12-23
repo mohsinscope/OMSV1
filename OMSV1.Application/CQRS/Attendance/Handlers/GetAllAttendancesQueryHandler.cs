@@ -21,6 +21,9 @@ public class GetAllAttendancesQueryHandler : IRequestHandler<GetAllAttendancesQu
     public async Task<PagedList<AttendanceDto>> Handle(GetAllAttendancesQuery request, CancellationToken cancellationToken)
     {
         var query = _unitOfWork.Repository<Attendance>().GetAllAsQueryable();
+                    // Apply ordering here - replace 'Date' with the field you want to order by
+            query = query.OrderByDescending(dp => dp.Date);  // Example: Order by Date in descending order
+
         var mappedQuery = query.ProjectTo<AttendanceDto>(_mapper.ConfigurationProvider);
 
         return await PagedList<AttendanceDto>.CreateAsync(

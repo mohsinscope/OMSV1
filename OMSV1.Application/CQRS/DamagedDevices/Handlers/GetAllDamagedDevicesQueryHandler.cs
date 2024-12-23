@@ -26,6 +26,8 @@ namespace OMSV1.Application.Handlers.DamagedDevices
         {
             // Retrieve the damaged devices as IQueryable
             var damagedDevicesQuery = _repository.GetAllAsQueryable();
+            // Apply ordering here - replace 'Date' with the field you want to order by
+            damagedDevicesQuery = damagedDevicesQuery.OrderByDescending(dp => dp.Date);  // Example: Order by Date in descending order
 
             // Map to DamagedDeviceDto using AutoMapper's ProjectTo
             var mappedQuery = damagedDevicesQuery.ProjectTo<DamagedDeviceDto>(_mapper.ConfigurationProvider);

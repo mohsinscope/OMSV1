@@ -26,6 +26,9 @@ namespace OMSV1.Application.Handlers.Lectures
         {
             // Retrieve the lectures as IQueryable
             var lecturesQuery = _repository.GetAllAsQueryable();
+                        // Apply ordering here - replace 'Date' with the field you want to order by
+            lecturesQuery = lecturesQuery.OrderByDescending(dp => dp.Date);  // Example: Order by Date in descending order
+
 
             // Map to LectureDto using AutoMapper's ProjectTo
             var mappedQuery = lecturesQuery.ProjectTo<LectureDto>(_mapper.ConfigurationProvider);

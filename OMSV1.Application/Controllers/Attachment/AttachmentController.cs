@@ -9,6 +9,7 @@ using OMSV1.Infrastructure.Persistence;
 using OMSV1.Infrastructure.Interfaces;
 using System.Threading.Tasks;
 using OMSV1.Application.Queries.Attachments;
+using OMSV1.Application.Commands.Attachment;
 
 namespace OMSV1.Application.Controllers
 {
@@ -46,6 +47,38 @@ public async Task<IActionResult> GetAttachmentsById(int id, string entityType)
 
     return Ok(attachments);
 }
+       [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAttachment(int id)
+        {
+            var command = new DeleteAttachmentCommand(id);
+            var result = await mediator.Send(command);
+
+            if (!result)
+            {
+                return NotFound($"Attachment with ID {id} not found.");
+            }
+
+            return Ok("Attachment deleted successfully.");
+        }
+
+        // Update Attachment (File is optional)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateAttachment(int id, 
+            [FromForm] IFormFile file, 
+            [FromForm] string fileName, 
+            [FromForm] EntityType entityType, 
+            [FromForm] int entityId)
+        {
+            var command = new UpdateAttachmentCommand(id, file, fileName, entityType, entityId);
+            var updatedAttachment = await mediator.Send(command);
+
+            if (updatedAttachment == null)
+            {
+                return NotFound($"Attachment with ID {id} not found.");
+            }
+
+            return Ok(updatedAttachment);
+        }
 
         [HttpPost("add-attachment")]
         public async Task<ActionResult<AttachmentDto>> AddAttachment(

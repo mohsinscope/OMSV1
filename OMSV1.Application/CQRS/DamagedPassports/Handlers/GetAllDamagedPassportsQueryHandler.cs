@@ -26,6 +26,9 @@ namespace OMSV1.Application.Handlers.DamagedPassports
         {
             // Retrieve the damaged passports as IQueryable
             var damagedPassportsQuery = _repository.GetAllAsQueryable();
+            // Apply ordering here - replace 'Date' with the field you want to order by
+            damagedPassportsQuery = damagedPassportsQuery.OrderByDescending(dp => dp.Date);  // Example: Order by Date in descending order
+
 
             // Map to DamagedPassportDto using AutoMapper's ProjectTo
             var mappedQuery = damagedPassportsQuery.ProjectTo<DamagedPassportDto>(_mapper.ConfigurationProvider);
@@ -35,6 +38,7 @@ namespace OMSV1.Application.Handlers.DamagedPassports
                 mappedQuery,
                 request.PaginationParams.PageNumber,
                 request.PaginationParams.PageSize
+
             );
 
             return pagedDamagedPassports;  // Return the paginated list
