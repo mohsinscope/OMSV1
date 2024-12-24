@@ -4,7 +4,7 @@ using OMSV1.Application.Helpers;
 
 namespace OMSV1.Application.Queries.Attendances
 {
-    public class GetAllAttendancesQuery : IRequest<PagedList<AttendanceDto>>
+    public class GetAllAttendancesQuery : IRequest<PagedList<AttendanceAllDto>>
     {
         public PaginationParams PaginationParams { get; }
 

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace OMSV1.Application.Handlers.DamagedPassports
 {
-    public class GetAllDamagedPassportsQueryHandler : IRequestHandler<GetAllDamagedPassportsQuery, PagedList<DamagedPassportDto>>
+    public class GetAllDamagedPassportsQueryHandler : IRequestHandler<GetAllDamagedPassportsQuery, PagedList<DamagedPassportAllDto>>
     {
         private readonly IGenericRepository<DamagedPassport> _repository;
         private readonly IMapper _mapper;
@@ -22,7 +22,7 @@ namespace OMSV1.Application.Handlers.DamagedPassports
             _mapper = mapper;
         }
 
-        public async Task<PagedList<DamagedPassportDto>> Handle(GetAllDamagedPassportsQuery request, CancellationToken cancellationToken)
+        public async Task<PagedList<DamagedPassportAllDto>> Handle(GetAllDamagedPassportsQuery request, CancellationToken cancellationToken)
         {
             // Retrieve the damaged passports as IQueryable
             var damagedPassportsQuery = _repository.GetAllAsQueryable();
@@ -30,11 +30,11 @@ namespace OMSV1.Application.Handlers.DamagedPassports
             damagedPassportsQuery = damagedPassportsQuery.OrderByDescending(dp => dp.Date);  // Example: Order by Date in descending order
 
 
-            // Map to DamagedPassportDto using AutoMapper's ProjectTo
-            var mappedQuery = damagedPassportsQuery.ProjectTo<DamagedPassportDto>(_mapper.ConfigurationProvider);
+            // Map to DamagedPassportAllDto using AutoMapper's ProjectTo
+            var mappedQuery = damagedPassportsQuery.ProjectTo<DamagedPassportAllDto>(_mapper.ConfigurationProvider);
 
             // Apply pagination using PagedList
-            var pagedDamagedPassports = await PagedList<DamagedPassportDto>.CreateAsync(
+            var pagedDamagedPassports = await PagedList<DamagedPassportAllDto>.CreateAsync(
                 mappedQuery,
                 request.PaginationParams.PageNumber,
                 request.PaginationParams.PageSize

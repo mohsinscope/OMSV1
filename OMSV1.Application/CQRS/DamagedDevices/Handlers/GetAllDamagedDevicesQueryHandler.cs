@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace OMSV1.Application.Handlers.DamagedDevices
 {
-    public class GetAllDamagedDevicesQueryHandler : IRequestHandler<GetAllDamagedDevicesQuery, PagedList<DamagedDeviceDto>>
+    public class GetAllDamagedDevicesQueryHandler : IRequestHandler<GetAllDamagedDevicesQuery, PagedList<DamagedDeviceAllDto>>
     {
         private readonly IGenericRepository<DamagedDevice> _repository;
         private readonly IMapper _mapper;
@@ -22,18 +22,18 @@ namespace OMSV1.Application.Handlers.DamagedDevices
             _mapper = mapper;
         }
 
-        public async Task<PagedList<DamagedDeviceDto>> Handle(GetAllDamagedDevicesQuery request, CancellationToken cancellationToken)
+        public async Task<PagedList<DamagedDeviceAllDto>> Handle(GetAllDamagedDevicesQuery request, CancellationToken cancellationToken)
         {
             // Retrieve the damaged devices as IQueryable
             var damagedDevicesQuery = _repository.GetAllAsQueryable();
             // Apply ordering here - replace 'Date' with the field you want to order by
             damagedDevicesQuery = damagedDevicesQuery.OrderByDescending(dp => dp.Date);  // Example: Order by Date in descending order
 
-            // Map to DamagedDeviceDto using AutoMapper's ProjectTo
-            var mappedQuery = damagedDevicesQuery.ProjectTo<DamagedDeviceDto>(_mapper.ConfigurationProvider);
+            // Map to DamagedDeviceAllDto using AutoMapper's ProjectTo
+            var mappedQuery = damagedDevicesQuery.ProjectTo<DamagedDeviceAllDto>(_mapper.ConfigurationProvider);
 
             // Apply pagination using PagedList
-            var pagedDamagedDevices = await PagedList<DamagedDeviceDto>.CreateAsync(
+            var pagedDamagedDevices = await PagedList<DamagedDeviceAllDto>.CreateAsync(
                 mappedQuery,
                 request.PaginationParams.PageNumber,
                 request.PaginationParams.PageSize

@@ -2,15 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.DamagedPassports;
 using OMSV1.Application.Queries.DamagedPassports;
-using OMSV1.Application.Dtos; // Import DTOs namespace
-using OMSV1.Application.Commands.DamagedDevices;
 using OMSV1.Infrastructure.Extensions;
 using OMSV1.Application.Helpers; // Assuming the DeleteDamagedPassportCommand exists here.
-using OMSV1.Application.CQRS.DamagedDevices.Queries;
 using OMSV1.Application.CQRS.DamagedPassports.Queries;
 namespace OMSV1.Application.Controllers.DamagedPassports
 {
- 
+
     public class DamagedPassportController : BaseApiController
     {
         private readonly IMediator _mediator;
@@ -91,7 +88,7 @@ namespace OMSV1.Application.Controllers.DamagedPassports
 
             return NoContent(); // 204 No Content, as the passport has been deleted successfully
         }
-                [HttpPost("search")]
+        [HttpPost("search")]
         public async Task<IActionResult> GetDamagedDevices([FromBody] GetDamagedPassportQuery query)
         {
             try
@@ -106,6 +103,20 @@ namespace OMSV1.Application.Controllers.DamagedPassports
                 return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
             }
         }
+
+             [HttpPost("search/statistics")]
+            public async Task<IActionResult> GetAttendanceStatistics([FromBody] SearchDamagedPassportsStatisticsQuery query)
+            {
+                try
+                {
+                    var result = await _mediator.Send(query);
+                    return Ok(result);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+                }
+            }
 
     }
 }
