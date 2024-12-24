@@ -21,6 +21,19 @@ public async Task<IActionResult> GetAllGovernorates([FromQuery] PaginationParams
     Response.AddPaginationHeader(governorates);
     return Ok(governorates); // Returns PagedList<GovernorateDto>
 }
+        [HttpGet("Dropdown/{governorateId}")]
+        public async Task<IActionResult> GetOfficesByGovernorate(int governorateId)
+        {
+            var query = new GetGovernoratesWithOfficesForDropdownQuery(governorateId);
+            var offices = await _mediator.Send(query);
+
+            if (offices == null || !offices.Any())
+            {
+                return NotFound("No offices found for the provided governorate.");
+            }
+
+            return Ok(offices);
+        }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetGovernorateById(int id)

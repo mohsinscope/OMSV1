@@ -25,118 +25,106 @@ namespace OMSV1.Application.Queries.Attendances
             _officeRepo = officeRepo;
         }
 
-        public async Task<AttendanceStatisticsDto> Handle(SearchAttendanceStatisticsQuery request, CancellationToken cancellationToken)
-        {
-            // Fetch attendance data with only required fields
-            var attendances = await _attendanceRepo.ListAsQueryable(new FilterAttendanceStatisticsSpecification(
-                officeId: request.OfficeId,
-                governorateId: request.GovernorateId,
-                workingHours: request.WorkingHours,
-                date: request.Date
-            ))
-            .Select(a => new
+            public async Task<AttendanceStatisticsDto> Handle(SearchAttendanceStatisticsQuery request, CancellationToken cancellationToken)
             {
-                a.OfficeId,
-                a.ReceivingStaff,
-                a.AccountStaff,
-                a.PrintingStaff,
-                a.QualityStaff,
-                a.DeliveryStaff
-            }).ToListAsync(cancellationToken);
+                // Fetch governorate-specific attendance data
+                var attendanceQuery = _attendanceRepo.ListAsQueryable(new FilterAttendanceStatisticsSpecification(
+                    officeId: request.OfficeId,
+                    governorateId: request.GovernorateId,
+                    workingHours: request.WorkingHours,
+                    date: request.Date
+                ));
 
-            // Fetch office data, filtering by Governorate ID if provided
-            var offices = await _officeRepo.GetAllAsQueryable()
-            .Where(o => !request.GovernorateId.HasValue || o.GovernorateId == request.GovernorateId)
-            .Select(o => new OfficeStatisticsDto
-            {
-                Id = o.Id,
-                Name = o.Name,
-                ReceivingStaff = o.ReceivingStaff,
-                AccountStaff = o.AccountStaff,
-                PrintingStaff = o.PrintingStaff,
-                QualityStaff = o.QualityStaff,
-                DeliveryStaff = o.DeliveryStaff
-            }).ToListAsync(cancellationToken);
+                var totalAttendance = await attendanceQuery
+                    .GroupBy(a => a.OfficeId)
+                    .Select(group => new
+                    {
+                        OfficeId = group.Key,
+                        TotalReceivingStaff = group.Sum(a => a.ReceivingStaff),
+                        TotalAccountStaff = group.Sum(a => a.AccountStaff),
+                        TotalPrintingStaff = group.Sum(a => a.PrintingStaff),
+                        TotalQualityStaff = group.Sum(a => a.QualityStaff),
+                        TotalDeliveryStaff = group.Sum(a => a.DeliveryStaff)
+                    }).ToListAsync(cancellationToken);
 
-            // Total staff counts
-            var totalStaffCount = offices.Sum(o => o.ReceivingStaff + o.AccountStaff + o.PrintingStaff + o.QualityStaff + o.DeliveryStaff);
-            var officeStaffCount = request.OfficeId.HasValue
-                ? offices.Where(o => o.Id == request.OfficeId).Sum(o => o.ReceivingStaff + o.AccountStaff + o.PrintingStaff + o.QualityStaff + o.DeliveryStaff)
-                : 0;
+                // Fetch office data filtered by Governorate ID
+                var offices = await _officeRepo.GetAllAsQueryable()
+                    .Where(o => !request.GovernorateId.HasValue || o.GovernorateId == request.GovernorateId)
+                    .Select(o => new OfficeStatisticsDto
+                    {
+                        Id = o.Id,
+                        Name = o.Name,
+                        ReceivingStaff = o.ReceivingStaff,
+                        AccountStaff = o.AccountStaff,
+                        PrintingStaff = o.PrintingStaff,
+                        QualityStaff = o.QualityStaff,
+                        DeliveryStaff = o.DeliveryStaff
+                    })
+                    .ToListAsync(cancellationToken);
 
-            // Calculate available staff based on attendance
-            var availableStaff = attendances.Sum(a => a.ReceivingStaff + a.AccountStaff + a.PrintingStaff + a.QualityStaff + a.DeliveryStaff);
-            var availableStaffInOffice = request.OfficeId.HasValue
-                ? attendances.Where(a => a.OfficeId == request.OfficeId)
-                    .Sum(a => a.ReceivingStaff + a.AccountStaff + a.PrintingStaff + a.QualityStaff + a.DeliveryStaff)
-                : 0;
-
-            // Calculate total specific staff
-            int CalculateTotalSpecificStaff(Func<OfficeStatisticsDto, int> selector) =>
-                offices.Sum(selector);
-
-            int CalculateTotalSpecificStaffInOffice(Func<OfficeStatisticsDto, int> selector) =>
-                request.OfficeId.HasValue
-                    ? offices.Where(o => o.Id == request.OfficeId).Sum(selector)
+                // Total staff counts
+                var totalStaffCount = offices.Sum(o => o.ReceivingStaff + o.AccountStaff + o.PrintingStaff + o.QualityStaff + o.DeliveryStaff);
+                var officeStaffCount = request.OfficeId.HasValue
+                    ? offices.Where(o => o.Id == request.OfficeId).Sum(o => o.ReceivingStaff + o.AccountStaff + o.PrintingStaff + o.QualityStaff + o.DeliveryStaff)
                     : 0;
 
-            // Optional: Filter by specific staff type
-            int GetAvailableSpecificStaff(Func<dynamic, int> selector) =>
-                request.StaffType != null ? attendances.Sum(selector) : 0;
+                // Calculate available staff based on attendance
+                var availableStaff = totalAttendance.Sum(a => a.TotalReceivingStaff + a.TotalAccountStaff + a.TotalPrintingStaff + a.TotalQualityStaff + a.TotalDeliveryStaff);
+                var availableStaffInOffice = request.OfficeId.HasValue
+                    ? totalAttendance.Where(a => a.OfficeId == request.OfficeId).Sum(a => a.TotalReceivingStaff + a.TotalAccountStaff + a.TotalPrintingStaff + a.TotalQualityStaff + a.TotalDeliveryStaff)
+                    : 0;
 
-            var availableSpecificStaff = GetAvailableSpecificStaff(a => request.StaffType switch
-            {
-                "ReceivingStaff" => a.ReceivingStaff,
-                "AccountStaff" => a.AccountStaff,
-                "PrintingStaff" => a.PrintingStaff,
-                "QualityStaff" => a.QualityStaff,
-                "DeliveryStaff" => a.DeliveryStaff,
-                _ => 0
-            });
+                // Calculate total specific staff if a staff type is provided
+                int GetAvailableSpecificStaff(Func<dynamic, int> selector) =>
+                    request.StaffType != null ? totalAttendance.Sum(selector) : 0;
 
-            var totalSpecificStaff = CalculateTotalSpecificStaff(o => request.StaffType switch
-            {
-                "ReceivingStaff" => o.ReceivingStaff,
-                "AccountStaff" => o.AccountStaff,
-                "PrintingStaff" => o.PrintingStaff,
-                "QualityStaff" => o.QualityStaff,
-                "DeliveryStaff" => o.DeliveryStaff,
-                _ => 0
-            });
+                var availableSpecificStaff = GetAvailableSpecificStaff(a => request.StaffType switch
+                {
+                    "ReceivingStaff" => a.TotalReceivingStaff,
+                    "AccountStaff" => a.TotalAccountStaff,
+                    "PrintingStaff" => a.TotalPrintingStaff,
+                    "QualityStaff" => a.TotalQualityStaff,
+                    "DeliveryStaff" => a.TotalDeliveryStaff,
+                    _ => 0
+                });
 
-            var totalSpecificStaffInOffice = CalculateTotalSpecificStaffInOffice(o => request.StaffType switch
-            {
-                "ReceivingStaff" => o.ReceivingStaff,
-                "AccountStaff" => o.AccountStaff,
-                "PrintingStaff" => o.PrintingStaff,
-                "QualityStaff" => o.QualityStaff,
-                "DeliveryStaff" => o.DeliveryStaff,
-                _ => 0
-            });
+                var totalSpecificStaff = offices.Sum(o => request.StaffType switch
+                {
+                    "ReceivingStaff" => o.ReceivingStaff,
+                    "AccountStaff" => o.AccountStaff,
+                    "PrintingStaff" => o.PrintingStaff,
+                    "QualityStaff" => o.QualityStaff,
+                    "DeliveryStaff" => o.DeliveryStaff,
+                    _ => 0
+                });
 
-            // Calculate percentages
-            double CalculatePercentage(int available, int total) => total > 0 ? Math.Round((double)available / total * 100, 2) : 0;
+                var totalSpecificStaffInOffice = offices.Where(o => o.Id == request.OfficeId).Sum(o => request.StaffType switch
+                {
+                    "ReceivingStaff" => o.ReceivingStaff,
+                    "AccountStaff" => o.AccountStaff,
+                    "PrintingStaff" => o.PrintingStaff,
+                    "QualityStaff" => o.QualityStaff,
+                    "DeliveryStaff" => o.DeliveryStaff,
+                    _ => 0
+                });
 
-            return new AttendanceStatisticsDto
-            {
-                TotalStaffCount = totalStaffCount,
-                TotalStaffInOffice = officeStaffCount,
-                AvailableStaff = availableStaff,
-                AvailableStaffInOffice = availableStaffInOffice,
-                AvailableSpecificStaff = availableSpecificStaff,
+                // Calculate percentages
+                double CalculatePercentage(int available, int total) => total > 0 ? Math.Round((double)available / total * 100, 2) : 0;
 
-                // New fields
-                TotalSpecificStaff = totalSpecificStaff,
-                TotalSpecificStaffInOffice = totalSpecificStaffInOffice,
-
-                // Percentages
-                AvailableStaffPercentage = CalculatePercentage(availableStaff, totalStaffCount),
-                AvailableStaffInOfficePercentage = CalculatePercentage(availableStaffInOffice, officeStaffCount),
-                AvailableSpecificStaffPercentage = CalculatePercentage(availableSpecificStaff, totalSpecificStaff)
-            };
-        }
-
-
+                return new AttendanceStatisticsDto
+                {
+                    TotalStaffCount = totalStaffCount,
+                    TotalStaffInOffice = officeStaffCount,
+                    AvailableStaff = availableStaff,
+                    AvailableStaffInOffice = availableStaffInOffice,
+                    AvailableSpecificStaff = availableSpecificStaff,
+                    TotalSpecificStaff = totalSpecificStaff,
+                    TotalSpecificStaffInOffice = totalSpecificStaffInOffice, // Ensure this is properly assigned
+                    AvailableStaffPercentage = CalculatePercentage(availableStaff, totalStaffCount),
+                    AvailableStaffInOfficePercentage = CalculatePercentage(availableStaffInOffice, officeStaffCount),
+                    AvailableSpecificStaffPercentage = CalculatePercentage(availableSpecificStaff, totalSpecificStaff)
+                };
+            }
 
     }
 }
