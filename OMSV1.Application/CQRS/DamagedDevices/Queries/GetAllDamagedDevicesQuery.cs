@@ -4,7 +4,7 @@ using OMSV1.Application.Helpers;
 
 namespace OMSV1.Application.Queries.DamagedDevices
 {
-    public class GetAllDamagedDevicesQuery : IRequest<PagedList<DamagedDeviceDto>>
+    public class GetAllDamagedDevicesQuery : IRequest<PagedList<DamagedDeviceAllDto>>
     {
         public PaginationParams PaginationParams { get; }
 

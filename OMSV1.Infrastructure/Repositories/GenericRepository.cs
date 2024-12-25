@@ -97,7 +97,11 @@ namespace OMSV1.Infrastructure.Repositories
 
                 return await query.FirstOrDefaultAsync(e => e.Id == id);
             }
-
+                    // Implement AnyAsync method
+public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
+{
+    return await _context.Set<T>().AnyAsync(predicate, cancellationToken);
+}
 
 
         private IQueryable<T> ApplySpecification(ISpecification<T> spec)

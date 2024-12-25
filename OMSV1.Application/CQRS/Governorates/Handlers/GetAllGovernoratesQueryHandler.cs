@@ -24,7 +24,6 @@ public class GetAllGovernoratesQueryHandler : IRequestHandler<GetAllGovernorates
     {
         // Retrieve the governorates as IQueryable
         var governoratesQuery = _repository.GetAllAsQueryable();
-
         // Map to GovernorateDto using AutoMapper's ProjectTo
         var mappedQuery = governoratesQuery.ProjectTo<GovernorateDto>(_mapper.ConfigurationProvider);
 

@@ -6,6 +6,7 @@ using OMSV1.Application.CQRS.DamagedDevices.Queries;
 using OMSV1.Application.CQRS.Queries.DamagedDevices;
 using OMSV1.Application.Dtos.DamagedDevices;
 using OMSV1.Application.Helpers;
+using OMSV1.Application.Queries.Attendances;
 using OMSV1.Application.Queries.DamagedDevices;
 using OMSV1.Infrastructure.Extensions;
 
@@ -167,6 +168,19 @@ namespace OMSV1.Application.Controllers.DamagedDevices
                 return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
             }
         }
+            [HttpPost("search/statistics")]
+            public async Task<IActionResult> GetAttendanceStatistics([FromBody] SearchDamagedDevicesStatisticsQuery query)
+            {
+                try
+                {
+                    var result = await _mediator.Send(query);
+                    return Ok(result);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+                }
+            }
 
 
     }

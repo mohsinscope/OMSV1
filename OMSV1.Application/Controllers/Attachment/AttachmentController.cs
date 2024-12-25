@@ -9,6 +9,7 @@ using OMSV1.Infrastructure.Persistence;
 using OMSV1.Infrastructure.Interfaces;
 using System.Threading.Tasks;
 using OMSV1.Application.Queries.Attachments;
+using OMSV1.Application.Commands.Attachment;
 
 namespace OMSV1.Application.Controllers
 {

@@ -49,16 +49,22 @@ public class AutoMapperProfiles : Profile
             CreateMap<AddDamagedPassportCommand, DamagedPassport>();
             CreateMap<UpdateDamagedPassportCommand, DamagedPassport>();
             CreateMap<DamagedPassport, DamagedPassportDto>();
+            CreateMap<DamagedPassport, DamagedPassportAllDto>();
+
             // Mapping for adding a new DamagedDevice
             CreateMap<AddDamagedDeviceCommand, DamagedDevice>();
             CreateMap<DamagedDevice, DamagedDeviceDto>();
+            CreateMap<DamagedDevice, DamagedDeviceAllDto>();
+
             //Lecture
             CreateMap<AddLectureCommand,Lecture>();
             CreateMap<Lecture,LectureDto>();
+            CreateMap<Lecture,LectureAllDto>();
             // Profile Mapping
             CreateMap<Profile, ProfileDto>();
             //Attendance Mapping
             CreateMap<Attendance, AttendanceDto>();
+            CreateMap<Attendance, AttendanceAllDto>();
             CreateMap<CreateAttendanceCommand, Attendance>();
 
 

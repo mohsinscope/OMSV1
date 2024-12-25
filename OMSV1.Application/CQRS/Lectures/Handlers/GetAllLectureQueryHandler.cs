@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace OMSV1.Application.Handlers.Lectures
 {
-    public class GetAllLecturesQueryHandler : IRequestHandler<GetAllLecturesQuery, PagedList<LectureDto>>
+    public class GetAllLecturesQueryHandler : IRequestHandler<GetAllLecturesQuery, PagedList<LectureAllDto>>
     {
         private readonly IGenericRepository<Lecture> _repository;
         private readonly IMapper _mapper;
@@ -22,16 +22,19 @@ namespace OMSV1.Application.Handlers.Lectures
             _mapper = mapper;
         }
 
-        public async Task<PagedList<LectureDto>> Handle(GetAllLecturesQuery request, CancellationToken cancellationToken)
+        public async Task<PagedList<LectureAllDto>> Handle(GetAllLecturesQuery request, CancellationToken cancellationToken)
         {
             // Retrieve the lectures as IQueryable
             var lecturesQuery = _repository.GetAllAsQueryable();
+                        // Apply ordering here - replace 'Date' with the field you want to order by
+            lecturesQuery = lecturesQuery.OrderByDescending(dp => dp.Date);  // Example: Order by Date in descending order
 
-            // Map to LectureDto using AutoMapper's ProjectTo
-            var mappedQuery = lecturesQuery.ProjectTo<LectureDto>(_mapper.ConfigurationProvider);
+
+            // Map to LectureAllDto using AutoMapper's ProjectTo
+            var mappedQuery = lecturesQuery.ProjectTo<LectureAllDto>(_mapper.ConfigurationProvider);
 
             // Apply pagination using PagedList
-            var pagedLectures = await PagedList<LectureDto>.CreateAsync(
+            var pagedLectures = await PagedList<LectureAllDto>.CreateAsync(
                 mappedQuery,
                 request.PaginationParams.PageNumber,
                 request.PaginationParams.PageSize

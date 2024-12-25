@@ -8,8 +8,7 @@ namespace OMSV1.Domain.Specifications.Attendances
     {
         public FilterAttendanceStatisticsSpecification(
             int? workingHours = null,
-            DateTime? startDate = null,
-            DateTime? endDate = null,
+            DateTime? date = null,
             int? officeId = null,
             int? governorateId = null)
             : base(x =>
@@ -17,8 +16,7 @@ namespace OMSV1.Domain.Specifications.Attendances
                 (workingHours.Value == (int)WorkingHours.Both) || 
                 x.WorkingHours == (WorkingHours)workingHours.Value) &&
 
-                (!startDate.HasValue || x.Date >= startDate.Value) &&
-                (!endDate.HasValue || x.Date <= endDate.Value) &&
+                (x.Date == date)&&  // Match the exact date
                 (!officeId.HasValue || x.OfficeId == officeId.Value) &&
                 (!governorateId.HasValue || x.GovernorateId == governorateId.Value))
         {

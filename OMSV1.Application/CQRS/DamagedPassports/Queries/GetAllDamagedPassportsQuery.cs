@@ -4,7 +4,7 @@ using OMSV1.Application.Helpers;  // Assuming PaginationParams and PagedList are
 
 namespace OMSV1.Application.Queries.DamagedPassports
 {
-    public class GetAllDamagedPassportsQuery : IRequest<PagedList<DamagedPassportDto>>
+    public class GetAllDamagedPassportsQuery : IRequest<PagedList<DamagedPassportAllDto>>
     {
         public PaginationParams PaginationParams { get; }
 

@@ -26,5 +26,7 @@ namespace OMSV1.Domain.SeedWork
         Task<IReadOnlyList<T>> GetAllAsync();
         Task UpdateAsync(T entity);
         Task<T?> GetByIdWithIncludesAsync(int id, params Expression<Func<T, object>>[] includes);
+         // Add the AnyAsync method
+        Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken);
     }
 }
