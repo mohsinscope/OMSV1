@@ -1,12 +1,14 @@
 using System;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
+using OMSV1.Application.Dtos.Attachments;
+using OMSV1.Domain.Enums;
 
 namespace OMSV1.Infrastructure.Interfaces;
 
 public interface IPhotoService
 {
-    Task<ImageUploadResult> AddPhotoAsync(IFormFile file);
+    Task<PhotoUploadResult> AddPhotoAsync(IFormFile file,int entityId, EntityType  entityType);
     Task<DeletionResult> DeletePhotoAsync(string publicId);
 }
 

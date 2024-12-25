@@ -28,6 +28,11 @@ builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
+// var builder1 = WebApplication.CreateBuilder(new WebApplicationOptions
+// {
+//     WebRootPath = "wwwroot", // Set the desired web root path
+//     ContentRootPath = AppContext.BaseDirectory // Ensure proper content root path
+// });
 
 
 
@@ -68,7 +73,7 @@ app.UseCors(x => x
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
+app.UseStaticFiles();
 
 using (var scope = app.Services.CreateScope())
 {

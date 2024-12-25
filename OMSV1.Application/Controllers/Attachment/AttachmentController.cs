@@ -27,25 +27,25 @@ namespace OMSV1.Application.Controllers
             this.mediator=mediator;
         }
         // Get Attachments by Entity ID and Entity Type
-   [HttpGet("{entityType}/{id}")]
-public async Task<IActionResult> GetAttachmentsById(int id, string entityType)
-{
-    // Map string to Enum (EntityType)
-    if (!Enum.TryParse(entityType, true, out EntityType parsedEntityType))
-    {
-        return BadRequest("Invalid entity type.");
-    }
+        [HttpGet("{entityType}/{id}")]
+        public async Task<IActionResult> GetAttachmentsById(int id, string entityType)
+        {
+            // Map string to Enum (EntityType)
+            if (!Enum.TryParse(entityType, true, out EntityType parsedEntityType))
+            {
+                return BadRequest("Invalid entity type.");
+            }
 
-    var query = new GetAttachmentsByEntityIdQuery(id, parsedEntityType);
-    var attachments = await mediator.Send(query);
+            var query = new GetAttachmentsByEntityIdQuery(id, parsedEntityType);
+            var attachments = await mediator.Send(query);
 
-    if (attachments == null || attachments.Count == 0)
-    {
-        return NotFound("No attachments found for the provided ID.");
-    }
+            if (attachments == null || attachments.Count == 0)
+            {
+                return NotFound("No attachments found for the provided ID.");
+            }
 
-    return Ok(attachments);
-}
+            return Ok(attachments);
+        }
 
         [HttpPost("add-attachment")]
         public async Task<ActionResult<AttachmentDto>> AddAttachment(
@@ -53,14 +53,11 @@ public async Task<IActionResult> GetAttachmentsById(int id, string entityType)
             [FromForm] int entityId, 
             [FromForm] OMSV1.Domain.Enums.EntityType entityType)
         {
-            // Validate the incoming file and request
             if (file == null || file.Length == 0)
                 return BadRequest("No file was uploaded.");
 
-            // Upload the file to Cloudinary
-            var result = await photoService.AddPhotoAsync(file);
+            var result = await photoService.AddPhotoAsync(file,entityId,entityType);
 
-            // Validate the entity based on type
             switch (entityType)
             {
                 case OMSV1.Domain.Enums.EntityType.DamagedDevice:
@@ -92,21 +89,19 @@ public async Task<IActionResult> GetAttachmentsById(int id, string entityType)
                     }
                     break;
 
-                // Add more cases for other entity types as needed
                 default:
                     return BadRequest("Unsupported entity type.");
             }
 
             // Create the attachment entity
-            var attachmentcu = new AttachmentCU(
-                fileName: file.FileName,
-                filePath: result.SecureUrl.AbsoluteUri,
+            var attachment = new AttachmentCU(
+                fileName: result.FileName,
+                filePath: result.FilePath,
                 entityType: entityType,
                 entityId: entityId
             );
-
             // Save to the database
-            appDbContext.AttachmentCUs.Add(attachmentcu);
+            appDbContext.AttachmentCUs.Add(attachment);
 
             if (await appDbContext.SaveChangesAsync() > 0)
             {

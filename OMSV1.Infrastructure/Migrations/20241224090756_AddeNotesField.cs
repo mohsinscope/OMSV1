@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace OMSV1.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class NoteseToDamageDevices : Migration
+    public partial class AddeNotesField : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -53,6 +53,23 @@ namespace OMSV1.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AttachmentCUs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FileName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    FilePath = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    EntityType = table.Column<string>(type: "text", nullable: false),
+                    EntityId = table.Column<int>(type: "integer", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AttachmentCUs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -347,7 +364,7 @@ namespace OMSV1.Infrastructure.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     SerialNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Date = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DamagedDeviceTypeId = table.Column<int>(type: "integer", nullable: false),
                     DeviceTypeId = table.Column<int>(type: "integer", nullable: false),
                     OfficeId = table.Column<int>(type: "integer", nullable: false),
@@ -400,6 +417,7 @@ namespace OMSV1.Infrastructure.Migrations
                     PassportNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DamagedTypeId = table.Column<int>(type: "integer", nullable: false),
+                    Note = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     OfficeId = table.Column<int>(type: "integer", nullable: false),
                     GovernorateId = table.Column<int>(type: "integer", nullable: false),
                     ProfileId = table.Column<int>(type: "integer", nullable: false),
@@ -442,6 +460,7 @@ namespace OMSV1.Infrastructure.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Note = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     OfficeId = table.Column<int>(type: "integer", nullable: false),
                     GovernorateId = table.Column<int>(type: "integer", nullable: false),
                     ProfileId = table.Column<int>(type: "integer", nullable: false),
@@ -505,29 +524,6 @@ namespace OMSV1.Infrastructure.Migrations
                         principalTable: "Profiles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AttachmentCUs",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    FileName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    FilePath = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    EntityType = table.Column<string>(type: "text", nullable: false),
-                    EntityId = table.Column<int>(type: "integer", nullable: false),
-                    DamagedPassportId = table.Column<int>(type: "integer", nullable: true),
-                    DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AttachmentCUs", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AttachmentCUs_DamagedPassports_DamagedPassportId",
-                        column: x => x.DamagedPassportId,
-                        principalTable: "DamagedPassports",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -637,11 +633,6 @@ namespace OMSV1.Infrastructure.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AttachmentCUs_DamagedPassportId",
-                table: "AttachmentCUs",
-                column: "DamagedPassportId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Attendances_GovernorateId",
@@ -799,13 +790,13 @@ namespace OMSV1.Infrastructure.Migrations
                 name: "DamagedDevices");
 
             migrationBuilder.DropTable(
+                name: "DamagedPassports");
+
+            migrationBuilder.DropTable(
                 name: "Lectures");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
-
-            migrationBuilder.DropTable(
-                name: "DamagedPassports");
 
             migrationBuilder.DropTable(
                 name: "ExpenseTypes");

@@ -12,8 +12,8 @@ using OMSV1.Infrastructure.Persistence;
 namespace OMSV1.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241221120308_NoteseToDamageDevices")]
-    partial class NoteseToDamageDevices
+    [Migration("20241224090756_AddeNotesField")]
+    partial class AddeNotesField
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -121,9 +121,6 @@ namespace OMSV1.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("DamagedPassportId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
 
@@ -145,8 +142,6 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DamagedPassportId");
 
                     b.ToTable("AttachmentCUs", (string)null);
                 });
@@ -220,7 +215,7 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
@@ -333,6 +328,11 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.Property<int>("GovernorateId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("OfficeId")
                         .HasColumnType("integer");
@@ -567,6 +567,11 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.Property<int>("GovernorateId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("OfficeId")
                         .HasColumnType("integer");
@@ -827,13 +832,6 @@ namespace OMSV1.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("OMSV1.Domain.Entities.Attachments.AttachmentCU", b =>
-                {
-                    b.HasOne("OMSV1.Domain.Entities.DamagedPassport.DamagedPassport", null)
-                        .WithMany("Attachments")
-                        .HasForeignKey("DamagedPassportId");
-                });
-
             modelBuilder.Entity("OMSV1.Domain.Entities.Attendances.Attendance", b =>
                 {
                     b.HasOne("OMSV1.Domain.Entities.Governorates.Governorate", "Governorate")
@@ -1084,11 +1082,6 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("OMSV1.Domain.Entities.DamagedPassport.DamagedPassport", b =>
-                {
-                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.MonthlyExpenses", b =>

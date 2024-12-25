@@ -19,6 +19,21 @@ namespace OMSV1.Application.Helpers;
                 StatusCode = (int)statusCode
             };
         }
+
+
+        public static IActionResult CreateSuccessResponse(HttpStatusCode statusCode, string message)
+        {
+            var successResponse = new
+            {
+                Message = message
+            };
+
+            return new ObjectResult(successResponse)
+            {
+                StatusCode = (int)statusCode
+            };
+        }
+        
     }
 
 

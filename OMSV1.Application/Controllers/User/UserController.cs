@@ -17,12 +17,15 @@ using OMSV1.Infrastructure.Interfaces;
 using OMSV1.Domain.Enums;
 using OMSV1.Infrastructure.Persistence;
 using OMSV1.Application.Helpers;
+using OMSV1.Application.CQRS.Users.Commands;
 namespace OMSV1.Application.Controllers.User;
 
 
 public class AccountController(UserManager<ApplicationUser> userManager,ITokenService tokenService,IMapper mapper , IMediator mediator,IPhotoService photoService,AppDbContext appDbContext) : BaseApiController
 {
 
+
+    // Admin Add Users
     [Authorize(Policy = "RequireAdminRole")] 
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterUserCommand command)
@@ -32,7 +35,7 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
     }
         
 
-
+    // Login Endpoint
     [HttpPost("Login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
@@ -58,7 +61,7 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
 
 
  
-
+    // Get All Profiles With Roles Assigned To the User
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("profiles-with-users-and-roles")]
     public async Task<ActionResult> GetProfilesWithUsersAndRoles()
@@ -68,6 +71,7 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
     }
 
 
+    // Update Profile Only
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPut("{id}")]
     public async Task<ActionResult<ProfileDto>> UpdateProfile(int id, [FromBody] UpdateProfileCommand command)
@@ -88,6 +92,36 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
         {
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
+    }
+
+
+    // Update Profile And User Together 
+    [HttpPut("{id:int}")]
+    [Authorize(Policy = "RequireAdminRole")]
+    public async Task<IActionResult> UpdateUser(int id, UpdateUserCommand command)
+    {
+        if (id != command.UserId)
+            return BadRequest("User ID mismatch between route and body.");
+
+        return await mediator.Send(command);
+    }
+
+
+    // Change Password
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordCommand command)
+    {
+        return await mediator.Send(command);
+    }
+
+
+
+    // Reset Password 
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordCommand command)
+    {
+        return await mediator.Send(command);
     }
 
 }
