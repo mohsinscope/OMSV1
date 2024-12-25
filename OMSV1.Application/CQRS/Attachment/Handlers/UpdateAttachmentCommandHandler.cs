@@ -46,10 +46,12 @@ namespace OMSV1.Application.Commands.Attachment
                 }
 
                 // Upload the new file and get the URL
-                var result = await _photoService.AddPhotoAsync(request.File);
+                var result = await _photoService.AddPhotoAsync(request.File,attachment.EntityId,attachment.EntityType);
 
                 // Update the attachment's file path with the new URL
-                attachment.UpdateFilePath(result.SecureUrl.AbsoluteUri);
+                // attachment.UpdateFilePath(result.SecureUrl.AbsoluteUri);
+                attachment.UpdateFilePath(result.FilePath);
+
             }
 
             // Update other properties of the attachment
