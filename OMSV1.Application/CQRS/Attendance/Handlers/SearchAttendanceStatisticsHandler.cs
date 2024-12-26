@@ -1,7 +1,10 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos.Attendances;
 using OMSV1.Application.Dtos.Offices;
+using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
@@ -25,7 +28,9 @@ namespace OMSV1.Application.Queries.Attendances
             _officeRepo = officeRepo;
         }
 
-            public async Task<AttendanceStatisticsDto> Handle(SearchAttendanceStatisticsQuery request, CancellationToken cancellationToken)
+        public async Task<AttendanceStatisticsDto> Handle(SearchAttendanceStatisticsQuery request, CancellationToken cancellationToken)
+        {
+            try
             {
                 // Fetch governorate-specific attendance data
                 var attendanceQuery = _attendanceRepo.ListAsQueryable(new FilterAttendanceStatisticsSpecification(
@@ -74,7 +79,7 @@ namespace OMSV1.Application.Queries.Attendances
                     ? totalAttendance.Where(a => a.OfficeId == request.OfficeId).Sum(a => a.TotalReceivingStaff + a.TotalAccountStaff + a.TotalPrintingStaff + a.TotalQualityStaff + a.TotalDeliveryStaff)
                     : 0;
 
-                // Calculate total specific staff if a staff type is provided
+                // Calculate available specific staff based on StaffType filter
                 int GetAvailableSpecificStaff(Func<dynamic, int> selector) =>
                     request.StaffType != null ? totalAttendance.Sum(selector) : 0;
 
@@ -125,6 +130,11 @@ namespace OMSV1.Application.Queries.Attendances
                     AvailableSpecificStaffPercentage = CalculatePercentage(availableSpecificStaff, totalSpecificStaff)
                 };
             }
-
+            catch (Exception ex)
+            {
+                // Log the exception and throw a custom exception if necessary
+                throw new HandlerException("An error occurred while fetching the attendance statistics.", ex);
+            }
+        }
     }
 }
