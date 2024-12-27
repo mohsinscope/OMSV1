@@ -6,6 +6,7 @@ using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Governorates;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.SeedWork;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,18 +23,26 @@ public class GetAllGovernoratesQueryHandler : IRequestHandler<GetAllGovernorates
 
     public async Task<PagedList<GovernorateDto>> Handle(GetAllGovernoratesQuery request, CancellationToken cancellationToken)
     {
-        // Retrieve the governorates as IQueryable
-        var governoratesQuery = _repository.GetAllAsQueryable();
-        // Map to GovernorateDto using AutoMapper's ProjectTo
-        var mappedQuery = governoratesQuery.ProjectTo<GovernorateDto>(_mapper.ConfigurationProvider);
+        try
+        {
+            // Retrieve the governorates as IQueryable
+            var governoratesQuery = _repository.GetAllAsQueryable();
+            // Map to GovernorateDto using AutoMapper's ProjectTo
+            var mappedQuery = governoratesQuery.ProjectTo<GovernorateDto>(_mapper.ConfigurationProvider);
 
-        // Apply pagination using PagedList
-        var pagedGovernorates = await PagedList<GovernorateDto>.CreateAsync(
-            mappedQuery,
-            request.PaginationParams.PageNumber,
-            request.PaginationParams.PageSize
-        );
+            // Apply pagination using PagedList
+            var pagedGovernorates = await PagedList<GovernorateDto>.CreateAsync(
+                mappedQuery,
+                request.PaginationParams.PageNumber,
+                request.PaginationParams.PageSize
+            );
 
-        return pagedGovernorates;
+            return pagedGovernorates;
+        }
+        catch (Exception ex)
+        {
+            // Catch and throw a custom exception for better error reporting
+            throw new HandlerException("An error occurred while retrieving governorates.", ex);
+        }
     }
 }

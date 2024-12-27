@@ -5,98 +5,146 @@ using OMSV1.Application.Dtos.Offices;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Offices;
 using OMSV1.Infrastructure.Extensions;
+using System;
+using System.Threading.Tasks;
+using System.Net;
 
 namespace OMSV1.Application.Controllers.Offices
 {
-
-    public class OfficeController(IMediator mediator) : BaseApiController
+    public class OfficeController : BaseApiController
     {
-        private readonly IMediator _mediator = mediator;
+        private readonly IMediator _mediator;
 
-    // GET: api/Office
-    [HttpGet]
-    public async Task<IActionResult> GetAllOffices([FromQuery] PaginationParams paginationParams)
-    {
-        var offices = await _mediator.Send(new GetAllOfficesQuery(paginationParams));
-        Response.AddPaginationHeader(offices);
-        return Ok(offices); // Returns PagedList<OfficeDto>
-    }
+        public OfficeController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        // GET: api/Office
+        [HttpGet]
+        public async Task<IActionResult> GetAllOffices([FromQuery] PaginationParams paginationParams)
+        {
+            try
+            {
+                var offices = await _mediator.Send(new GetAllOfficesQuery(paginationParams));
+                Response.AddPaginationHeader(offices);  // Add pagination headers
+                return Ok(offices);  // Returns PagedList<OfficeDto>
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving the offices.", new[] { ex.Message });
+            }
+        }
 
         // GET: api/Office/{id}
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetOfficeById(int id)
         {
-            var office = await _mediator.Send(new GetOfficeByIdQuery(id));
-            if (office == null)
+            try
             {
-                return NotFound($"Office with ID {id} not found.");
+                var office = await _mediator.Send(new GetOfficeByIdQuery(id));
+                if (office == null)
+                {
+                    return NotFound($"Office with ID {id} not found.");
+                }
+                return Ok(office); // Returns OfficeDto
             }
-            return Ok(office); // Returns OfficeDto
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving the office by ID.", new[] { ex.Message });
+            }
         }
 
         // POST: api/Office
         [HttpPost]
         public async Task<IActionResult> CreateOffice([FromBody] CreateOfficeDto officeDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var command = new AddOfficeCommand
+                {
+                    Name = officeDto.Name,
+                    Code = officeDto.Code,
+                    ReceivingStaff = officeDto.ReceivingStaff,
+                    AccountStaff = officeDto.AccountStaff,
+                    PrintingStaff = officeDto.PrintingStaff,
+                    QualityStaff = officeDto.QualityStaff,
+                    DeliveryStaff = officeDto.DeliveryStaff,
+                    GovernorateId = officeDto.GovernorateId
+                };
+
+                var officeId = await _mediator.Send(command);
+                return CreatedAtAction(nameof(GetOfficeById), new { id = officeId }, officeId);
             }
-
-            var command = new AddOfficeCommand
+            catch (Exception ex)
             {
-                Name = officeDto.Name,
-                Code = officeDto.Code,
-                ReceivingStaff = officeDto.ReceivingStaff,
-                AccountStaff = officeDto.AccountStaff,
-                PrintingStaff = officeDto.PrintingStaff,
-                QualityStaff = officeDto.QualityStaff,
-                DeliveryStaff = officeDto.DeliveryStaff,
-                GovernorateId = officeDto.GovernorateId
-            };
-
-            var officeId = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetOfficeById), new { id = officeId }, officeId);
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while creating the office.", new[] { ex.Message });
+            }
         }
+
         // GET: api/Office/dropdown
         [HttpGet("dropdown")]
         public async Task<IActionResult> GetOfficesForDropdown()
         {
-            var offices = await _mediator.Send(new GetOfficesForDropdownQuery());
-            return Ok(offices); // Returns List<OfficeDropdownDto>
+            try
+            {
+                var offices = await _mediator.Send(new GetOfficesForDropdownQuery());
+                return Ok(offices);  // Returns List<OfficeDropdownDto>
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving offices for dropdown.", new[] { ex.Message });
+            }
         }
-
-                
 
         // PUT: api/Office/{id}
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateOffice(int id, [FromBody] UpdateOfficeCommand command)
         {
-            if (id != command.OfficeId)
+            try
             {
-                return BadRequest("Mismatched office ID in the URL and body.");
-            }
+                if (id != command.OfficeId)
+                {
+                    return BadRequest("Mismatched office ID in the URL and body.");
+                }
 
-            var isUpdated = await _mediator.Send(command);
-            if (!isUpdated)
+                var isUpdated = await _mediator.Send(command);
+                if (!isUpdated)
+                {
+                    return NotFound($"Office with ID {id} not found.");
+                }
+
+                return NoContent();  // 204 No Content
+            }
+            catch (Exception ex)
             {
-                return NotFound($"Office with ID {id} not found.");
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while updating the office.", new[] { ex.Message });
             }
-
-            return NoContent();
         }
 
         // DELETE: api/Office/{id}
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteOffice(int id)
         {
-            var isDeleted = await _mediator.Send(new DeleteOfficeCommand(id));
-            if (!isDeleted)
+            try
             {
-                return NotFound($"Office with ID {id} not found.");
-            }
+                var isDeleted = await _mediator.Send(new DeleteOfficeCommand(id));
+                if (!isDeleted)
+                {
+                    return NotFound($"Office with ID {id} not found.");
+                }
 
-            return NoContent();
+                return NoContent();  // 204 No Content
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while deleting the office.", new[] { ex.Message });
+            }
         }
     }
 }

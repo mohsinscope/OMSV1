@@ -1,8 +1,10 @@
 using MediatR;
 using OMSV1.Infrastructure.Persistence;
 using OMSV1.Domain.Entities.DamagedDevices;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using OMSV1.Application.Helpers; // Assuming HandlerException is defined here
 
 namespace OMSV1.Application.Commands.LOV
 {
@@ -17,18 +19,30 @@ namespace OMSV1.Application.Commands.LOV
 
         public async Task<bool> Handle(UpdateDamagedDeviceTypeCommand request, CancellationToken cancellationToken)
         {
-            var damagedDeviceType = await _context.DamagedDeviceTypes
-                .FindAsync(request.Id);
+            try
+            {
+                // Retrieve the damaged device type by ID
+                var damagedDeviceType = await _context.DamagedDeviceTypes
+                    .FindAsync(request.Id);
 
-            if (damagedDeviceType == null)
-                return false;
+                // If not found, return false
+                if (damagedDeviceType == null)
+                    return false;
 
-            damagedDeviceType.Update(request.Name, request.Description);
+                // Update the entity
+                damagedDeviceType.Update(request.Name, request.Description);
 
-            _context.DamagedDeviceTypes.Update(damagedDeviceType);
-            await _context.SaveChangesAsync(cancellationToken);
+                // Update the entity in the context and save the changes
+                _context.DamagedDeviceTypes.Update(damagedDeviceType);
+                await _context.SaveChangesAsync(cancellationToken);
 
-            return true;
+                return true; // Return true if the update was successful
+            }
+            catch (Exception ex)
+            {
+                // Throw a custom exception if an error occurs
+                throw new HandlerException("An error occurred while updating the damaged device type.", ex);
+            }
         }
     }
 }

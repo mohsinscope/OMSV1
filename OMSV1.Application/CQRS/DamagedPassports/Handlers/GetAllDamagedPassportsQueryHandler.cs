@@ -24,24 +24,31 @@ namespace OMSV1.Application.Handlers.DamagedPassports
 
         public async Task<PagedList<DamagedPassportAllDto>> Handle(GetAllDamagedPassportsQuery request, CancellationToken cancellationToken)
         {
-            // Retrieve the damaged passports as IQueryable
-            var damagedPassportsQuery = _repository.GetAllAsQueryable();
-            // Apply ordering here - replace 'Date' with the field you want to order by
-            damagedPassportsQuery = damagedPassportsQuery.OrderByDescending(dp => dp.Date);  // Example: Order by Date in descending order
+            try
+            {
+                // Retrieve the damaged passports as IQueryable
+                var damagedPassportsQuery = _repository.GetAllAsQueryable();
 
+                // Apply ordering here - replace 'Date' with the field you want to order by
+                damagedPassportsQuery = damagedPassportsQuery.OrderByDescending(dp => dp.Date);  // Example: Order by Date in descending order
 
-            // Map to DamagedPassportAllDto using AutoMapper's ProjectTo
-            var mappedQuery = damagedPassportsQuery.ProjectTo<DamagedPassportAllDto>(_mapper.ConfigurationProvider);
+                // Map to DamagedPassportAllDto using AutoMapper's ProjectTo
+                var mappedQuery = damagedPassportsQuery.ProjectTo<DamagedPassportAllDto>(_mapper.ConfigurationProvider);
 
-            // Apply pagination using PagedList
-            var pagedDamagedPassports = await PagedList<DamagedPassportAllDto>.CreateAsync(
-                mappedQuery,
-                request.PaginationParams.PageNumber,
-                request.PaginationParams.PageSize
+                // Apply pagination using PagedList
+                var pagedDamagedPassports = await PagedList<DamagedPassportAllDto>.CreateAsync(
+                    mappedQuery,
+                    request.PaginationParams.PageNumber,
+                    request.PaginationParams.PageSize
+                );
 
-            );
-
-            return pagedDamagedPassports;  // Return the paginated list
+                return pagedDamagedPassports;  // Return the paginated list
+            }
+            catch (Exception ex)
+            {
+                // Handle any unexpected errors and throw a custom exception
+                throw new HandlerException("An error occurred while retrieving the damaged passports.", ex);
+            }
         }
     }
 }

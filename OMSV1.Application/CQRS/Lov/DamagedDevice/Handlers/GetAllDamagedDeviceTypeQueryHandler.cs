@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using OMSV1.Application.Helpers; // Assuming HandlerException is defined here
 
 namespace OMSV1.Application.Commands.LOV
 {
@@ -20,16 +21,25 @@ namespace OMSV1.Application.Commands.LOV
 
         public async Task<List<DamagedDeviceTypeDto>> Handle(GetAllDamagedDeviceTypesQuery request, CancellationToken cancellationToken)
         {
-            var damagedDeviceTypes = await _context.DamagedDeviceTypes
-                .Select(ddt => new DamagedDeviceTypeDto
-                {
-                    Id = ddt.Id,
-                    Name = ddt.Name,
-                    Description = ddt.Description
-                })
-                .ToListAsync(cancellationToken);
+            try
+            {
+                // Fetch all damaged device types from the database
+                var damagedDeviceTypes = await _context.DamagedDeviceTypes
+                    .Select(ddt => new DamagedDeviceTypeDto
+                    {
+                        Id = ddt.Id,
+                        Name = ddt.Name,
+                        Description = ddt.Description
+                    })
+                    .ToListAsync(cancellationToken);
 
-            return damagedDeviceTypes;
+                return damagedDeviceTypes;
+            }
+            catch (Exception ex)
+            {
+                // If an exception occurs, throw a custom HandlerException
+                throw new HandlerException("An error occurred while retrieving the damaged device types.", ex);
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Application.CQRS.Lov.DamagedDevice;
-
+using OMSV1.Application.Helpers; // Assuming HandlerException is defined here
 
 namespace OMSV1.Application.CQRS.Lov.DamagedDevice
 {
@@ -20,13 +20,21 @@ namespace OMSV1.Application.CQRS.Lov.DamagedDevice
 
         public async Task<bool> Handle(AddDeviceTypeCommand request, CancellationToken cancellationToken)
         {
-            var deviceType = new DeviceType(request.Name, request.Description);
+            try
+            {
+                var deviceType = new DeviceType(request.Name, request.Description);
 
-            // Use the generic repository to add the new device type
-            await _unitOfWork.Repository<DeviceType>().AddAsync(deviceType);
-            await _unitOfWork.SaveAsync(cancellationToken); // Commit the transaction
+                // Use the generic repository to add the new device type
+                await _unitOfWork.Repository<DeviceType>().AddAsync(deviceType);
+                await _unitOfWork.SaveAsync(cancellationToken); // Commit the transaction
 
-            return true;
+                return true; // Return true if successfully added
+            }
+            catch (Exception ex)
+            {
+                // If an exception occurs, throw a custom HandlerException
+                throw new HandlerException("An error occurred while adding the device type.", ex);
+            }
         }
     }
 }

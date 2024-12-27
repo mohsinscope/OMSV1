@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.LOV;
 using OMSV1.Application.CQRS.Lov.DamagedPassport;
 using OMSV1.Application.Dtos.LOV;
+using OMSV1.Application.Helpers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Net;
+
 namespace OMSV1.Application.Controllers.LOV
 {
     public class DamagedTypeController : BaseApiController
@@ -18,61 +21,96 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Add Damaged Type
         [HttpPost("add")]
-        public async Task<ActionResult> AddDamagedType([FromBody] AddDamagedTypeCommand command)
+        public async Task<IActionResult> AddDamagedType([FromBody] AddDamagedTypeCommand command)
         {
-            var result = await _mediator.Send(command);
-            if (result)
+            try
             {
-                return Ok("Damaged Type added successfully");
+                var result = await _mediator.Send(command);
+                if (result)
+                {
+                    return Ok("Damaged Type added successfully");
+                }
+                return BadRequest("Failed to add Damaged Type");
             }
-            return BadRequest("Failed to add Damaged Type");
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while adding the damaged type.", new[] { ex.Message });
+            }
         }
 
         // Get All Damaged Types
         [HttpGet("all")]
-        public async Task<ActionResult<IEnumerable<DamagedTypeDto>>> GetAllDamagedTypes()
+        public async Task<IActionResult> GetAllDamagedTypes()
         {
-            var query = new GetAllDamagedTypesQuery();
-            var damagedTypes = await _mediator.Send(query);
-            return Ok(damagedTypes);
+            try
+            {
+                var query = new GetAllDamagedTypesQuery();
+                var damagedTypes = await _mediator.Send(query);
+                return Ok(damagedTypes);
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving damaged types.", new[] { ex.Message });
+            }
         }
 
         // Get a Specific Damaged Type by ID
         [HttpGet("{id}")]
-        public async Task<ActionResult<DamagedTypeDto>> GetDamagedTypeById(int id)
+        public async Task<IActionResult> GetDamagedTypeById(int id)
         {
-            var query = new GetDamagedTypeByIdQuery(id);  // Assuming you have a query handler for this
-            var damagedType = await _mediator.Send(query);
-            if (damagedType == null)
+            try
             {
-                return NotFound("Damaged Type not found");
+                var query = new GetDamagedTypeByIdQuery(id);  
+                var damagedType = await _mediator.Send(query);
+                if (damagedType == null)
+                {
+                    return NotFound("Damaged Type not found");
+                }
+                return Ok(damagedType);
             }
-            return Ok(damagedType);
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving the damaged type by ID.", new[] { ex.Message });
+            }
         }
 
         // Update Damaged Type
         [HttpPut("update/{id}")]
-        public async Task<ActionResult> UpdateDamagedType(int id, [FromBody] UpdateDamagedTypeCommand command)
+        public async Task<IActionResult> UpdateDamagedType(int id, [FromBody] UpdateDamagedTypeCommand command)
         {
-            command.Id = id;  // Ensure the command has the correct ID
-            var result = await _mediator.Send(command);
-            if (result)
+            try
             {
-                return Ok("Damaged Type updated successfully");
+                command.Id = id;  // Ensure the command has the correct ID
+                var result = await _mediator.Send(command);
+                if (result)
+                {
+                    return Ok("Damaged Type updated successfully");
+                }
+                return BadRequest("Failed to update Damaged Type");
             }
-            return BadRequest("Failed to update Damaged Type");
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while updating the damaged type.", new[] { ex.Message });
+            }
         }
 
-                // Delete Damaged Type
-                [HttpDelete("delete/{id}")]
-            public async Task<ActionResult> DeleteDamagedType(int id)
+        // Delete Damaged Type
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteDamagedType(int id)
         {
-            var result = await _mediator.Send(new DeleteDamagedTypeCommand(id)); // Pass the id to the constructor
-            if (result)
+            try
             {
-                return Ok("Damaged Type deleted successfully");
+                var result = await _mediator.Send(new DeleteDamagedTypeCommand(id));
+                if (result)
+                {
+                    return Ok("Damaged Type deleted successfully");
+                }
+                return BadRequest("Failed to delete Damaged Type");
             }
-            return BadRequest("Failed to delete Damaged Type");
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while deleting the damaged type.", new[] { ex.Message });
+            }
         }
     }
 }

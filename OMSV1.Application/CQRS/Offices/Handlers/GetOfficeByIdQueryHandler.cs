@@ -1,8 +1,10 @@
 using AutoMapper;
 using MediatR;
 using OMSV1.Application.Dtos.Offices;
+using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,8 +23,16 @@ namespace OMSV1.Application.Queries.Offices
 
         public async Task<OfficeDto> Handle(GetOfficeByIdQuery request, CancellationToken cancellationToken)
         {
-            var office = await _repository.GetByIdAsync(request.OfficeId);
-            return office == null ? null : _mapper.Map<OfficeDto>(office);
+            try
+            {
+                var office = await _repository.GetByIdAsync(request.OfficeId);
+                return office == null ? null : _mapper.Map<OfficeDto>(office);
+            }
+            catch (Exception ex)
+            {
+                // Log the error (you can use a logging library like Serilog or NLog)
+                throw new HandlerException("An error occurred while retrieving the office.", ex);
+            }
         }
     }
 }
