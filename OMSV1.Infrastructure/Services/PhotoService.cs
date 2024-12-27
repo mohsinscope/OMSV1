@@ -13,10 +13,11 @@ namespace OMSV1.Infrastructure.Services;
 public class PhotoService : IPhotoService
 {
     private readonly IWebHostEnvironment _webHostEnvironment;
+    private readonly string _networkStoragePath = @"\\172.16.108.26\samba";
+
     public PhotoService(IWebHostEnvironment webHostEnvironment)
     {
             _webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));
-
 
     }
     public async Task<PhotoUploadResult> AddPhotoAsync(IFormFile file, int entityId, EntityType entityType)
@@ -24,30 +25,35 @@ public class PhotoService : IPhotoService
         if (file == null || file.Length == 0)
             throw new ArgumentException("No file uploaded.");
 
-        // Determine the web root path
-        string webRootPath = _webHostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-
-        // Ensure the uploads folder exists
-        string uploadsFolder = Path.Combine(webRootPath, "uploads");
-        if (!Directory.Exists(uploadsFolder))
-            Directory.CreateDirectory(uploadsFolder);
-
-        // Generate a unique filename based on entity type and entity ID
-        string uniqueFileName = $"{entityType}_{entityId}_{file.FileName}";
-        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-        string fileUrl = $"/uploads/{uniqueFileName}";
-
-        // Save file
-        using (var stream = new FileStream(filePath, FileMode.Create))
+        try
         {
-            await file.CopyToAsync(stream);
+            // Ensure the uploads folder exists in network storage
+            string uploadsFolder = Path.Combine(_networkStoragePath, "uploads");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            // Generate a unique filename based on entity type and entity ID
+            string uniqueFileName = $"{entityType}_{entityId}_{Guid.NewGuid()}_{file.FileName}";
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+            string fileUrl = $"/uploads/{uniqueFileName}"; // Keep the URL format for web access
+
+            // Save file to network storage
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return new PhotoUploadResult
+            {
+                FilePath = fileUrl,  
+                FileName = uniqueFileName
+            };
         }
-
-        return new PhotoUploadResult
+        catch (Exception ex)
         {
-            FilePath = fileUrl,
-            FileName = uniqueFileName
-        };
+            // Add proper error handling
+            throw new Exception($"Failed to upload file to network storage: {ex.Message}", ex);
+        }
     }
 
     public Task<DeletionResult> DeletePhotoAsync(string publicId)
