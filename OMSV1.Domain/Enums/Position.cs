@@ -6,5 +6,6 @@ public enum Position
         Manager = 1,
         Director = 2,
         Supervisor =3,
-        Accontnt =4
+        Accontnt =4,
+        FollowUpEmployee = 5
 }
