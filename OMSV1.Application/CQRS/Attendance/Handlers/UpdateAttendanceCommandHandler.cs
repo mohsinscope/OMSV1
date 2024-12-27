@@ -3,6 +3,7 @@ using OMSV1.Application.Commands.Attendances;
 using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Enums;
+using OMSV1.Application.Helpers;
 
 namespace OMSV1.Application.Handlers.Attendances
 {
@@ -17,6 +18,7 @@ namespace OMSV1.Application.Handlers.Attendances
 
         public async Task<Unit> Handle(UpdateAttendanceCommand request, CancellationToken cancellationToken)
         {
+            try{
             // Retrieve the existing attendance record
             var attendance = await _unitOfWork.Repository<Attendance>().GetByIdAsync(request.Id);
 
@@ -49,6 +51,17 @@ namespace OMSV1.Application.Handlers.Attendances
 
             // Return confirmation (Unit.Value represents a successful operation)
             return Unit.Value;
+        }
+                   catch (KeyNotFoundException knfEx)
+            {
+                // Handle not found error
+                throw new HandlerException("Attendance record not found.", knfEx);
+            }
+            catch (Exception ex)
+            {
+                // Log and rethrow as a HandlerException for consistent error handling
+                throw new HandlerException("An error occurred while updating the attendance record.", ex);
+            }
         }
     }
 }

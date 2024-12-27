@@ -6,6 +6,7 @@ using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Attendances;
 using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.SeedWork;
+using Microsoft.EntityFrameworkCore;
 
 public class GetAllAttendancesQueryHandler : IRequestHandler<GetAllAttendancesQuery, PagedList<AttendanceAllDto>>
 {
@@ -20,16 +21,27 @@ public class GetAllAttendancesQueryHandler : IRequestHandler<GetAllAttendancesQu
 
     public async Task<PagedList<AttendanceAllDto>> Handle(GetAllAttendancesQuery request, CancellationToken cancellationToken)
     {
-        var query = _unitOfWork.Repository<Attendance>().GetAllAsQueryable();
-                    // Apply ordering here - replace 'Date' with the field you want to order by
-            query = query.OrderByDescending(dp => dp.Date);  // Example: Order by Date in descending order
+        try
+        {
+            var query = _unitOfWork.Repository<Attendance>().GetAllAsQueryable();
 
-        var mappedQuery = query.ProjectTo<AttendanceAllDto>(_mapper.ConfigurationProvider);
+            // Apply ordering - order by Date in descending order (you can replace 'Date' with any field)
+            query = query.OrderByDescending(dp => dp.Date);
 
-        return await PagedList<AttendanceAllDto>.CreateAsync(
-            mappedQuery,
-            request.PaginationParams.PageNumber,
-            request.PaginationParams.PageSize
-        );
+            // Project the results to AttendanceAllDto using AutoMapper
+            var mappedQuery = query.ProjectTo<AttendanceAllDto>(_mapper.ConfigurationProvider);
+
+            // Create the paginated list of AttendanceAllDto
+            return await PagedList<AttendanceAllDto>.CreateAsync(
+                mappedQuery,
+                request.PaginationParams.PageNumber,
+                request.PaginationParams.PageSize
+            );
+        }
+        catch (Exception ex)
+        {
+            // Optionally log the error here if necessary
+            throw new HandlerException("An error occurred while fetching attendance records.", ex);
+        }
     }
 }

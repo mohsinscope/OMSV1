@@ -182,6 +182,6 @@ namespace OMSV1.Application.Controllers.DamagedDevices
                 }
             }
 
-
+ 
     }
 }
