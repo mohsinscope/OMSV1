@@ -4,6 +4,7 @@ using OMSV1.Domain.Entities.DamagedDevices;
 using System.Threading;
 using System.Threading.Tasks;
 using OMSV1.Domain.SeedWork;
+using OMSV1.Application.Helpers; // Assuming HandlerException is defined here
 
 namespace OMSV1.Application.Commands.LOV
 {
@@ -18,20 +19,28 @@ namespace OMSV1.Application.Commands.LOV
 
         public async Task<bool> Handle(DeleteDamagedDeviceTypeCommand request, CancellationToken cancellationToken)
         {
-            // Use the IUnitOfWork to find the damaged device type by ID
-            var damagedDeviceType = await _unitOfWork.Repository<DamagedDeviceType>()
-                .GetByIdAsync(request.Id);
+            try
+            {
+                // Use the IUnitOfWork to find the damaged device type by ID
+                var damagedDeviceType = await _unitOfWork.Repository<DamagedDeviceType>()
+                    .GetByIdAsync(request.Id);
 
-            if (damagedDeviceType == null)
-                return false; // Return false if the device type does not exist
+                if (damagedDeviceType == null)
+                    return false; // Return false if the device type does not exist
 
-            // Use the repository to delete the entity
-            await _unitOfWork.Repository<DamagedDeviceType>().DeleteAsync(damagedDeviceType);
+                // Use the repository to delete the entity
+                await _unitOfWork.Repository<DamagedDeviceType>().DeleteAsync(damagedDeviceType);
 
-            // Commit the changes to the database
-            await _unitOfWork.SaveAsync(cancellationToken);
+                // Commit the changes to the database
+                await _unitOfWork.SaveAsync(cancellationToken);
 
-            return true; // Return true if deletion was successful
+                return true; // Return true if deletion was successful
+            }
+            catch (Exception ex)
+            {
+                // If an exception occurs, throw a custom HandlerException
+                throw new HandlerException("An error occurred while deleting the damaged device type.", ex);
+            }
         }
     }
 }

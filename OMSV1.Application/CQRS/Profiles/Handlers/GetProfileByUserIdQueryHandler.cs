@@ -2,6 +2,7 @@ using System;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos.Profiles;
+using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Profiles;
 using OMSV1.Infrastructure.Persistence;
 
@@ -18,30 +19,39 @@ namespace OMSV1.Application.CQRS.Queries.Profiles
 
         public async Task<ProfileDto> Handle(GetProfileByUserIdQuery request, CancellationToken cancellationToken)
         {
-            var profile = await _context.Profiles
-                .Include(p => p.Governorate)
-                .Include(p => p.Office)
-                .FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);
-
-            if (profile == null)
+            try
             {
-                return null; // or return a custom error
+                // Fetch the profile with related Governorate and Office
+                var profile = await _context.Profiles
+                    .Include(p => p.Governorate)
+                    .Include(p => p.Office)
+                    .FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);
+
+                if (profile == null)
+                {
+                    return null; // or throw custom exception, depending on your preference
+                }
+
+                // Manually map the entity to the DTO
+                var profileDto = new ProfileDto
+                {
+                    ProfileId = profile.Id,
+                    FullName = profile.FullName,
+                    Position = profile.Position.ToString(),
+                    GovernorateName = profile.Governorate.Name,
+                    OfficeName = profile.Office.Name,
+                    UserId = request.UserId,
+                    GovernorateId = profile.Governorate.Id,
+                    OfficeId = profile.Office.Id
+                };
+
+                return profileDto;
             }
-
-            // Manually map the entity to the DTO
-            var profileDto = new ProfileDto
+            catch (Exception ex)
             {
-                ProfileId = profile.Id,
-                FullName = profile.FullName,
-                Position = profile.Position.ToString(),
-                GovernorateName = profile.Governorate.Name,
-                OfficeName = profile.Office.Name,
-                UserId = request.UserId,
-                GovernorateId= profile.Governorate.Id,
-                OfficeId=profile.Office.Id
-            };
-
-            return profileDto;
+                // Log the error (you can use a logging library like Serilog or NLog here)
+                throw new HandlerException("An error occurred while retrieving the profile by user ID.", ex);
+            }
         }
     }
 }

@@ -6,28 +6,31 @@ using OMSV1.Application.CQRS.DamagedDevices.Queries;
 using OMSV1.Application.CQRS.Queries.DamagedDevices;
 using OMSV1.Application.Dtos.DamagedDevices;
 using OMSV1.Application.Helpers;
-using OMSV1.Application.Queries.Attendances;
 using OMSV1.Application.Queries.DamagedDevices;
 using OMSV1.Infrastructure.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace OMSV1.Application.Controllers.DamagedDevices
 {
-
+    [ApiController]
+    [Route("api/[controller]")]
     public class DamagedDeviceController : BaseApiController
-    
     {
-        
         private readonly IMediator _mediator;
+
         public DamagedDeviceController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
-
-
-
-    [HttpGet]
-    public async Task<IActionResult> GetAllDamagedDevices([FromQuery] PaginationParams paginationParams)
+    // Get all damaged devices with pagination
+[HttpGet]
+public async Task<IActionResult> GetAllDamagedDevices([FromQuery] PaginationParams paginationParams)
+{
+    try
     {
         // Send the pagination parameters to the query handler
         var damagedDevices = await _mediator.Send(new GetAllDamagedDevicesQuery(paginationParams));
@@ -38,150 +41,195 @@ namespace OMSV1.Application.Controllers.DamagedDevices
         // Return the paginated result
         return Ok(damagedDevices);  // Returns PagedList<DamagedDeviceDto>
     }
+    catch (Exception ex)
+    {
+        // Handle the error and return a custom error response
+        return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, 
+            "An error occurred while retrieving the damaged devices.", new[] { ex.Message });
+    }
+}
 
-        
-    [HttpGet("governorate/{governorateId}")]
-    public async Task<ActionResult<List<DamagedDeviceDto>>> GetByGovernorate(
-        int governorateId, 
-        [FromQuery] DateTime? startDate,  
-        [FromQuery] DateTime? endDate,
-        [FromQuery] int pageNumber = 1, 
-        [FromQuery] int pageSize = 10)
+
+// Get damaged devices by governorate with optional date filters
+[HttpGet("governorate/{governorateId}")]
+public async Task<IActionResult> GetByGovernorate(
+    int governorateId, 
+    [FromQuery] DateTime? startDate,  
+    [FromQuery] DateTime? endDate)
+{
+    try
     {
         var query = new GetDamagedDevicesByGovernorateQuery
         {
             GovernorateId = governorateId,
             StartDate = startDate,
-            EndDate = endDate,
-            PageNumber = pageNumber,
-            PageSize = pageSize
+            EndDate = endDate
         };
 
         var result = await _mediator.Send(query);
-        return Ok(result);
+        return Ok(result);  // Return the result with the list of DamagedDeviceDto
     }
+    catch (Exception ex)
+    {
+        return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, 
+            "An error occurred while retrieving damaged devices by governorate.", new[] { ex.Message });
+    }
+}
 
 
-    [HttpGet("office/{officeId}")]
-    public async Task<ActionResult<List<DamagedDeviceDto>>> GetByOffice(
-        int officeId, 
-        [FromQuery] DateTime? startDate,  
-        [FromQuery] DateTime? endDate,
-        [FromQuery] int pageNumber = 1, 
-        [FromQuery] int pageSize = 10)
+// Get damaged devices by office with optional date filters
+[HttpGet("office/{officeId}")]
+public async Task<IActionResult> GetByOffice(
+    int officeId, 
+    [FromQuery] DateTime? startDate,  
+    [FromQuery] DateTime? endDate)
+{
+    try
     {
         var query = new GetDamagedDevicesByOfficeQuery
         {
             OfficeId = officeId,
             StartDate = startDate,
-            EndDate = endDate,
-            PageNumber = pageNumber,
-            PageSize = pageSize
+            EndDate = endDate
         };
 
         var result = await _mediator.Send(query);
-        return Ok(result);
+        return Ok(result);  // Return the result with the list of DamagedDeviceDto
     }
-
-    [HttpGet("serial/{serialNumber}")]
-    public async Task<ActionResult<DamagedDeviceDto>> GetBySerialNumber(string serialNumber)
+    catch (Exception ex)
     {
-        var query = new GetDamagedDeviceBySerialNumberQuery
-        {
-            SerialNumber = serialNumber
-        };
+        return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, 
+            "An error occurred while retrieving damaged devices by office.", new[] { ex.Message });
+    }
+}
 
+// Get damaged device by serial number
+[HttpGet("serial/{serialNumber}")]
+public async Task<IActionResult> GetBySerialNumber(string serialNumber)
+{
+    try
+    {
+        var query = new GetDamagedDeviceBySerialNumberQuery { SerialNumber = serialNumber };
         var result = await _mediator.Send(query);
-        return result != null ? Ok(result) : NotFound();
-    }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetDamagedDeviceById(int id)
-    {
-        var query = new GetDamagedDeviceByIdQuery(id);
-        var damagedDeviceDto = await _mediator.Send(query);
-
-        if (damagedDeviceDto == null)
+        
+        if (result == null)
         {
-            return NotFound();
+            return NotFound();  // Return 404 if the device is not found
         }
 
-        return Ok(damagedDeviceDto);  // Return the DamagedDeviceDto
+        return Ok(result);  // Return the result with DamagedDeviceDto
     }
-
-    [HttpPost]
-    public async Task<IActionResult> AddDamagedDevice([FromBody] AddDamagedDeviceCommand command)
+    catch (Exception ex)
     {
-        try
-        {
-            var userId = User.GetUserId(); 
-            command.UserId = userId;
-
-            var id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetDamagedDeviceById), new { id }, id);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
+        return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, 
+            "An error occurred while retrieving the damaged device by serial number.", new[] { ex.Message });
     }
+}
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateDamagedDevice(int id, [FromBody] UpdateDamagedDeviceCommand command)
-    {
-        if (id != command.Id) return BadRequest("Mismatched DamagedDevice ID.");
 
-        var isUpdated = await _mediator.Send(command);
-        if (!isUpdated) return NotFound();
-        return NoContent();
-    }
+        // Get damaged device by ID
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetDamagedDeviceById(int id)
+        {
+            try
+            {
+                var query = new GetDamagedDeviceByIdQuery(id);
+                var damagedDeviceDto = await _mediator.Send(query);
 
+                if (damagedDeviceDto == null)
+                {
+                    return NotFound();  // Return 404 if no device is found
+                }
+
+                return Ok(damagedDeviceDto);  // Return the DamagedDeviceDto
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while fetching the damaged device.", new[] { ex.Message });
+            }
+        }
+
+        // Add a new damaged device
+        [HttpPost]
+        public async Task<IActionResult> AddDamagedDevice([FromBody] AddDamagedDeviceCommand command)
+        {
+            try
+            {
+                var userId = User.GetUserId(); // Assume you have a helper to get user ID from JWT
+                command.UserId = userId;
+
+                var id = await _mediator.Send(command);
+                return CreatedAtAction(nameof(GetDamagedDeviceById), new { id }, id);  // Return 201 Created response
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");  // Catch any unhandled exceptions
+            }
+        }
+
+        // Update a damaged device
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateDamagedDevice(int id, [FromBody] UpdateDamagedDeviceCommand command)
+        {
+            if (id != command.Id) return BadRequest("Mismatched DamagedDevice ID.");
+
+            var isUpdated = await _mediator.Send(command);
+            if (!isUpdated) return NotFound();
+
+            return NoContent();  // Return 204 No Content if update is successful
+        }
+
+        // Delete a damaged device
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDamagedDevice(int id)
         {
-            var command = new DeleteDamagedDeviceCommand(id);
-            var result = await _mediator.Send(command);
-
-            if (!result)
+            try
             {
-                return NotFound("Damaged device not found.");
-            }
+                var command = new DeleteDamagedDeviceCommand(id);
+                var result = await _mediator.Send(command);
 
-            return NoContent(); // Successfully deleted
+                if (!result)
+                {
+                    return NotFound("Damaged device not found.");  // Return 404 if device is not found
+                }
+
+                return NoContent(); // Successfully deleted, return 204 No Content
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");  // Catch any unhandled exceptions
+            }
         }
 
-
-
-
+        // Search damaged devices with filters
         [HttpPost("search")]
         public async Task<IActionResult> GetDamagedDevices([FromBody] GetDamagedDevicesQuery query)
         {
             try
             {
                 var result = await _mediator.Send(query);
-                Response.AddPaginationHeader(result);
-                return Ok(result);
+                Response.AddPaginationHeader(result); // Add pagination headers
+                return Ok(result);  // Return the search result
             }
             catch (Exception ex)
             {
-                // Log the error here (if necessary)
-                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });  // Return 500 if any error occurs
             }
         }
-            [HttpPost("search/statistics")]
-            public async Task<IActionResult> GetAttendanceStatistics([FromBody] SearchDamagedDevicesStatisticsQuery query)
-            {
-                try
-                {
-                    var result = await _mediator.Send(query);
-                    return Ok(result);
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
-                }
-            }
 
- 
+        // Get statistics for damaged devices
+        [HttpPost("search/statistics")]
+        public async Task<IActionResult> GetDamagedDeviceStatistics([FromBody] SearchDamagedDevicesStatisticsQuery query)
+        {
+            try
+            {
+                var result = await _mediator.Send(query);
+                return Ok(result);  // Return the statistics result
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });  // Return 500 if any error occurs
+            }
+        }
     }
 }

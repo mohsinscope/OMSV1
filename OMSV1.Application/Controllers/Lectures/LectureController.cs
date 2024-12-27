@@ -7,8 +7,8 @@ using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Lectures;
 using OMSV1.Infrastructure.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace OMSV1.Application.Controllers.Lectures
 {
@@ -25,70 +25,103 @@ namespace OMSV1.Application.Controllers.Lectures
         [HttpGet]
         public async Task<IActionResult> GetAllLectures([FromQuery] PaginationParams paginationParams)
         {
-            // Send the pagination parameters to the query handler
-            var lectures = await _mediator.Send(new GetAllLecturesQuery(paginationParams));
+            try
+            {
+                // Send the pagination parameters to the query handler
+                var lectures = await _mediator.Send(new GetAllLecturesQuery(paginationParams));
 
-            // Add pagination headers to the response
-            Response.AddPaginationHeader(lectures);
+                // Add pagination headers to the response
+                Response.AddPaginationHeader(lectures);
 
-            // Return the paginated result
-            return Ok(lectures);  // Returns PagedList<LectureDto>
+                // Return the paginated result
+                return Ok(lectures);  // Returns PagedList<LectureDto>
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving the lectures.", new[] { ex.Message });
+            }
         }
 
+        // GET method to retrieve a lecture by ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLectureById(int id)
         {
-            var query = new GetLectureByIdQuery(id);
-            var lectureDto = await _mediator.Send(query);
-
-            if (lectureDto == null)
+            try
             {
-                return NotFound();
-            }
+                var query = new GetLectureByIdQuery(id);
+                var lectureDto = await _mediator.Send(query);
 
-            return Ok(lectureDto);  // Return the LectureDto
+                if (lectureDto == null)
+                {
+                    return NotFound($"Lecture with ID {id} not found.");
+                }
+
+                return Ok(lectureDto);  // Return the LectureDto
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving the lecture by ID.", new[] { ex.Message });
+            }
         }
 
+        // POST method to add a new lecture
         [HttpPost]
         public async Task<IActionResult> AddLecture([FromBody] AddLectureCommand command)
         {
             try
             {
                 var id = await _mediator.Send(command);
-                return CreatedAtAction(nameof(GetLectureById), new { id }, id);
+                return CreatedAtAction(nameof(GetLectureById), new { id }, id);  // Return 201 Created response
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");  // Catch any unhandled exceptions
             }
         }
 
+        // PUT method to update the lecture
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLecture(int id, [FromBody] UpdateLectureCommand command)
         {
-            if (id != command.Id)
-                return BadRequest("Mismatched Lecture ID.");
+            try
+            {
+                if (id != command.Id)
+                    return BadRequest("Mismatched Lecture ID.");
 
-            var isUpdated = await _mediator.Send(command);
-            if (!isUpdated) return NotFound();
-            return NoContent();
+                var isUpdated = await _mediator.Send(command);
+                if (!isUpdated)
+                    return NotFound($"Lecture with ID {id} not found.");
+
+                return NoContent();  // 204 No Content
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while updating the lecture.", new[] { ex.Message });
+            }
         }
 
+        // DELETE method to delete the lecture
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLecture(int id)
         {
-            var command = new DeleteLectureCommand(id);
-            var result = await _mediator.Send(command);
-
-            if (!result)
+            try
             {
-                return NotFound("Lecture not found.");
-            }
+                var result = await _mediator.Send(new DeleteLectureCommand(id));
 
-            return NoContent(); // Successfully deleted
+                if (!result)
+                    return NotFound($"Lecture with ID {id} not found.");
+
+                return NoContent();  // Successfully deleted
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");  // Catch any unhandled exceptions
+            }
         }
+
+        // Search for lectures with filters
         [HttpPost("search")]
-        public async Task<IActionResult> GetDamagedDevices([FromBody] GetLectureQuery query)
+        public async Task<IActionResult> GetLectures([FromBody] GetLectureQuery query)
         {
             try
             {
@@ -98,8 +131,7 @@ namespace OMSV1.Application.Controllers.Lectures
             }
             catch (Exception ex)
             {
-                // Log the error here (if necessary)
-                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while processing your request.", new[] { ex.Message });
             }
         }
     }

@@ -24,22 +24,36 @@ namespace OMSV1.Application.Handlers.DamagedDevices
 
         public async Task<PagedList<DamagedDeviceAllDto>> Handle(GetAllDamagedDevicesQuery request, CancellationToken cancellationToken)
         {
-            // Retrieve the damaged devices as IQueryable
-            var damagedDevicesQuery = _repository.GetAllAsQueryable();
-            // Apply ordering here - replace 'Date' with the field you want to order by
-            damagedDevicesQuery = damagedDevicesQuery.OrderByDescending(dp => dp.Date);  // Example: Order by Date in descending order
+            try
+            {
+                // Retrieve the damaged devices as IQueryable
+                var damagedDevicesQuery = _repository.GetAllAsQueryable();
+                
+                // Apply ordering here - replace 'Date' with the field you want to order by
+                damagedDevicesQuery = damagedDevicesQuery.OrderByDescending(dp => dp.Date);  // Example: Order by Date in descending order
 
-            // Map to DamagedDeviceAllDto using AutoMapper's ProjectTo
-            var mappedQuery = damagedDevicesQuery.ProjectTo<DamagedDeviceAllDto>(_mapper.ConfigurationProvider);
+                // Map to DamagedDeviceAllDto using AutoMapper's ProjectTo
+                var mappedQuery = damagedDevicesQuery.ProjectTo<DamagedDeviceAllDto>(_mapper.ConfigurationProvider);
 
-            // Apply pagination using PagedList
-            var pagedDamagedDevices = await PagedList<DamagedDeviceAllDto>.CreateAsync(
-                mappedQuery,
-                request.PaginationParams.PageNumber,
-                request.PaginationParams.PageSize
-            );
+                // Apply pagination using PagedList
+                var pagedDamagedDevices = await PagedList<DamagedDeviceAllDto>.CreateAsync(
+                    mappedQuery,
+                    request.PaginationParams.PageNumber,
+                    request.PaginationParams.PageSize
+                );
 
-            return pagedDamagedDevices;  // Return the paginated list
+                return pagedDamagedDevices;  // Return the paginated list
+            }
+            catch (HandlerException ex)
+            {
+                // Log and rethrow the custom exception
+                throw new HandlerException("Error occurred while retrieving all damaged devices.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Catch unexpected errors and rethrow them as HandlerException
+                throw new HandlerException("An unexpected error occurred while retrieving all damaged devices.", ex);
+            }
         }
     }
 }

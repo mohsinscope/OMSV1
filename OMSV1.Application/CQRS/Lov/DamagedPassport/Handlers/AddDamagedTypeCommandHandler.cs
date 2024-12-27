@@ -1,9 +1,11 @@
 using MediatR;
 using OMSV1.Infrastructure.Interfaces; // For IUnitOfWork
 using OMSV1.Domain.Entities.DamagedPassport; // For DamagedType entity
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using OMSV1.Domain.SeedWork;
+using OMSV1.Application.Helpers; // Assuming HandlerException is defined here
 
 namespace OMSV1.Application.Commands.LOV
 {
@@ -18,13 +20,27 @@ namespace OMSV1.Application.Commands.LOV
 
         public async Task<bool> Handle(AddDamagedTypeCommand request, CancellationToken cancellationToken)
         {
-            var damagedType = new DamagedType(request.Name, request.Description);
+            try
+            {
+                // Create the new DamagedType entity from the command
+                var damagedType = new DamagedType(request.Name, request.Description);
 
-            // Use the generic repository to add the new damaged type
-            await _unitOfWork.Repository<DamagedType>().AddAsync(damagedType);
-            await _unitOfWork.SaveAsync(cancellationToken);  // Commit the transaction
+                // Use the generic repository to add the new damaged type
+                await _unitOfWork.Repository<DamagedType>().AddAsync(damagedType);
 
-            return true;
+                // Commit the transaction (save to the database)
+                if (!await _unitOfWork.SaveAsync(cancellationToken))
+                {
+                    throw new Exception("Failed to save the damaged type to the database.");
+                }
+
+                return true; // Return true if the operation was successful
+            }
+            catch (Exception ex)
+            {
+                // Log and throw a custom exception if an error occurs
+                throw new HandlerException("An error occurred while adding the damaged type.", ex);
+            }
         }
     }
 }

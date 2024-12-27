@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.LOV;
 using OMSV1.Application.CQRS.Lov.DamagedDevice;
 using OMSV1.Application.Dtos.LOV;
+using OMSV1.Application.Helpers;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace OMSV1.Application.Controllers.LOV
 {
@@ -18,72 +21,107 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Add DeviceType
         [HttpPost]
-        public async Task<ActionResult<DeviceTypeDto>> AddDeviceType([FromBody] AddDeviceTypeCommand command)
+        public async Task<IActionResult> AddDeviceType([FromBody] AddDeviceTypeCommand command)
         {
-            var result = await _mediator.Send(command);
-            if (result)
+            try
             {
-                return Ok("Device Type added successfully");
+                var result = await _mediator.Send(command);
+                if (result)
+                {
+                    return Ok("Device Type added successfully");
+                }
+                return BadRequest("Failed to add Device Type");
             }
-            return BadRequest("Failed to add Device Type");
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while adding the device type.", new[] { ex.Message });
+            }
         }
 
         // Get All DeviceTypes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DeviceTypeDto>>> GetAllDeviceTypes()
+        public async Task<IActionResult> GetAllDeviceTypes()
         {
-            var query = new GetAllDeviceTypesQuery(); // Assuming you have a query handler for fetching device types
-            var deviceTypes = await _mediator.Send(query);  // Send the query using MediatR
-
-            return Ok(deviceTypes);  // Return the fetched list
+            try
+            {
+                var query = new GetAllDeviceTypesQuery(); 
+                var deviceTypes = await _mediator.Send(query);  
+                return Ok(deviceTypes);  
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving device types.", new[] { ex.Message });
+            }
         }
 
         // Get DeviceType by Id
         [HttpGet("{id}")]
-        public async Task<ActionResult<DeviceTypeDto>> GetDeviceTypeById(int id)
+        public async Task<IActionResult> GetDeviceTypeById(int id)
         {
-            var query = new GetDeviceTypesQueryById(id); // Create a query to get a device type by its Id
-            var deviceType = await _mediator.Send(query); // Send the query
+            try
+            {
+                var query = new GetDeviceTypesQueryById(id); 
+                var deviceType = await _mediator.Send(query); 
 
-            if (deviceType == null)
-                return NotFound($"Device Type with ID {id} not found.");
+                if (deviceType == null)
+                {
+                    return NotFound($"Device Type with ID {id} not found.");
+                }
 
-            return Ok(deviceType); // Return the device type
+                return Ok(deviceType); 
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving the device type by ID.", new[] { ex.Message });
+            }
         }
 
         // Update DeviceType
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateDeviceType(int id, [FromBody] UpdateDeviceTypeCommand command)
+        public async Task<IActionResult> UpdateDeviceType(int id, [FromBody] UpdateDeviceTypeCommand command)
         {
-            if (id != command.Id)
+            try
             {
-                return BadRequest("Device Type ID mismatch.");
+                if (id != command.Id)
+                {
+                    return BadRequest("Device Type ID mismatch.");
+                }
+
+                var result = await _mediator.Send(command);
+
+                if (result)
+                {
+                    return Ok("Device Type updated successfully");
+                }
+
+                return BadRequest("Failed to update Device Type");
             }
-
-            var result = await _mediator.Send(command);
-
-            if (result)
+            catch (Exception ex)
             {
-                return Ok("Device Type updated successfully");
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while updating the device type.", new[] { ex.Message });
             }
-
-            return BadRequest("Failed to update Device Type");
         }
 
         // Delete DeviceType
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteDeviceType(int id)
+        public async Task<IActionResult> DeleteDeviceType(int id)
         {
-            // Pass the id to the DeleteDeviceTypeCommand
-            var command = new DeleteDeviceTypeCommand(id);  // Pass the id to the command constructor
-            var result = await _mediator.Send(command);
-
-            if (result)
+            try
             {
-                return Ok("Device Type deleted successfully");
-            }
+                var command = new DeleteDeviceTypeCommand(id); 
+                var result = await _mediator.Send(command);
 
-            return BadRequest("Failed to delete Device Type");
+                if (result)
+                {
+                    return Ok("Device Type deleted successfully");
+                }
+
+                return BadRequest("Failed to delete Device Type");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while deleting the device type.", new[] { ex.Message });
+            }
         }
     }
 }

@@ -9,40 +9,53 @@ using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Specifications.DamagedDevices;
 
-namespace OMSV1.Application.CQRS.DamagedDevices.Commands;
-
-public class GetDamagedDevicesQueryHandler : IRequestHandler<GetDamagedDevicesQuery, PagedList<DamagedDeviceDto>>
+namespace OMSV1.Application.CQRS.DamagedDevices.Commands
 {
-    private readonly IGenericRepository<DamagedDevice> _repository;
-    private readonly IMapper _mapper;
-
-    public GetDamagedDevicesQueryHandler(IGenericRepository<DamagedDevice> repository, IMapper mapper)
+    public class GetDamagedDevicesQueryHandler : IRequestHandler<GetDamagedDevicesQuery, PagedList<DamagedDeviceDto>>
     {
-        _repository = repository;
-        _mapper = mapper;
+        private readonly IGenericRepository<DamagedDevice> _repository;
+        private readonly IMapper _mapper;
+
+        public GetDamagedDevicesQueryHandler(IGenericRepository<DamagedDevice> repository, IMapper mapper)
+        {
+            _repository = repository;
+            _mapper = mapper;
+        }
+
+        public async Task<PagedList<DamagedDeviceDto>> Handle(GetDamagedDevicesQuery request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // Create the specification based on the query parameters
+                var spec = new FilterDamagedDevicesSpecification(
+                    request.SerialNumber,
+                    request.StartDate,
+                    request.EndDate,
+                    request.DamagedDeviceTypeId,
+                    request.DeviceTypeId,
+                    request.OfficeId,
+                    request.GovernorateId,
+                    request.ProfileId);
+
+                // Get the queryable list of DamagedDevice entities
+                var queryableResult = _repository.ListAsQueryable(spec);
+
+                // Map to DamagedDeviceDto
+                var mappedQuery = queryableResult.ProjectTo<DamagedDeviceDto>(_mapper.ConfigurationProvider);
+
+                // Create a paginated list of DamagedDeviceDto
+                return await PagedList<DamagedDeviceDto>.CreateAsync(mappedQuery, request.PaginationParams.PageNumber, request.PaginationParams.PageSize);
+            }
+            catch (HandlerException ex)
+            {
+                // Catch and handle specific exceptions, like validation or business logic failures
+                throw new HandlerException("An error occurred while retrieving the damaged devices.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Catch and handle unexpected exceptions, like database or mapping issues
+                throw new HandlerException("An unexpected error occurred while retrieving the damaged devices.", ex);
+            }
+        }
     }
-
-public async Task<PagedList<DamagedDeviceDto>> Handle(GetDamagedDevicesQuery request, CancellationToken cancellationToken)
-{
-    // Create the specification based on the query parameters
-    var spec = new FilterDamagedDevicesSpecification(
-        request.SerialNumber,
-        request.StartDate,
-        request.EndDate,
-        request.DamagedDeviceTypeId,
-        request.DeviceTypeId,
-        request.OfficeId,
-        request.GovernorateId,
-        request.ProfileId);
-
-    // Get the queryable list of DamagedDevice entities
-    var queryableResult = _repository.ListAsQueryable(spec);
-
-    // Map to DamagedDeviceDto
-    var mappedQuery = queryableResult.ProjectTo<DamagedDeviceDto>(_mapper.ConfigurationProvider);
-
-    // Create a paginated list of DamagedDeviceDto
-    return await PagedList<DamagedDeviceDto>.CreateAsync(mappedQuery, request.PaginationParams.PageNumber, request.PaginationParams.PageSize);
-}
-
 }

@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.DamagedPassports;
 using OMSV1.Application.Queries.DamagedPassports;
 using OMSV1.Infrastructure.Extensions;
-using OMSV1.Application.Helpers; // Assuming the DeleteDamagedPassportCommand exists here.
+using OMSV1.Application.Helpers;
 using OMSV1.Application.CQRS.DamagedPassports.Queries;
+using System.Net;
 namespace OMSV1.Application.Controllers.DamagedPassports
 {
-
+    [ApiController]
+    [Route("api/[controller]")]
     public class DamagedPassportController : BaseApiController
     {
         private readonly IMediator _mediator;
@@ -17,27 +19,48 @@ namespace OMSV1.Application.Controllers.DamagedPassports
             _mediator = mediator;
         }
 
-       // Get All Damaged Devices with Pagination
-       [HttpGet]
-        public async Task<IActionResult> GetAllDamagedPassport([FromQuery] PaginationParams paginationParams)
+        // Get All damaged passports with Pagination
+        [HttpGet]
+        public async Task<IActionResult> GetAllDamagedPassports([FromQuery] PaginationParams paginationParams)
         {
-            // Send the pagination parameters to the query handler
-            var damagedDevices = await _mediator.Send(new GetAllDamagedPassportsQuery(paginationParams));
+            try
+            {
+                // Send the pagination parameters to the query handler
+                var damagedPassports = await _mediator.Send(new GetAllDamagedPassportsQuery(paginationParams));
 
-            // Add pagination headers to the response
-            Response.AddPaginationHeader(damagedDevices);
+                // Add pagination headers to the response
+                Response.AddPaginationHeader(damagedPassports);
 
-            // Return the paginated result
-            return Ok(damagedDevices);  // Returns PagedList<DamagedDeviceDto>
+                // Return the paginated result
+                return Ok(damagedPassports);  // Returns PagedList<DamagedPassportDto>
+            }
+            catch (Exception ex)
+            {
+                // Handle errors and return a 500 Internal Server Error with a message
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, 
+                    "An error occurred while retrieving the damaged passports.", 
+                    new[] { ex.Message });
+            }
         }
 
         // GET method to retrieve a damaged passport by ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDamagedPassportById(int id)
         {
-            var passport = await _mediator.Send(new GetDamagedPassportByIdQuery(id));
-            if (passport == null) return NotFound();
-            return Ok(passport);  // This returns a single DamagedPassportDto
+            try
+            {
+                var passport = await _mediator.Send(new GetDamagedPassportByIdQuery(id));
+                if (passport == null) return NotFound();  // Return 404 if not found
+
+                return Ok(passport);  // Return the DamagedPassportDto
+            }
+            catch (Exception ex)
+            {
+                // Handle errors and return a 500 Internal Server Error
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, 
+                    "An error occurred while retrieving the damaged passport by ID.", 
+                    new[] { ex.Message });
+            }
         }
 
         // POST method to add a new damaged passport
@@ -46,12 +69,12 @@ namespace OMSV1.Application.Controllers.DamagedPassports
         {
             try
             {
-                // Use MediatR to handle the logic
                 var id = await _mediator.Send(command);
-                return CreatedAtAction(nameof(GetDamagedPassportById), new { id }, id);
+                return CreatedAtAction(nameof(GetDamagedPassportById), new { id }, id);  // 201 Created response
             }
             catch (Exception ex)
             {
+                // Handle errors and return a 500 Internal Server Error
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -79,45 +102,53 @@ namespace OMSV1.Application.Controllers.DamagedPassports
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDamagedPassport(int id)
         {
-            var result = await _mediator.Send(new DeleteDamagedPassportCommand(id));
-
-            if (!result)
+            try
             {
-                return NotFound($"DamagedPassport with ID {id} not found.");
-            }
+                var result = await _mediator.Send(new DeleteDamagedPassportCommand(id));
 
-            return NoContent(); // 204 No Content, as the passport has been deleted successfully
+                if (!result)
+                {
+                    return NotFound($"DamagedPassport with ID {id} not found.");
+                }
+
+                return NoContent(); // 204 No Content, as the passport has been deleted successfully
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
+
+        // POST method for searching damaged passports with filters
         [HttpPost("search")]
-        public async Task<IActionResult> GetDamagedDevices([FromBody] GetDamagedPassportQuery query)
+        public async Task<IActionResult> GetDamagedPassports([FromBody] GetDamagedPassportQuery query)
         {
             try
             {
                 var result = await _mediator.Send(query);
-                Response.AddPaginationHeader(result);
-                return Ok(result);
+                Response.AddPaginationHeader(result);  // Add pagination headers
+                return Ok(result);  // Return the search result
             }
             catch (Exception ex)
             {
-                // Log the error here (if necessary)
+                // Handle errors and return a 500 Internal Server Error with message details
                 return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
             }
         }
 
-             [HttpPost("search/statistics")]
-            public async Task<IActionResult> GetAttendanceStatistics([FromBody] SearchDamagedPassportsStatisticsQuery query)
+        // POST method for statistics related to damaged passports
+        [HttpPost("search/statistics")]
+        public async Task<IActionResult> GetDamagedPassportStatistics([FromBody] SearchDamagedPassportsStatisticsQuery query)
+        {
+            try
             {
-                try
-                {
-                    var result = await _mediator.Send(query);
-                    return Ok(result);
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
-                }
+                var result = await _mediator.Send(query);
+                return Ok(result);  // Return the statistics result
             }
-
-
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+            }
+        }
     }
 }
