@@ -17,7 +17,26 @@ namespace OMSV1.Application.Controllers.Profiles
         {
             _mediator = mediator;
         }
+          // Get all roles
+        [HttpGet("all-roles")]
+        public async Task<IActionResult> GetAllRoles()
+        {
+            try
+            {
+                var roles = await _mediator.Send(new GetAllRolesQuery()); // Fetch all roles from the query handler
+                if (roles == null || roles.Count == 0)
+                {
+                    return NotFound(new { message = "No roles found." }); // Return a 404 if no roles are found
+                }
 
+                return Ok(roles); // Return the list of roles as the response
+            }
+            catch (Exception ex)
+            {
+                // Handle unexpected errors and return a structured error response
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving roles.", new[] { ex.Message });
+            }
+        }
         // Get Profile by UserId
         [HttpGet("user-profile")]
         public async Task<IActionResult> GetProfileByUserId()

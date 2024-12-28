@@ -9,6 +9,7 @@ using OMSV1.Infrastructure.Extensions;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net;
+using OMSV1.Application.CQRS.Governorates;
 
 namespace OMSV1.Application.Controllers.Governorates
 {
@@ -38,6 +39,7 @@ namespace OMSV1.Application.Controllers.Governorates
                 return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving the governorates.", new[] { ex.Message });
             }
         }
+        
 
         // GET: api/Governorate/{id}
         [HttpGet("{id:int}")]
@@ -149,6 +151,21 @@ namespace OMSV1.Application.Controllers.Governorates
                 return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving governorate with offices.", new[] { ex.Message });
             }
         }
+        [HttpPost("search-offices")]
+        public async Task<IActionResult> SearchOffices([FromBody] SearchOfficesQuery request)
+        {
+            try
+            {
+                var result = await _mediator.Send(request);
+                return Ok(result); // Return the result (List<OfficeCountDto>) based on the query
+            }
+            catch (Exception ex)
+            {
+                // Handle unexpected errors and return a structured error response
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while searching for offices.", new[] { ex.Message });
+            }
+        }
+
 
         // DELETE: api/Governorate/{id}
         [HttpDelete("{id:int}")]
