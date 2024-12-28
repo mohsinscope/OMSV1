@@ -53,55 +53,50 @@ namespace OMSV1.Application.Controllers
             return Ok(attachments);
         }
           // PUT: api/attachment/{id}
-  [HttpPut("{id}")]
-public async Task<IActionResult> UpdateAttachment(int id, 
-    [FromForm] IFormFile file, 
-    [FromForm] string fileName, 
-    [FromForm] int entityId, 
-    [FromForm] OMSV1.Domain.Enums.EntityType entityType)
-{
-    if (file == null || file.Length == 0)
-    {
-        return BadRequest("No file was uploaded.");
-    }
-
-    // Ensure the attachment ID in the URL matches the request body
-    if (id != entityId)
-    {
-        return BadRequest("Attachment ID in the URL does not match the ID in the request body.");
-    }
-
-    try
-    {
-        // Create a new UpdateAttachmentCommand based on the form data
-        var request = new UpdateAttachmentCommand
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateAttachment(int id, 
+            [FromForm] IFormFile file, 
+            [FromForm] int entityId, 
+            [FromForm] OMSV1.Domain.Enums.EntityType entityType)
         {
-            AttachmentId = id,
-            NewPhoto = file,
-            EntityId = entityId,
-            EntityType = entityType
-        };
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file was uploaded.");
+            }
 
-        // Send the request to update the attachment
-        var result = await mediator.Send(request);
 
-        if (!result)
-        {
-            return NotFound($"Attachment with ID {id} not found.");
+
+            try
+            {
+                // Create a new UpdateAttachmentCommand based on the form data
+                var request = new UpdateAttachmentCommand
+                {
+                    AttachmentId = id,
+                    NewPhoto = file,
+                    EntityId = entityId,
+                    EntityType = entityType
+                };
+
+                // Send the request to update the attachment
+                var result = await mediator.Send(request);
+
+                if (!result)
+                {
+                    return NotFound($"Attachment with ID {id} not found.");
+                }
+
+                // Return a successful response if the update was successful
+                return NoContent(); // 204 No Content
+            }
+            catch (HandlerException ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Unexpected error: {ex.Message}");
+            }
         }
-
-        // Return a successful response if the update was successful
-        return NoContent(); // 204 No Content
-    }
-    catch (HandlerException ex)
-    {
-        return StatusCode(500, $"Internal server error: {ex.Message}");
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, $"Unexpected error: {ex.Message}");
-    }
-}
 
          // POST: api/Attachment/add-attachment
         [HttpPost("add-attachment")]

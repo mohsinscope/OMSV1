@@ -19,11 +19,10 @@ public class AttachmentCU : Entity
         EntityId = entityId;
     }
 
-    public void Update(string fileName, string filePath, EntityType entityType, int entityId)
+    public void Update(string fileName, string filePath)
     {
         FileName = fileName;
         FilePath = filePath;
-        EntityType = entityType;
-        EntityId = entityId;
+
     }
 }
