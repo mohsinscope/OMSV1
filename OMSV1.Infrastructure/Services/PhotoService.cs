@@ -56,15 +56,31 @@ public class PhotoService : IPhotoService
         }
     }
 
-    public Task<DeletionResult> DeletePhotoAsync(string publicId)
+    public async Task<bool> DeletePhotoAsync(string filePath)
     {
-        throw new NotImplementedException();
+        if (string.IsNullOrEmpty(filePath))
+            throw new ArgumentException("File path cannot be null or empty.");
+
+        try
+        {
+            // Construct the full file path in network storage
+            string fullFilePath = Path.Combine(_networkStoragePath, filePath.TrimStart('/'));
+
+            // Check if the file exists
+            if (!File.Exists(fullFilePath))
+                throw new FileNotFoundException("File not found in network storage.", fullFilePath);
+
+            // Delete the file
+            File.Delete(fullFilePath);
+
+            return true; // Return true if file deletion is successful
+        }
+        catch (Exception ex)
+        {
+            // Add proper error handling
+            throw new Exception($"Failed to delete file from network storage: {ex.Message}", ex);
+        }
     }
 
 
-    // public async Task<DeletionResult> DeletePhotoAsync(string publicId)
-    // {
-    //     var deleteParams = new DeletionParams(publicId);
-    //     return await _cloudinary.DestroyAsync(deleteParams);
-    // }
 }
