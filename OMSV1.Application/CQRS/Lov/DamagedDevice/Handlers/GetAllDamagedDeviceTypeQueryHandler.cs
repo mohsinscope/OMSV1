@@ -1,30 +1,32 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos;
-using OMSV1.Infrastructure.Persistence;
+using OMSV1.Domain.SeedWork;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using OMSV1.Application.Helpers; // Assuming HandlerException is defined here
+using OMSV1.Application.Helpers;
+using OMSV1.Domain.Entities.DamagedDevices;
+using Microsoft.EntityFrameworkCore;
 
 namespace OMSV1.Application.Commands.LOV
 {
     public class GetAllDamagedDeviceTypesQueryHandler : IRequestHandler<GetAllDamagedDeviceTypesQuery, List<DamagedDeviceTypeDto>>
     {
-        private readonly AppDbContext _context;
+        private readonly IGenericRepository<DamagedDeviceType> _damagedDeviceTypeRepository;
 
-        public GetAllDamagedDeviceTypesQueryHandler(AppDbContext context)
+        public GetAllDamagedDeviceTypesQueryHandler(IGenericRepository<DamagedDeviceType> damagedDeviceTypeRepository)
         {
-            _context = context;
+            _damagedDeviceTypeRepository = damagedDeviceTypeRepository;
         }
 
         public async Task<List<DamagedDeviceTypeDto>> Handle(GetAllDamagedDeviceTypesQuery request, CancellationToken cancellationToken)
         {
             try
             {
-                // Fetch all damaged device types from the database
-                var damagedDeviceTypes = await _context.DamagedDeviceTypes
+                // Fetch all damaged device types from the repository
+                var damagedDeviceTypes = await _damagedDeviceTypeRepository.GetAllAsQueryable()
                     .Select(ddt => new DamagedDeviceTypeDto
                     {
                         Id = ddt.Id,

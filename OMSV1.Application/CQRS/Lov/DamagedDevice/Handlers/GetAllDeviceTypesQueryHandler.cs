@@ -1,47 +1,45 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
+using OMSV1.Infrastructure.Interfaces;
 using OMSV1.Application.Dtos.LOV;
-using OMSV1.Infrastructure.Persistence;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using OMSV1.Application.Helpers;  // Assuming HandlerException is defined here
+using OMSV1.Domain.SeedWork;
+using OMSV1.Domain.Entities.DamagedDevices;
+using OMSV1.Application.Helpers; // Assuming HandlerException is defined here
 
 namespace OMSV1.Application.CQRS.Lov.DamagedDevice
 {
-    public class GetAllDeviceTypesQueryHandler : IRequestHandler<GetAllDeviceTypesQuery, IEnumerable<DeviceTypeDto>>
+    public class GetAllDeviceTypesQueryHandler : IRequestHandler<GetAllDeviceTypesQuery, List<DeviceTypeDto>>
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public GetAllDeviceTypesQueryHandler(AppDbContext context)
+        public GetAllDeviceTypesQueryHandler(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<DeviceTypeDto>> Handle(GetAllDeviceTypesQuery request, CancellationToken cancellationToken)
+        public async Task<List<DeviceTypeDto>> Handle(GetAllDeviceTypesQuery request, CancellationToken cancellationToken)
         {
             try
             {
-                // Fetch all DeviceTypes from the database
-                var deviceTypes = await _context.DeviceTypes
-                    .AsNoTracking()  // Ensure the query is read-only for better performance
-                    .ToListAsync(cancellationToken);
+                // Fetch all device types from the repository
+                var deviceTypes = await _unitOfWork.Repository<DeviceType>().GetAllAsync();
 
                 // Map the entities to DTOs
-                var deviceTypeDtos = deviceTypes.Select(dt => new DeviceTypeDto
+                var deviceTypesDto = deviceTypes.Select(dt => new DeviceTypeDto
                 {
                     Id = dt.Id,
                     Name = dt.Name,
                     Description = dt.Description
                 }).ToList();
 
-                return deviceTypeDtos;
+                return deviceTypesDto;
             }
             catch (Exception ex)
             {
-                // If an exception occurs, throw a custom HandlerException with the original exception
-                throw new HandlerException("An error occurred while retrieving the device types.", ex);
+                // Log and throw a custom exception if an error occurs
+                throw new HandlerException("An error occurred while fetching all device types.", ex);
             }
         }
     }

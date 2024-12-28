@@ -29,3 +29,5 @@ project.lock.json
 *.Thumbs.db
 #Exclude Migrations
 /Migrations/
+#Exclude Migrations
+/publish/

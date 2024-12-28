@@ -21,7 +21,7 @@ using OMSV1.Application.CQRS.Users.Commands;
 namespace OMSV1.Application.Controllers.User;
 
 
-public class AccountController(UserManager<ApplicationUser> userManager,ITokenService tokenService,IMapper mapper , IMediator mediator,IPhotoService photoService,AppDbContext appDbContext) : BaseApiController
+public class AccountController(UserManager<ApplicationUser> userManager,ITokenService tokenService, IMediator mediator) : BaseApiController
 {
 
 
@@ -72,27 +72,27 @@ public class AccountController(UserManager<ApplicationUser> userManager,ITokenSe
 
 
     // Update Profile Only
-    [Authorize(Policy = "RequireAdminRole")]
-    [HttpPut("{id}")]
-    public async Task<ActionResult<ProfileDto>> UpdateProfile(int id, [FromBody] UpdateProfileCommand command)
-    {
-        if (id != command.ProfileId)
-            return BadRequest("Profile ID mismatch.");
+    // [Authorize(Policy = "RequireAdminRole")]
+    // [HttpPut("{id}")]
+    // public async Task<ActionResult<ProfileDto>> UpdateProfile(int id, [FromBody] UpdateProfileCommand command)
+    // {
+    //     if (id != command.ProfileId)
+    //         return BadRequest("Profile ID mismatch.");
 
-        try
-        {
-            var updatedProfile = await mediator.Send(command);
-            return Ok(updatedProfile);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
-    }
+    //     try
+    //     {
+    //         var updatedProfile = await mediator.Send(command);
+    //         return Ok(updatedProfile);
+    //     }
+    //     catch (KeyNotFoundException ex)
+    //     {
+    //         return NotFound(ex.Message);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(500, $"Internal server error: {ex.Message}");
+    //     }
+    // }
 
 
     // Update Profile And User Together 

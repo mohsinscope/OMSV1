@@ -1,7 +1,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos.Governorates;
-using OMSV1.Infrastructure.Persistence;
+using OMSV1.Domain.Entities.Offices;
+using OMSV1.Domain.SeedWork;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -11,11 +12,11 @@ namespace OMSV1.Application.CQRS.Governorates
 {
     public class SearchOfficesQueryHandler : IRequestHandler<SearchOfficesQuery, List<OfficeCountDto>>
     {
-        private readonly AppDbContext _context;
+        private readonly IGenericRepository<Office> _officeRepository;
 
-        public SearchOfficesQueryHandler(AppDbContext context)
+        public SearchOfficesQueryHandler(IGenericRepository<Office> officeRepository)
         {
-            _context = context;
+            _officeRepository = officeRepository;
         }
 
         public async Task<List<OfficeCountDto>> Handle(SearchOfficesQuery request, CancellationToken cancellationToken)
@@ -23,7 +24,7 @@ namespace OMSV1.Application.CQRS.Governorates
             if (request.GovernorateId.HasValue)
             {
                 // If GovernorateId is provided, return offices for that governorate
-                var officeCount = await _context.Offices
+                var officeCount = await _officeRepository.GetAllAsQueryable()
                     .Where(o => o.GovernorateId == request.GovernorateId.Value)
                     .GroupBy(o => o.GovernorateId)
                     .Select(g => new OfficeCountDto
@@ -38,7 +39,7 @@ namespace OMSV1.Application.CQRS.Governorates
             else
             {
                 // If GovernorateId is null, return total office count across all governorates
-                var totalOffices = await _context.Offices
+                var totalOffices = await _officeRepository.GetAllAsQueryable()
                     .GroupBy(o => 1)  // Grouping by a constant value to get the total count
                     .Select(g => new OfficeCountDto
                     {

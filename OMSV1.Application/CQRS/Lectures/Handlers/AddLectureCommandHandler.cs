@@ -16,13 +16,11 @@ namespace OMSV1.Application.Handlers.Lectures
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly AppDbContext _context;
 
-        public AddLectureCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext context)
+        public AddLectureCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _context = context;
         }
 
         public async Task<int> Handle(AddLectureCommand request, CancellationToken cancellationToken)
