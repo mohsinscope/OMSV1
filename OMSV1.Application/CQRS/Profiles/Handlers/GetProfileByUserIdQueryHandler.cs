@@ -1,55 +1,56 @@
-using System;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos.Profiles;
+using OMSV1.Infrastructure.Interfaces; // For IUnitOfWork
+using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Application.Helpers;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using OMSV1.Domain.SeedWork;
 using OMSV1.Application.Queries.Profiles;
-using OMSV1.Infrastructure.Persistence;
 
 namespace OMSV1.Application.CQRS.Queries.Profiles
 {
     public class GetProfileByUserIdQueryHandler : IRequestHandler<GetProfileByUserIdQuery, ProfileDto>
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public GetProfileByUserIdQueryHandler(AppDbContext context)
+        public GetProfileByUserIdQueryHandler(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<ProfileDto> Handle(GetProfileByUserIdQuery request, CancellationToken cancellationToken)
         {
             try
             {
-                // Fetch the profile with related Governorate and Office
-                var profile = await _context.Profiles
-                    .Include(p => p.Governorate)
-                    .Include(p => p.Office)
-                    .FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);
+                // Fetch the profile entity with related Governorate and Office
+                var profile = await _unitOfWork.Repository<Profile>()
+                    .GetByIdAsync(request.UserId); // Assuming GetByIdAsync is adjusted to fetch by UserId
 
                 if (profile == null)
                 {
-                    return null; // or throw custom exception, depending on your preference
+                    return null; // Return null or throw an exception as needed
                 }
 
-                // Manually map the entity to the DTO
+                // Map the entity to DTO
                 var profileDto = new ProfileDto
                 {
                     ProfileId = profile.Id,
                     FullName = profile.FullName,
                     Position = profile.Position.ToString(),
-                    GovernorateName = profile.Governorate.Name,
-                    OfficeName = profile.Office.Name,
+                    GovernorateName = profile.Governorate?.Name, // Null check to prevent NRE
+                    OfficeName = profile.Office?.Name, // Null check to prevent NRE
                     UserId = request.UserId,
-                    GovernorateId = profile.Governorate.Id,
-                    OfficeId = profile.Office.Id
+                    GovernorateId = profile.Governorate?.Id ?? 0, // Fallback if Governorate is null
+                    OfficeId = profile.Office?.Id ?? 0 // Fallback if Office is null
                 };
 
                 return profileDto;
             }
             catch (Exception ex)
             {
-                // Log the error (you can use a logging library like Serilog or NLog here)
+                // Log the exception (using a logging library like Serilog or NLog is suggested)
                 throw new HandlerException("An error occurred while retrieving the profile by user ID.", ex);
             }
         }

@@ -16,14 +16,12 @@ namespace OMSV1.Application.Handlers.Attendances
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly AppDbContext _context;
 
         // Constructor to inject dependencies
-        public CreateAttendanceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext context)
+        public CreateAttendanceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _context = context;
         }
 
         public async Task<int> Handle(CreateAttendanceCommand request, CancellationToken cancellationToken)

@@ -1,41 +1,44 @@
 using MediatR;
 using OMSV1.Application.Dtos.Governorates;
-using OMSV1.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
-using System;
+using OMSV1.Infrastructure.Interfaces; // For IUnitOfWork
+using OMSV1.Domain.Entities.Governorates;
+using OMSV1.Application.Helpers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using OMSV1.Application.Helpers;
+using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Application.Queries.Governorates
 {
     public class GetGovernoratesForDropdownQueryHandler : IRequestHandler<GetGovernoratesForDropdownQuery, List<GovernorateDropdownDto>>
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public GetGovernoratesForDropdownQueryHandler(AppDbContext context)
+        public GetGovernoratesForDropdownQueryHandler(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<GovernorateDropdownDto>> Handle(GetGovernoratesForDropdownQuery request, CancellationToken cancellationToken)
         {
             try
             {
-                // Fetch the list of Governorates and map it to GovernorateDropdownDto
-                return await _context.Governorates
-                    .Select(o => new GovernorateDropdownDto
-                    {
-                        Id = o.Id,
-                        Name = o.Name
-                    })
-                    .ToListAsync(cancellationToken);
+                // Fetch the governorates using the repository inside unit of work
+                var governorates = await _unitOfWork.Repository<Governorate>().GetAllAsync();
+
+                // Map the entities to DTOs
+                var governorateDropdownDtos = governorates.Select(g => new GovernorateDropdownDto
+                {
+                    Id = g.Id,
+                    Name = g.Name
+                }).ToList();
+
+                return governorateDropdownDtos;
             }
             catch (Exception ex)
             {
-                // Handle the exception and throw a custom HandlerException
-                throw new HandlerException("An error occurred while fetching governorates for dropdown.", ex);
+                // Log and throw a custom exception if an error occurs
+                throw new HandlerException("An error occurred while retrieving the governorates for dropdown.", ex);
             }
         }
     }

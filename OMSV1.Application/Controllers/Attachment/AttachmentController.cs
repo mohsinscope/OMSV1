@@ -20,15 +20,13 @@ namespace OMSV1.Application.Controllers
     public class AttachmentController : BaseApiController
     {
         private readonly IPhotoService photoService;
-        private readonly AppDbContext appDbContext;
         private readonly IMediator mediator;
         private readonly IUnitOfWork unitOfWork;
 
         // Inject the necessary services through the constructor
-        public AttachmentController(IPhotoService photoService, AppDbContext appDbContext,IMediator mediator,IUnitOfWork unitOfWork)
+        public AttachmentController(IPhotoService photoService,IMediator mediator,IUnitOfWork unitOfWork)
         {
             this.photoService = photoService;
-            this.appDbContext = appDbContext;
             this.mediator=mediator;
             this.unitOfWork=unitOfWork;
         }

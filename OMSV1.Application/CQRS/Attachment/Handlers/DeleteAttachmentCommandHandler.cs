@@ -1,26 +1,28 @@
 using MediatR;
-using OMSV1.Infrastructure.Persistence;
 using OMSV1.Domain.Entities.Attachments;
-using Microsoft.EntityFrameworkCore;
+using OMSV1.Infrastructure.Interfaces;
+using OMSV1.Application.Commands.Attachments;
+using OMSV1.Application.Helpers;
 using System.Threading;
 using System.Threading.Tasks;
+using OMSV1.Domain.SeedWork;
+using OMSV1.Application.Commands.Attachment;
 
-namespace OMSV1.Application.Commands.Attachment
+namespace OMSV1.Application.Handlers.Attachments
 {
     public class DeleteAttachmentCommandHandler : IRequestHandler<DeleteAttachmentCommand, bool>
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public DeleteAttachmentCommandHandler(AppDbContext context)
+        public DeleteAttachmentCommandHandler(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<bool> Handle(DeleteAttachmentCommand request, CancellationToken cancellationToken)
         {
-            // Find the attachment by ID
-            var attachment = await _context.AttachmentCUs
-                .FirstOrDefaultAsync(a => a.Id == request.Id, cancellationToken);
+            // Fetch the attachment by ID using the repository inside the unit of work
+            var attachment = await _unitOfWork.Repository<AttachmentCU>().GetByIdAsync(request.Id);
 
             if (attachment == null)
             {
@@ -28,11 +30,11 @@ namespace OMSV1.Application.Commands.Attachment
                 return false;
             }
 
-            // Remove the attachment from the database
-            _context.AttachmentCUs.Remove(attachment);
+            // Delete the attachment asynchronously from the repository
+            await _unitOfWork.Repository<AttachmentCU>().DeleteAsync(attachment);
 
-            // Save changes to the database
-            var result = await _context.SaveChangesAsync(cancellationToken) > 0;
+            // Save changes to the database using the unit of work
+            var result = await _unitOfWork.SaveAsync(cancellationToken);
 
             return result;
         }

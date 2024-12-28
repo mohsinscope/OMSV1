@@ -1,40 +1,44 @@
 using MediatR;
-using OMSV1.Infrastructure.Persistence;
 using OMSV1.Domain.Entities.DamagedDevices;
+using OMSV1.Domain.SeedWork;
+using OMSV1.Application.Helpers;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using OMSV1.Application.Helpers; // Assuming HandlerException is defined here
 
 namespace OMSV1.Application.Commands.LOV
 {
     public class UpdateDamagedDeviceTypeCommandHandler : IRequestHandler<UpdateDamagedDeviceTypeCommand, bool>
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UpdateDamagedDeviceTypeCommandHandler(AppDbContext context)
+        public UpdateDamagedDeviceTypeCommandHandler(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<bool> Handle(UpdateDamagedDeviceTypeCommand request, CancellationToken cancellationToken)
         {
             try
             {
-                // Retrieve the damaged device type by ID
-                var damagedDeviceType = await _context.DamagedDeviceTypes
-                    .FindAsync(request.Id);
+                // Retrieve the damaged device type by ID using the generic repository
+                var damagedDeviceType = await _unitOfWork.Repository<DamagedDeviceType>()
+                    .GetByIdAsync(request.Id);
 
-                // If not found, return false
                 if (damagedDeviceType == null)
+                {
+                    // If not found, return false
                     return false;
+                }
 
-                // Update the entity
+                // Update the entity with new values
                 damagedDeviceType.Update(request.Name, request.Description);
 
-                // Update the entity in the context and save the changes
-                _context.DamagedDeviceTypes.Update(damagedDeviceType);
-                await _context.SaveChangesAsync(cancellationToken);
+                // Update the entity in the repository and save changes
+                await _unitOfWork.Repository<DamagedDeviceType>().UpdateAsync(damagedDeviceType);
+
+                // Commit the changes to the database
+                await _unitOfWork.SaveAsync(cancellationToken);
 
                 return true; // Return true if the update was successful
             }

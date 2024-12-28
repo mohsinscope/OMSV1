@@ -1,10 +1,14 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos.Governorates;
 using OMSV1.Application.Dtos.Offices;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Governorates;
-using OMSV1.Infrastructure.Persistence;
+using OMSV1.Domain.Entities.Governorates;
+using OMSV1.Domain.Entities.Offices;
+using OMSV1.Domain.SeedWork;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,20 +19,34 @@ namespace OMSV1.Application.Queries.Offices
 {
     public class GetGovernoratesWithOfficesForDropdownQueryHandler : IRequestHandler<GetGovernoratesWithOfficesForDropdownQuery, List<GovernorateWithOfficesDropdownDto>>
     {
-        private readonly AppDbContext _context;
+        private readonly IGenericRepository<Governorate> _governorateRepository;
+        private readonly IGenericRepository<Office> _officeRepository;
+        private readonly IMapper _mapper;
 
-        public GetGovernoratesWithOfficesForDropdownQueryHandler(AppDbContext context)
+        public GetGovernoratesWithOfficesForDropdownQueryHandler(
+            IGenericRepository<Governorate> governorateRepository,
+            IGenericRepository<Office> officeRepository,
+            IMapper mapper)
         {
-            _context = context;
+            _governorateRepository = governorateRepository;
+            _officeRepository = officeRepository;
+            _mapper = mapper;
         }
 
         public async Task<List<GovernorateWithOfficesDropdownDto>> Handle(GetGovernoratesWithOfficesForDropdownQuery request, CancellationToken cancellationToken)
         {
             try
             {
-                // Fetch governorates and their related offices
-                var governorates = await _context.Governorates
-                    .Where(g => !request.GovernorateId.HasValue || g.Id == request.GovernorateId)  // Optional filter for specific GovernorateId
+                // Retrieve governorates with offices using IUnitOfWork
+                var governoratesQuery = _governorateRepository.GetAllAsQueryable();
+
+                if (request.GovernorateId.HasValue)
+                {
+                    governoratesQuery = governoratesQuery.Where(g => g.Id == request.GovernorateId.Value);
+                }
+
+                // Project to the appropriate DTO structure
+                var governorates = await governoratesQuery
                     .Select(g => new GovernorateWithOfficesDropdownDto
                     {
                         Id = g.Id,
@@ -47,7 +65,7 @@ namespace OMSV1.Application.Queries.Offices
             }
             catch (Exception ex)
             {
-                // Handle the exception and throw a custom HandlerException
+                // Handle and throw a custom HandlerException
                 throw new HandlerException("An error occurred while fetching governorates and their offices for dropdown.", ex);
             }
         }

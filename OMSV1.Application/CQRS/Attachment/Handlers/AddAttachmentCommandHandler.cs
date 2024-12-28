@@ -1,16 +1,16 @@
 using MediatR;
-using OMSV1.Infrastructure.Interfaces;
 using OMSV1.Application.Dtos.Attachments;
 using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Enums;
 using OMSV1.Domain.SeedWork;
-using OMSV1.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using OMSV1.Infrastructure.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
-using OMSV1.Application.Commands.Attachment;
 using OMSV1.Application.Commands.Attachments;
+using OMSV1.Application.Helpers;
+using OMSV1.Domain.Entities.DamagedDevices;
+using OMSV1.Domain.Entities.Lectures;
+using OMSV1.Domain.Entities.DamagedPassport;
 
 namespace OMSV1.Application.Handlers.Attachments
 {
@@ -18,13 +18,11 @@ namespace OMSV1.Application.Handlers.Attachments
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPhotoService _photoService;
-        private readonly AppDbContext _appDbContext;
 
-        public AddAttachmentCommandHandler(IUnitOfWork unitOfWork, IPhotoService photoService, AppDbContext appDbContext)
+        public AddAttachmentCommandHandler(IUnitOfWork unitOfWork, IPhotoService photoService)
         {
             _unitOfWork = unitOfWork;
             _photoService = photoService;
-            _appDbContext = appDbContext;
         }
 
         public async Task<string> Handle(AddAttachmentCommand request, CancellationToken cancellationToken)
@@ -35,12 +33,11 @@ namespace OMSV1.Application.Handlers.Attachments
             // Upload the photo using the photo service
             var result = await _photoService.AddPhotoAsync(request.File, request.EntityId, request.EntityType);
 
-            // Check if the entity exists based on the entity type
+            // Check if the entity exists based on the entity type using IUnitOfWork repositories
             switch (request.EntityType)
             {
                 case EntityType.DamagedDevice:
-                    var damagedDeviceExists = await _appDbContext.DamagedDevices
-                        .FirstOrDefaultAsync(dd => dd.Id == request.EntityId, cancellationToken);
+                    var damagedDeviceExists = await _unitOfWork.Repository<DamagedDevice>().GetByIdAsync(request.EntityId);
                     if (damagedDeviceExists == null)
                     {
                         throw new ArgumentException($"No damaged device found with ID {request.EntityId}.");
@@ -48,8 +45,7 @@ namespace OMSV1.Application.Handlers.Attachments
                     break;
 
                 case EntityType.Lecture:
-                    var lectureExists = await _appDbContext.Lectures
-                        .FirstOrDefaultAsync(dd => dd.Id == request.EntityId, cancellationToken);
+                    var lectureExists = await _unitOfWork.Repository<Lecture>().GetByIdAsync(request.EntityId);
                     if (lectureExists == null)
                     {
                         throw new ArgumentException($"No lecture found with ID {request.EntityId}.");
@@ -57,8 +53,7 @@ namespace OMSV1.Application.Handlers.Attachments
                     break;
 
                 case EntityType.DamagedPassport:
-                    var damagedPassportExists = await _appDbContext.DamagedPassports
-                        .FirstOrDefaultAsync(dp => dp.Id == request.EntityId, cancellationToken);
+                    var damagedPassportExists = await _unitOfWork.Repository<DamagedPassport>().GetByIdAsync(request.EntityId);
                     if (damagedPassportExists == null)
                     {
                         throw new ArgumentException($"No damaged passport found with ID {request.EntityId}.");

@@ -14,12 +14,11 @@ using OMSV1.Infrastructure.Persistence;
 
 namespace OMSV1.Application.Handlers.DamagedDevices
 {
-    public class AddDamagedDeviceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator, AppDbContext context) : IRequestHandler<AddDamagedDeviceCommand, int>
+    public class AddDamagedDeviceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator) : IRequestHandler<AddDamagedDeviceCommand, int>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IMapper _mapper = mapper;
         private readonly IMediator _mediator = mediator;
-        private readonly AppDbContext _context;
 
 public async Task<int> Handle(AddDamagedDeviceCommand request, CancellationToken cancellationToken)
     {

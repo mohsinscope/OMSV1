@@ -1,40 +1,43 @@
 using MediatR;
 using OMSV1.Application.Dtos.Offices;
-using OMSV1.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
-using System;
+using OMSV1.Infrastructure.Interfaces; // For IUnitOfWork
+using OMSV1.Domain.Entities.Offices;
+using OMSV1.Application.Helpers;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using OMSV1.Application.Helpers;
+using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Application.Queries.Offices
 {
     public class GetOfficesForDropdownQueryHandler : IRequestHandler<GetOfficesForDropdownQuery, List<OfficeDropdownDto>>
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public GetOfficesForDropdownQueryHandler(AppDbContext context)
+        public GetOfficesForDropdownQueryHandler(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<OfficeDropdownDto>> Handle(GetOfficesForDropdownQuery request, CancellationToken cancellationToken)
         {
             try
             {
-                return await _context.Offices
-                    .Select(o => new OfficeDropdownDto
-                    {
-                        Id = o.Id,
-                        Name = o.Name
-                    })
-                    .ToListAsync(cancellationToken);
+                // Fetch the offices using the repository inside unit of work
+                var offices = await _unitOfWork.Repository<Office>().GetAllAsync();
+
+                // Map the entities to DTOs
+                var officeDropdownDtos = offices.Select(o => new OfficeDropdownDto
+                {
+                    Id = o.Id,
+                    Name = o.Name
+                }).ToList();
+
+                return officeDropdownDtos;
             }
             catch (Exception ex)
             {
-                // Log the error (you can use a logging library like Serilog or NLog here)
+                // Log and throw a custom exception if an error occurs
                 throw new HandlerException("An error occurred while retrieving the office data for dropdown.", ex);
             }
         }
