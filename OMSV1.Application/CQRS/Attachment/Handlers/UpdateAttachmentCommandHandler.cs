@@ -1,89 +1,71 @@
 using MediatR;
-using OMSV1.Infrastructure.Persistence;
+using OMSV1.Infrastructure.Interfaces;
+using OMSV1.Application.Dtos.Attachments;
 using OMSV1.Domain.Entities.Attachments;
-using OMSV1.Application.Dtos;
-using Microsoft.EntityFrameworkCore;
+using OMSV1.Domain.SeedWork;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using OMSV1.Infrastructure.Interfaces;
+using OMSV1.Application.Helpers;
+using System.Net.Mail;
+using OMSV1.Application.Commands.Attachment;
 
-namespace OMSV1.Application.Commands.Attachment
+namespace OMSV1.Application.Handlers.Attachments
 {
-    public class UpdateAttachmentCommandHandler : IRequestHandler<UpdateAttachmentCommand, AttachmentDto>
+    public class UpdateAttachmentCommandHandler : IRequestHandler<UpdateAttachmentCommand, bool>
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IPhotoService _photoService;
 
-        public UpdateAttachmentCommandHandler(AppDbContext context, IPhotoService photoService)
+        public UpdateAttachmentCommandHandler(IUnitOfWork unitOfWork, IPhotoService photoService)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _photoService = photoService;
         }
 
-        public async Task<AttachmentDto> Handle(UpdateAttachmentCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(UpdateAttachmentCommand request, CancellationToken cancellationToken)
         {
-            // Find the attachment by ID
-            var attachment = await _context.AttachmentCUs
-                .FirstOrDefaultAsync(a => a.Id == request.Id, cancellationToken);
-
-            if (attachment == null)
+            try
             {
-                // Attachment not found, return null
-                return null;
-            }
-
-            // If a new file is uploaded, handle the replacement process
-            if (request.File != null)
-            {
-                // Delete the old image from storage (only if the file path is available)
-                if (!string.IsNullOrEmpty(attachment.FilePath))
+                // Retrieve the attachment entity from the database
+                var attachment = await _unitOfWork.Repository<AttachmentCU>().GetByIdAsync(request.AttachmentId);
+                if (attachment == null)
                 {
-                    // Extract the public ID of the old image from the FilePath (assuming the file path contains the public ID)
-                    var oldFilePublicId = GetFilePublicIdFromUrl(attachment.FilePath);
-
-                    // Remove the old image from storage
-                    await _photoService.DeletePhotoAsync(oldFilePublicId); // You will need to implement this method in your IPhotoService
+                    throw new KeyNotFoundException($"Attachment with ID {request.AttachmentId} not found.");
                 }
 
-                // Upload the new file and get the URL
-                var result = await _photoService.AddPhotoAsync(request.File,attachment.EntityId,attachment.EntityType);
-
-                // Update the attachment's file path with the new URL
-                // attachment.UpdateFilePath(result.SecureUrl.AbsoluteUri);
-                attachment.UpdateFilePath(result.FilePath);
-
-            }
-
-            // Update other properties of the attachment
-            attachment.Update(request.FileName, attachment.FilePath, request.EntityType, request.EntityId);
-
-            // Save changes to the database
-            var resultSave = await _context.SaveChangesAsync(cancellationToken) > 0;
-
-            if (resultSave)
-            {
-                // Return the updated AttachmentDto
-                return new AttachmentDto
+                // Step 1: Delete the old photo from the local storage (if it exists)
+                if (!string.IsNullOrEmpty(attachment.FilePath))
                 {
-                    Id = attachment.Id,
-                    FileName = attachment.FileName,
-                    FilePath = attachment.FilePath,
-                    EntityType = attachment.EntityType,
-                    EntityId = attachment.EntityId
-                };
+                    await _photoService.DeletePhotoAsync(attachment.FilePath);
+                }
+
+                // Step 2: Upload the new photo to the local storage
+                var uploadResult = await _photoService.AddPhotoAsync(request.NewPhoto, request.EntityId, request.EntityType);
+
+                // Step 3: Update the attachment entity with the new photo details
+                attachment.Update(uploadResult.FileName, uploadResult.FilePath, request.EntityType, request.EntityId);
+
+                // Step 4: Update the attachment in the database asynchronously
+                await _unitOfWork.Repository<AttachmentCU>().UpdateAsync(attachment);
+
+                // Step 5: Save the changes asynchronously
+                await _unitOfWork.SaveAsync(cancellationToken);
+
+                return true;
             }
-
-            return null;
+            catch (KeyNotFoundException ex)
+            {
+                // Handle the case where the attachment is not found
+                throw new HandlerException("Failed to update the attachment: " + ex.Message, ex);
+            }
+            catch (Exception ex)
+            {
+                // Catch other unexpected errors and throw a custom exception
+                throw new HandlerException("An unexpected error occurred while updating the attachment.", ex);
+            }
         }
 
-        // Helper method to extract the public ID from the URL
-        private string GetFilePublicIdFromUrl(string fileUrl)
-        {
-            // Assuming the file URL is from Cloudinary, you would extract the public ID like so:
-            var uri = new Uri(fileUrl);
-            var segments = uri.AbsolutePath.Split('/');
-            var publicId = segments[segments.Length - 1].Split('.')[0]; // Remove file extension
-            return publicId;
-        }
+
     }
 }
