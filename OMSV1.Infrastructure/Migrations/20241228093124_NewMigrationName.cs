@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace OMSV1.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class date1 : Migration
+    public partial class NewMigrationName : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -370,7 +370,7 @@ namespace OMSV1.Infrastructure.Migrations
                     OfficeId = table.Column<int>(type: "integer", nullable: false),
                     GovernorateId = table.Column<int>(type: "integer", nullable: false),
                     ProfileId = table.Column<int>(type: "integer", nullable: false),
-                    Note = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Note = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>

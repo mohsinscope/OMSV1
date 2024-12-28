@@ -224,7 +224,6 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Note")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 

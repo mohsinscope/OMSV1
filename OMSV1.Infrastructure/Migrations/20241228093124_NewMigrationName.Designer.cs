@@ -12,8 +12,8 @@ using OMSV1.Infrastructure.Persistence;
 namespace OMSV1.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241224084206_date1")]
-    partial class date1
+    [Migration("20241228093124_NewMigrationName")]
+    partial class NewMigrationName
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -227,7 +227,6 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Note")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
