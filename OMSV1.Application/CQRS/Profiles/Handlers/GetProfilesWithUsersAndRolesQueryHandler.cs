@@ -1,13 +1,8 @@
 using MediatR;
 using OMSV1.Application.Dtos.Profiles;
-using OMSV1.Infrastructure.Interfaces;
 using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Application.CQRS.Queries.Profiles

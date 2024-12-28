@@ -1,7 +1,6 @@
 using MediatR;
 using OMSV1.Application.Dtos;
 using OMSV1.Domain.Enums;
-using System.Collections.Generic;
 
 namespace OMSV1.Application.Queries.Attachments
 {

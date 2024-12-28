@@ -7,9 +7,6 @@ using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.DamagedDevices;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.SeedWork;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OMSV1.Application.Handlers.DamagedDevices
 {

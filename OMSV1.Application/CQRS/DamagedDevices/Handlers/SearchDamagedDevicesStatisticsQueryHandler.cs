@@ -6,9 +6,6 @@ using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Specifications.DamagedDevices;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OMSV1.Application.Queries.DamagedDevices
 {

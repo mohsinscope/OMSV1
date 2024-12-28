@@ -2,10 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.LOV;
 using OMSV1.Application.CQRS.Lov.DamagedPassport;
-using OMSV1.Application.Dtos.LOV;
 using OMSV1.Application.Helpers;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Net;
 
 namespace OMSV1.Application.Controllers.LOV

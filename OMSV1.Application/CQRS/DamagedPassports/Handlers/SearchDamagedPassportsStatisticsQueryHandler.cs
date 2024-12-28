@@ -1,14 +1,10 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos;
-using OMSV1.Domain.Entities;
 using OMSV1.Domain.Entities.DamagedPassport;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Specifications.DamagedPassports;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using OMSV1.Application.Helpers;
 
 namespace OMSV1.Application.Queries.DamagedPassports

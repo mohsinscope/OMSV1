@@ -2,13 +2,11 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
 using OMSV1.Application.CQRS.Lectures.Queries;
-using OMSV1.Application.Dtos;
 using OMSV1.Application.Dtos.Lectures;
 using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.Lectures;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Specifications.Lectures;
-using System;
 
 namespace OMSV1.Application.CQRS.Lectures.Handlers
 {

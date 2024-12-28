@@ -1,12 +1,9 @@
-using System.Threading;
-using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using OMSV1.Application.Dtos.Governorates;
 using OMSV1.Application.Queries.Governorates;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.SeedWork;
-using System;
 using OMSV1.Application.Helpers;
 
 public class GetGovernorateByIdQueryHandler : IRequestHandler<GetGovernorateByIdQuery, GovernorateDto>

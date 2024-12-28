@@ -4,10 +4,7 @@ using OMSV1.Application.Commands.Governorates;
 using OMSV1.Application.Dtos.Governorates;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Governorates;
-using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Infrastructure.Extensions;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Net;
 using OMSV1.Application.CQRS.Governorates;
 

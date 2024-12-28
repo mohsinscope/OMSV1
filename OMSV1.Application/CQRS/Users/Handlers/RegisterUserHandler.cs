@@ -1,4 +1,3 @@
-using System;
 using System.Net;
 using AutoMapper;
 using MediatR;
@@ -7,14 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Dtos;
 using OMSV1.Application.Dtos.User;
 using OMSV1.Application.Helpers;
-using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Infrastructure.Identity;
 using OMSV1.Infrastructure.Interfaces;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace OMSV1.Application.Commands.Users

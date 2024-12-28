@@ -7,9 +7,6 @@ using OMSV1.Domain.Entities.DamagedPassport;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Specifications.DamagedPassports;
 using OMSV1.Application.CQRS.DamagedPassports.Queries;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OMSV1.Application.CQRS.DamagedPassports.Handlers
 {

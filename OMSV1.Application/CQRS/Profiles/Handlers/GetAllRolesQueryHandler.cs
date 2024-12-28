@@ -3,10 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Infrastructure.Identity;
 using OMSV1.Application.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OMSV1.Application.CQRS.Profiles
 {

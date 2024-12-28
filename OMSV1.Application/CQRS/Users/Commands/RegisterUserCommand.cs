@@ -1,7 +1,5 @@
-using System;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using OMSV1.Application.Dtos.User;
 using OMSV1.Domain.Enums;
 
 namespace OMSV1.Application.Commands.Users;

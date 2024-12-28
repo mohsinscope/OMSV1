@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using MediatR;
 using OMSV1.Application.Commands.Attendances;
 using OMSV1.Application.Helpers;

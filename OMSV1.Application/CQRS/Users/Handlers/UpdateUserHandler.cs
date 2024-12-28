@@ -1,4 +1,3 @@
-using System;
 using System.Net;
 using AutoMapper;
 using MediatR;
@@ -19,7 +18,6 @@ public class UpdateUserHandler : IRequestHandler<UpdateUserCommand, IActionResul
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
-    private readonly IMapper _mapper;
     private readonly ITokenService _tokenService;
     private readonly IGenericRepository<OMSV1.Domain.Entities.Profiles.Profile> _profileRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -27,14 +25,12 @@ public class UpdateUserHandler : IRequestHandler<UpdateUserCommand, IActionResul
     public UpdateUserHandler(
         UserManager<ApplicationUser> userManager,
         RoleManager<AppRole> roleManager,
-        IMapper mapper,
         ITokenService tokenService,
         IGenericRepository<OMSV1.Domain.Entities.Profiles.Profile> profileRepository,
         IUnitOfWork unitOfWork)
     {
         _userManager = userManager;
         _roleManager = roleManager;
-        _mapper = mapper;
         _tokenService = tokenService;
         _profileRepository = profileRepository;
         _unitOfWork = unitOfWork;

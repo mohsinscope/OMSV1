@@ -2,12 +2,9 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.Lectures;
 using OMSV1.Application.CQRS.Lectures.Queries;
-using OMSV1.Application.Dtos.Lectures;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Lectures;
 using OMSV1.Infrastructure.Extensions;
-using System;
-using System.Threading.Tasks;
 using System.Net;
 
 namespace OMSV1.Application.Controllers.Lectures

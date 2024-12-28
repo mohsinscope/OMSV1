@@ -1,14 +1,10 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
-using OMSV1.Application.CQRS.Attendances;
 using OMSV1.Application.Dtos.Attendances;
 using OMSV1.Application.Helpers;
-using OMSV1.Domain.Entities;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Specifications.Attendances;
-using OMSV1.Domain.Entities.Attendances;
-using System;
 
 namespace OMSV1.Application.CQRS.Attendances.Handlers
 {

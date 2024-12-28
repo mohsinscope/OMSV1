@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using MediatR;
 using OMSV1.Application.Commands.Governorates;
 using OMSV1.Domain.Entities.Governorates;

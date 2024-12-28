@@ -1,8 +1,6 @@
-using System;
 using MediatR;
 using OMSV1.Application.Dtos.DamagedDevices;
 using OMSV1.Application.Helpers;
-using OMSV1.Domain.Entities.DamagedDevices;
 
 namespace OMSV1.Application.CQRS.DamagedDevices.Queries;
 

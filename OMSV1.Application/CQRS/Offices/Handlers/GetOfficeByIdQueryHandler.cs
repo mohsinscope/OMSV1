@@ -4,9 +4,6 @@ using OMSV1.Application.Dtos.Offices;
 using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OMSV1.Application.Queries.Offices
 {

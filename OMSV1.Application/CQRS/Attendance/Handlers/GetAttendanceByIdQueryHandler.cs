@@ -6,7 +6,6 @@ using OMSV1.Application.Dtos.Attendances;
 using OMSV1.Application.Queries.Attendances;
 using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.SeedWork;
-using System.Linq;
 using OMSV1.Application.Helpers;
 
 namespace OMSV1.Application.Handlers.Attendances

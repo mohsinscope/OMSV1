@@ -5,9 +5,6 @@ using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Governorates;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.SeedWork;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OMSV1.Application.Handlers.Governorates
 {

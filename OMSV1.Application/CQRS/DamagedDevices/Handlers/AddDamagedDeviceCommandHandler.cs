@@ -1,24 +1,17 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Commands.DamagedDevices;
 using OMSV1.Application.Helpers;
-using OMSV1.Application.Queries.Profiles;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
-using OMSV1.Infrastructure.Persistence;
 
 namespace OMSV1.Application.Handlers.DamagedDevices
 {
-    public class AddDamagedDeviceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator) : IRequestHandler<AddDamagedDeviceCommand, int>
+    public class AddDamagedDeviceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper) : IRequestHandler<AddDamagedDeviceCommand, int>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IMapper _mapper = mapper;
-        private readonly IMediator _mediator = mediator;
 
 public async Task<int> Handle(AddDamagedDeviceCommand request, CancellationToken cancellationToken)
     {

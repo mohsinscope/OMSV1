@@ -1,11 +1,7 @@
 using MediatR;
 using OMSV1.Application.Dtos.Profiles;
-using OMSV1.Infrastructure.Interfaces; // For IUnitOfWork
 using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Application.Helpers;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Application.Queries.Profiles;
 

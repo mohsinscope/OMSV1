@@ -6,7 +6,6 @@ using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Attendances;
 using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.SeedWork;
-using Microsoft.EntityFrameworkCore;
 
 public class GetAllAttendancesQueryHandler : IRequestHandler<GetAllAttendancesQuery, PagedList<AttendanceAllDto>>
 {

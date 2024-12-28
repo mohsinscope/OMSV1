@@ -1,5 +1,4 @@
 using MediatR;
-using System;
 
 namespace OMSV1.Application.Commands.Lectures
 {

@@ -1,13 +1,8 @@
 using MediatR;
 using OMSV1.Infrastructure.Interfaces;
-using OMSV1.Application.Dtos.Attachments;
 using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.SeedWork;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using OMSV1.Application.Helpers;
-using System.Net.Mail;
 using OMSV1.Application.Commands.Attachment;
 
 namespace OMSV1.Application.Handlers.Attachments

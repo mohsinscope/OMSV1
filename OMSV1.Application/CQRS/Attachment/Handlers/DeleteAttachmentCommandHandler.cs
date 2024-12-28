@@ -1,10 +1,5 @@
 using MediatR;
 using OMSV1.Domain.Entities.Attachments;
-using OMSV1.Infrastructure.Interfaces;
-using OMSV1.Application.Commands.Attachments;
-using OMSV1.Application.Helpers;
-using System.Threading;
-using System.Threading.Tasks;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Application.Commands.Attachment;
 

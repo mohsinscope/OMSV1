@@ -1,5 +1,3 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos.Attendances;
@@ -9,9 +7,6 @@ using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Specifications.Attendances;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OMSV1.Application.Queries.Attendances
 {

@@ -1,5 +1,4 @@
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using OMSV1.Domain.Enums;
 
 namespace OMSV1.Application.Commands.Attachments

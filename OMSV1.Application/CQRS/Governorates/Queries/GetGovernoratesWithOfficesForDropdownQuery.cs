@@ -1,6 +1,5 @@
 using MediatR;
 using OMSV1.Application.Dtos.Governorates;
-using OMSV1.Application.Dtos.Offices;
 
 namespace OMSV1.Application.Queries.Governorates
 {

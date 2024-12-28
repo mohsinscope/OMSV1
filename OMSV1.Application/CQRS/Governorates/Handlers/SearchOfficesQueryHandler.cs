@@ -3,10 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos.Governorates;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OMSV1.Application.CQRS.Governorates
 {

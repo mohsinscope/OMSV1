@@ -1,22 +1,13 @@
-using System;
-using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using OMSV1.Application.Commands.Users;
 using OMSV1.Application.CQRS.Queries.Profiles;
-using OMSV1.Application.Dtos;
-using OMSV1.Application.Dtos.Profiles;
 using OMSV1.Application.Dtos.User;
-using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Infrastructure.Identity;
 using OMSV1.Infrastructure.Interfaces;
-using OMSV1.Domain.Enums;
-using OMSV1.Infrastructure.Persistence;
-using OMSV1.Application.Helpers;
 using OMSV1.Application.CQRS.Users.Commands;
 namespace OMSV1.Application.Controllers.User;
 

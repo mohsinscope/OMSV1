@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using OMSV1.Application.Commands.Attendances;
@@ -8,7 +5,6 @@ using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
-using OMSV1.Infrastructure.Persistence;
 
 namespace OMSV1.Application.Handlers.Attendances
 {

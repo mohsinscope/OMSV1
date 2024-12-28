@@ -3,7 +3,6 @@ using OMSV1.Application.Commands.Lectures;
 using OMSV1.Domain.Entities.Lectures;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Application.Helpers; // Assuming HandlerException is defined here
-using System;
 
 namespace OMSV1.Application.Handlers.Lectures
 {

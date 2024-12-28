@@ -1,34 +1,22 @@
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using OMSV1.Application.Dtos;
 using OMSV1.Domain.Enums;
-using OMSV1.Domain.Entities.Attachments;
-using OMSV1.Infrastructure.Persistence;
-using OMSV1.Infrastructure.Interfaces;
-using System.Threading.Tasks;
 using OMSV1.Application.Queries.Attachments;
 using OMSV1.Application.Commands.Attachment;
 using OMSV1.Application.Helpers;
-using OMSV1.Domain.SeedWork;
 using OMSV1.Application.Commands.Attachments;
 
 namespace OMSV1.Application.Controllers
 {
-   
+
     public class AttachmentController : BaseApiController
     {
-        private readonly IPhotoService photoService;
         private readonly IMediator mediator;
-        private readonly IUnitOfWork unitOfWork;
 
         // Inject the necessary services through the constructor
-        public AttachmentController(IPhotoService photoService,IMediator mediator,IUnitOfWork unitOfWork)
+        public AttachmentController(IMediator mediator)
         {
-            this.photoService = photoService;
             this.mediator=mediator;
-            this.unitOfWork=unitOfWork;
         }
         // Get Attachments by Entity ID and Entity Type
         [HttpGet("{entityType}/{id}")]

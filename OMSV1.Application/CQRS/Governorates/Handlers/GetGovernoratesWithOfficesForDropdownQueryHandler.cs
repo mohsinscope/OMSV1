@@ -1,5 +1,3 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos.Governorates;
@@ -7,30 +5,19 @@ using OMSV1.Application.Dtos.Offices;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Governorates;
 using OMSV1.Domain.Entities.Governorates;
-using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OMSV1.Application.Queries.Offices
 {
     public class GetGovernoratesWithOfficesForDropdownQueryHandler : IRequestHandler<GetGovernoratesWithOfficesForDropdownQuery, List<GovernorateWithOfficesDropdownDto>>
     {
         private readonly IGenericRepository<Governorate> _governorateRepository;
-        private readonly IGenericRepository<Office> _officeRepository;
-        private readonly IMapper _mapper;
 
         public GetGovernoratesWithOfficesForDropdownQueryHandler(
-            IGenericRepository<Governorate> governorateRepository,
-            IGenericRepository<Office> officeRepository,
-            IMapper mapper)
+            IGenericRepository<Governorate> governorateRepository
+            )
         {
             _governorateRepository = governorateRepository;
-            _officeRepository = officeRepository;
-            _mapper = mapper;
         }
 
         public async Task<List<GovernorateWithOfficesDropdownDto>> Handle(GetGovernoratesWithOfficesForDropdownQuery request, CancellationToken cancellationToken)

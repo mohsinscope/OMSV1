@@ -2,9 +2,6 @@ using MediatR;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Application.Helpers;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OMSV1.Application.Commands.LOV
 {

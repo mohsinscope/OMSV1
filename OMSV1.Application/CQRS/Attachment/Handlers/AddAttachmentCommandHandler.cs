@@ -1,13 +1,9 @@
 using MediatR;
-using OMSV1.Application.Dtos.Attachments;
 using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Enums;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Infrastructure.Interfaces;
-using System.Threading;
-using System.Threading.Tasks;
 using OMSV1.Application.Commands.Attachments;
-using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.Lectures;
 using OMSV1.Domain.Entities.DamagedPassport;

@@ -1,10 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using OMSV1.Application.Dtos.Profiles;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Profiles;
-using System;
-using System.Threading.Tasks;
 using System.Net;
 
 namespace OMSV1.Application.Controllers.Profiles

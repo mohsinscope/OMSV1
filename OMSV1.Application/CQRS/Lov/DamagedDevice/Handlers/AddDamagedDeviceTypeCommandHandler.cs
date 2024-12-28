@@ -1,8 +1,5 @@
 using MediatR;
-using OMSV1.Infrastructure.Interfaces;
 using OMSV1.Domain.Entities.DamagedDevices;
-using System.Threading;
-using System.Threading.Tasks;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Application.CQRS.Lov.DamagedDevice;
 using OMSV1.Application.Helpers; // Assuming HandlerException is defined here

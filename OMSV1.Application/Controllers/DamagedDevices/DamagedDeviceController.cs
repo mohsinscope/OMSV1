@@ -4,14 +4,10 @@ using OMSV1.Application.Commands.DamagedDevices;
 using OMSV1.Application.CQRS.Commands.DamagedDevices;
 using OMSV1.Application.CQRS.DamagedDevices.Queries;
 using OMSV1.Application.CQRS.Queries.DamagedDevices;
-using OMSV1.Application.Dtos.DamagedDevices;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.DamagedDevices;
 using OMSV1.Infrastructure.Extensions;
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace OMSV1.Application.Controllers.DamagedDevices
 {

@@ -1,4 +1,3 @@
-using System;
 using System.Net;
 using MediatR;
 using Microsoft.AspNetCore.Identity;

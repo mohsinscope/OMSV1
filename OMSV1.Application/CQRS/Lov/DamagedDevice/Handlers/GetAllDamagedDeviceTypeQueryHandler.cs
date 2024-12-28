@@ -1,11 +1,6 @@
 using MediatR;
 using OMSV1.Application.Dtos;
 using OMSV1.Domain.SeedWork;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.DamagedDevices;
 using Microsoft.EntityFrameworkCore;

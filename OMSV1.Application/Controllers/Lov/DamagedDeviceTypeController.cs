@@ -1,11 +1,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.LOV;
-using OMSV1.Application.Dtos;
 using OMSV1.Application.Queries.LOV;
 using OMSV1.Application.CQRS.Lov.DamagedDevice;
 using OMSV1.Application.Helpers;
-using System.Threading.Tasks;
 using System.Net;
 
 namespace OMSV1.Application.Controllers

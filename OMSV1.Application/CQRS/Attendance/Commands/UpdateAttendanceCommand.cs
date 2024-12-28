@@ -1,5 +1,4 @@
 using MediatR;
-using OMSV1.Domain.Enums;
 
 namespace OMSV1.Application.Commands.Attendances
 {

@@ -1,5 +1,4 @@
 using MediatR;
-using OMSV1.Application.Dtos.Attendances;
 using OMSV1.Application.Dtos;
 
 namespace OMSV1.Application.Queries.DamagedPassports
