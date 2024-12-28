@@ -10,6 +10,9 @@ using OMSV1.Infrastructure.Interfaces;
 using System.Threading.Tasks;
 using OMSV1.Application.Queries.Attachments;
 using OMSV1.Application.Commands.Attachment;
+using OMSV1.Application.Helpers;
+using OMSV1.Domain.SeedWork;
+using OMSV1.Application.Commands.Attachments;
 
 namespace OMSV1.Application.Controllers
 {
@@ -19,13 +22,15 @@ namespace OMSV1.Application.Controllers
         private readonly IPhotoService photoService;
         private readonly AppDbContext appDbContext;
         private readonly IMediator mediator;
+        private readonly IUnitOfWork unitOfWork;
 
         // Inject the necessary services through the constructor
-        public AttachmentController(IPhotoService photoService, AppDbContext appDbContext,IMediator mediator)
+        public AttachmentController(IPhotoService photoService, AppDbContext appDbContext,IMediator mediator,IUnitOfWork unitOfWork)
         {
             this.photoService = photoService;
             this.appDbContext = appDbContext;
             this.mediator=mediator;
+            this.unitOfWork=unitOfWork;
         }
         // Get Attachments by Entity ID and Entity Type
         [HttpGet("{entityType}/{id}")]
@@ -47,70 +52,72 @@ namespace OMSV1.Application.Controllers
 
             return Ok(attachments);
         }
+          // PUT: api/attachment/{id}
+  [HttpPut("{id}")]
+public async Task<IActionResult> UpdateAttachment(int id, 
+    [FromForm] IFormFile file, 
+    [FromForm] string fileName, 
+    [FromForm] int entityId, 
+    [FromForm] OMSV1.Domain.Enums.EntityType entityType)
+{
+    if (file == null || file.Length == 0)
+    {
+        return BadRequest("No file was uploaded.");
+    }
 
-        [HttpPost("add-attachment")]
-        public async Task<ActionResult<AttachmentDto>> AddAttachment(
-            [FromForm] IFormFile file, 
-            [FromForm] int entityId, 
-            [FromForm] OMSV1.Domain.Enums.EntityType entityType)
+    // Ensure the attachment ID in the URL matches the request body
+    if (id != entityId)
+    {
+        return BadRequest("Attachment ID in the URL does not match the ID in the request body.");
+    }
+
+    try
+    {
+        // Create a new UpdateAttachmentCommand based on the form data
+        var request = new UpdateAttachmentCommand
         {
-            if (file == null || file.Length == 0)
-                return BadRequest("No file was uploaded.");
+            AttachmentId = id,
+            NewPhoto = file,
+            EntityId = entityId,
+            EntityType = entityType
+        };
 
-            var result = await photoService.AddPhotoAsync(file,entityId,entityType);
+        // Send the request to update the attachment
+        var result = await mediator.Send(request);
 
-            switch (entityType)
+        if (!result)
+        {
+            return NotFound($"Attachment with ID {id} not found.");
+        }
+
+        // Return a successful response if the update was successful
+        return NoContent(); // 204 No Content
+    }
+    catch (HandlerException ex)
+    {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Unexpected error: {ex.Message}");
+    }
+}
+
+         // POST: api/Attachment/add-attachment
+        [HttpPost("add-attachment")]
+        public async Task<IActionResult> AddAttachment([FromForm] IFormFile file, [FromForm] int entityId, [FromForm] OMSV1.Domain.Enums.EntityType entityType)
+        {
+            try
             {
-                case OMSV1.Domain.Enums.EntityType.DamagedDevice:
-                    var damagedDeviceExists = await appDbContext.DamagedDevices
-                        .FirstOrDefaultAsync(dd => dd.Id == entityId);
+                var command = new AddAttachmentCommand(file, entityId, entityType);
+                var result = await mediator.Send(command);
 
-                    if (damagedDeviceExists == null)
-                    {
-                        return BadRequest($"No damaged device found with ID {entityId}.");
-                    }
-                    break;
-                    case OMSV1.Domain.Enums.EntityType.Lecture:
-                    var lectureExists = await appDbContext.Lectures
-                        .FirstOrDefaultAsync(dd => dd.Id == entityId);
-
-                    if (lectureExists == null)
-                    {
-                        return BadRequest($"No Lecture found with ID {entityId}.");
-                    }
-                    break;
-
-                case OMSV1.Domain.Enums.EntityType.DamagedPassport:
-                    var damagedPassportExists = await appDbContext.DamagedPassports
-                        .FirstOrDefaultAsync(dp => dp.Id == entityId);
-
-                    if (damagedPassportExists == null)
-                    {
-                        return BadRequest($"No damaged passport found with ID {entityId}.");
-                    }
-                    break;
-
-                default:
-                    return BadRequest("Unsupported entity type.");
+                return Ok(result); // Return success message or the DTO result
             }
-
-            // Create the attachment entity
-            var attachment = new AttachmentCU(
-                fileName: result.FileName,
-                filePath: result.FilePath,
-                entityType: entityType,
-                entityId: entityId
-            );
-            // Save to the database
-            appDbContext.AttachmentCUs.Add(attachment);
-
-            if (await appDbContext.SaveChangesAsync() > 0)
+            catch (Exception ex)
             {
-                // Return a success response
-                return Ok("Added Successfully");
+                return BadRequest($"Error: {ex.Message}");
             }
-
-            return BadRequest("Problem adding the attachment.");
         }
     }
 }

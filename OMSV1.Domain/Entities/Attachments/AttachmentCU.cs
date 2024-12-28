@@ -3,29 +3,27 @@ using OMSV1.Domain.Enums;
 
 namespace OMSV1.Domain.Entities.Attachments;
 
-public class AttachmentCU(string fileName, string filePath, EntityType entityType, int entityId) : Entity
+public class AttachmentCU : Entity
 {
     public int Id { get; set; }
-    public string FileName { get; private set; } = fileName;
-    public string FilePath { get; private set; } = filePath;
-    public EntityType EntityType { get; private set; } = entityType;
-    public int EntityId { get; private set; } = entityId;
-           // Constructor to initialize properties
+    public string FileName { get; private set; }
+    public string FilePath { get; private set; }
+    public EntityType EntityType { get; private set; }
+    public int EntityId { get; private set; }
 
-        // Update method to modify properties
-        public void Update(string fileName, string filePath, EntityType entityType, int entityId)
-        {
-            FileName = fileName;
-            FilePath = filePath;
-            EntityType = entityType;
-            EntityId = entityId;
-        }
-                // Method to update the file path (for when the file is replaced)
-        public void UpdateFilePath(string filePath)
-        {
-            FilePath = filePath;
-        }
+    public AttachmentCU(string fileName, string filePath, EntityType entityType, int entityId)
+    {
+        FileName = fileName;
+        FilePath = filePath;
+        EntityType = entityType;
+        EntityId = entityId;
+    }
 
-
+    public void Update(string fileName, string filePath, EntityType entityType, int entityId)
+    {
+        FileName = fileName;
+        FilePath = filePath;
+        EntityType = entityType;
+        EntityId = entityId;
+    }
 }
- 

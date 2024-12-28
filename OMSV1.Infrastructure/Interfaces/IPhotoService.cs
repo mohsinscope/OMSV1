@@ -8,7 +8,7 @@ namespace OMSV1.Infrastructure.Interfaces;
 
 public interface IPhotoService
 {
-    Task<PhotoUploadResult> AddPhotoAsync(IFormFile file,int entityId, EntityType  entityType);
-    Task<bool> DeletePhotoAsync(string publicId);
+    Task<PhotoUploadResult> AddPhotoAsync(IFormFile file, int entityId, EntityType entityType);
+    Task<bool> DeletePhotoAsync(string filePath);
 }
 
