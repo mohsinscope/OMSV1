@@ -29,6 +29,6 @@ public class FilterAttendanceSpecification : BaseSpecification<Attendance>
         AddInclude(x => x.Office);
         AddInclude(x => x.Profile);
                    // Apply ordering
-         ApplyOrderByDescending(x => x.Date);
+         ApplyOrderByDescending(x => x.DateCreated);
     }
 }

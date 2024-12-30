@@ -15,7 +15,7 @@ public class FilterDamagedDevicesStatisticsSpecification : BaseSpecification<Dam
             (!officeId.HasValue || x.OfficeId == officeId.Value) &&
             (!governorateId.HasValue || x.GovernorateId == governorateId.Value) &&
             (!damagedDeviceTypeId.HasValue || x.DamagedDeviceTypeId == damagedDeviceTypeId.Value) &&
-            (x.Date == date)  // Match the exact date
+            (!date.HasValue || x.Date == date.Value) // Show all data if date is null
         )
     {
         // Include related entities (if necessary)

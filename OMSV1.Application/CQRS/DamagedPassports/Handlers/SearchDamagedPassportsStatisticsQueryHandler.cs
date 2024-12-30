@@ -26,37 +26,13 @@ namespace OMSV1.Application.Queries.DamagedPassports
         {
             try
             {
-                IQueryable<DamagedPassport> damagedPassportQuery;
-
-                // Determine which query to execute based on the filters provided
-                if (!request.GovernorateId.HasValue)
-                {
-                    // Fetch all damaged passports in all offices and governorates
-                    damagedPassportQuery = _damagedPassportRepo.ListAsQueryable(new FilterDamagedPassportsStatisticsSpecification(
-                        officeId: request.OfficeId,
-                        damagedTypeId: request.DamagedTypeId,
-                        date: request.Date
-                    ));
-                }
-                else if (request.OfficeId.HasValue)
-                {
-                    // Fetch damaged passports filtered by both governorate and office
-                    damagedPassportQuery = _damagedPassportRepo.ListAsQueryable(new FilterDamagedPassportsStatisticsSpecification(
-                        officeId: request.OfficeId,
-                        governorateId: request.GovernorateId,
-                        damagedTypeId: request.DamagedTypeId,
-                        date: request.Date
-                    ));
-                }
-                else
-                {
-                    // Fetch damaged passports filtered by governorate (for all offices in that governorate)
-                    damagedPassportQuery = _damagedPassportRepo.ListAsQueryable(new FilterDamagedPassportsStatisticsSpecification(
-                        governorateId: request.GovernorateId,
-                        damagedTypeId: request.DamagedTypeId,
-                        date: request.Date
-                    ));
-                }
+                // Use the specification to filter damaged passports
+                var damagedPassportQuery = _damagedPassportRepo.ListAsQueryable(new FilterDamagedPassportsStatisticsSpecification(
+                    officeId: request.OfficeId,
+                    governorateId: request.GovernorateId,
+                    damagedTypeId: request.DamagedTypeId,
+                    date: request.Date
+                ));
 
                 // Aggregate the data by office
                 var totalDamagedPassports = await damagedPassportQuery
@@ -64,8 +40,8 @@ namespace OMSV1.Application.Queries.DamagedPassports
                     .Select(group => new
                     {
                         OfficeId = group.Key,
-                        AvailableDamagedPassports = group.Count(d => d.Date == request.Date),  // Direct comparison of dates
-                        AvailableSpecificDamagedPassports = group.Count(d => d.DamagedTypeId == request.DamagedTypeId && d.Date == request.Date)
+                        AvailableDamagedPassports = group.Count(d => !request.Date.HasValue || d.Date.Date == request.Date.Value.Date),
+                        AvailableSpecificDamagedPassports = group.Count(d => d.DamagedTypeId == request.DamagedTypeId && (!request.Date.HasValue || d.Date.Date == request.Date.Value.Date))
                     })
                     .ToListAsync(cancellationToken);
 
@@ -79,13 +55,17 @@ namespace OMSV1.Application.Queries.DamagedPassports
                     })
                     .ToListAsync(cancellationToken);
 
-                // Calculate total and available damaged passports across all offices
+                // Calculate totals
                 var availableDamagedPassportsCount = totalDamagedPassports.Sum(d => d.AvailableDamagedPassports);
                 var availableSpecificDamagedPassportsCount = totalDamagedPassports.Sum(d => d.AvailableSpecificDamagedPassports);
 
-                // If a specific office is provided, calculate the totals for that office
-                var officeSpecificTotal = totalDamagedPassports.Where(d => d.OfficeId == request.OfficeId).Sum(d => d.AvailableDamagedPassports);
-                var officeSpecificAvailable = totalDamagedPassports.Where(d => d.OfficeId == request.OfficeId).Sum(d => d.AvailableSpecificDamagedPassports);
+                var officeSpecificTotal = totalDamagedPassports
+                    .Where(d => d.OfficeId == request.OfficeId)
+                    .Sum(d => d.AvailableDamagedPassports);
+
+                var officeSpecificAvailable = totalDamagedPassports
+                    .Where(d => d.OfficeId == request.OfficeId)
+                    .Sum(d => d.AvailableSpecificDamagedPassports);
 
                 return new DamagedPassportsStatisticsDto
                 {
@@ -97,9 +77,11 @@ namespace OMSV1.Application.Queries.DamagedPassports
             }
             catch (Exception ex)
             {
-                // Handle any unexpected errors and throw a custom exception
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
                 throw new HandlerException("An error occurred while retrieving damaged passports statistics.", ex);
             }
         }
+
     }
 }

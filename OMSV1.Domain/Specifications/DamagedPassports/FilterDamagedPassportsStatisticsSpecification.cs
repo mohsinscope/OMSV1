@@ -15,7 +15,7 @@ public class FilterDamagedPassportsStatisticsSpecification : BaseSpecification<D
             (!officeId.HasValue || x.OfficeId == officeId.Value) &&
             (!governorateId.HasValue || x.GovernorateId == governorateId.Value) &&
             (!damagedTypeId.HasValue || x.DamagedTypeId == damagedTypeId.Value) &&
-            (x.Date == date)  // Match the exact date
+            (!date.HasValue || x.Date == date.Value) // Show all data if date is null
         )
     {
         // Include related entities (if necessary)
