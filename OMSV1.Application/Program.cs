@@ -82,14 +82,14 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
     // Create roles
-    // var roles = new[] { "Admin", "Supervisor", "DamageDevice","DamagePassport" ,"Lecture" ,"Attendance","Expense"};
-    // foreach (var role in roles)
-    // {
-    //     if (!await roleManager.RoleExistsAsync(role))
-    //     {
-    //         await roleManager.CreateAsync(new AppRole { Name = role });
-    //     }
-    // }
+    var roles = new[] { "Admin", "Supervisor", "DamageDevice","DamagePassport" ,"Lecture" ,"Attendance","Expense"};
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new AppRole { Name = role });
+        }
+    }
 
     // Create an admin user
     var adminEmail = "admin";
