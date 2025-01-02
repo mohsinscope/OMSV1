@@ -9,6 +9,8 @@ using System.Net;
 using OMSV1.Application.Controllers;
 using OMSV1.Application.CQRS.Attendance.Handlers;
 using OMSV1.Application.CQRS.Attendance.Queries;
+using Microsoft.AspNetCore.Authorization;
+using OMSV1.Application.Authorization.Attributes;
 
 namespace OMSV1.API.Controllers
 {
@@ -22,6 +24,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpGet]
+        [RequirePermission("Ar")]
         public async Task<IActionResult> GetAllAttendances([FromQuery] PaginationParams paginationParams)
         {
             try
@@ -43,6 +46,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [RequirePermission("Ar")]
         public async Task<IActionResult> GetAttendanceById(Guid id)
         {
             try
@@ -59,6 +63,8 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpPost]
+        [RequirePermission("Ap")]
+
         public async Task<IActionResult> CreateAttendance([FromBody] CreateAttendanceCommand command)
         {
             try
@@ -81,6 +87,8 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [RequirePermission("Au")]
+
         public async Task<IActionResult> UpdateAttendance(Guid id, [FromBody] UpdateAttendanceCommand command)
         {
             if (id != command.Id)
@@ -91,6 +99,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [RequirePermission("Ad")]
         public async Task<IActionResult> DeleteAttendance(Guid id)
         {
             var command = new DeleteAttendanceCommand(id);
@@ -99,6 +108,8 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpPost("search")]
+        [RequirePermission("Ar")]
+
         public async Task<IActionResult> GetAttendances([FromBody] GetAttendanceQuery query)
         {
             try
@@ -115,6 +126,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpPost("statistics/office")]
+        [RequirePermission("Ar")]
         public async Task<IActionResult> GetAttendanceStatistics([FromBody] GetAttendanceStatisticsInOfficeQuery query)
         {
             try
@@ -129,6 +141,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpPost("search/statistics")]
+        [RequirePermission("Ar")]
         public async Task<IActionResult> GetAttendanceStatistics([FromBody] SearchAttendanceStatisticsQuery query)
         {
             try

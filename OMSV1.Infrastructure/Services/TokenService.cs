@@ -15,13 +15,15 @@ public class TokenService : ITokenService
 {
     private readonly IConfiguration _configuration;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly AppDbContext _context;
     private readonly SymmetricSecurityKey _key;
 
-    public TokenService(IConfiguration configuration, UserManager<ApplicationUser> userManager)
+    public TokenService(IConfiguration configuration, UserManager<ApplicationUser> userManager, AppDbContext context)
     {
         _configuration = configuration;
         _userManager = userManager;
-        
+        _context = context;
+
         var tokenKey = configuration["TokenKey"] ?? throw new Exception("Cannot Access Token Key from app settings");
         if (tokenKey.Length < 64) throw new Exception("Your tokenkey needs to be longer");
         _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey));
@@ -31,20 +33,44 @@ public class TokenService : ITokenService
     {
         if (user.UserName == null) throw new Exception("No Username For User");
 
+        // Add basic claims
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.UserName)
         };
 
+        // Add roles as claims
         var roles = await _userManager.GetRolesAsync(user);
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
+        // Fetch role-based permissions
+        var rolePermissions = await _context.RolePermissions
+            .Where(rp => roles.Contains(rp.Role.Name))
+            .Select(rp => rp.Permission)
+            .Distinct()
+            .ToListAsync();
+
+        // Fetch user-specific permissions
+        var userPermissions = await _context.UserPermissions
+            .Where(up => up.UserId == user.Id)
+            .Select(up => up.Permission)
+            .ToListAsync();
+
+        // Combine role-based and user-specific permissions
+        var allPermissions = rolePermissions.Union(userPermissions).Distinct();
+
+        // Add all permissions as claims
+        claims.AddRange(allPermissions.Select(permission => new Claim("Permission", permission)));
+
+        // Create signing credentials
         var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
 
+        // Token expiration
         var accessTokenExpiry = DateTime.UtcNow.AddMinutes(2);
         var refreshTokenExpiry = DateTime.UtcNow.AddDays(7);
 
+        // Create access token descriptor
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
@@ -55,6 +81,7 @@ public class TokenService : ITokenService
         var tokenHandler = new JwtSecurityTokenHandler();
         var accessToken = tokenHandler.CreateToken(tokenDescriptor);
 
+        // Generate refresh token
         var refreshToken = GenerateRefreshToken();
 
         // Save refresh token to user
@@ -107,10 +134,10 @@ public class TokenService : ITokenService
         try
         {
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
-            
-            if (securityToken is not JwtSecurityToken jwtSecurityToken || 
-                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha512, 
-                StringComparison.InvariantCultureIgnoreCase))
+
+            if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha512,
+                    StringComparison.InvariantCultureIgnoreCase))
             {
                 return null;
             }
@@ -123,5 +150,3 @@ public class TokenService : ITokenService
         }
     }
 }
-
-

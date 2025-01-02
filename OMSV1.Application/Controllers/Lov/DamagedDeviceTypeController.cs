@@ -5,6 +5,7 @@ using OMSV1.Application.Queries.LOV;
 using OMSV1.Application.CQRS.Lov.DamagedDevice;
 using OMSV1.Application.Helpers;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OMSV1.Application.Controllers
 {
@@ -19,6 +20,7 @@ namespace OMSV1.Application.Controllers
 
         // GET ALL Damaged Device Types
         [HttpGet("all")]
+
         public async Task<IActionResult> GetAllDamagedDeviceTypes()
         {
             try
@@ -61,6 +63,7 @@ namespace OMSV1.Application.Controllers
 
         // UPDATE Damaged Device Type
         [HttpPut("{id}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> UpdateDamagedDeviceType(Guid id, [FromBody] UpdateDamagedDeviceTypeCommand command)
         {
             try
@@ -83,6 +86,7 @@ namespace OMSV1.Application.Controllers
 
         // ADD Damaged Device Type
         [HttpPost("add")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> AddDamagedDeviceType([FromBody] AddDamagedDeviceTypeCommand command)
         {
             try
@@ -111,6 +115,7 @@ namespace OMSV1.Application.Controllers
 
         // DELETE Damaged Device Type
         [HttpDelete("{id}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> DeleteDamagedDeviceType(Guid id)
         {
             try

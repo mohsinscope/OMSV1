@@ -6,7 +6,7 @@ namespace OMSV1.Domain.Specifications.Profiles
 {
     public class FilterProfilesSpecification : BaseSpecification<Profile>
     {
-        public FilterProfilesSpecification(string fullName, int? officeId, int? governorateId)
+        public FilterProfilesSpecification(string fullName, Guid? officeId, Guid? governorateId)
             : base(profile =>
                 (string.IsNullOrEmpty(fullName) || profile.FullName.Contains(fullName)) &&
                 (!officeId.HasValue || profile.OfficeId == officeId) &&

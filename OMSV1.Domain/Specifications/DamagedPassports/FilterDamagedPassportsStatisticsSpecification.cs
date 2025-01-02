@@ -10,19 +10,19 @@ public class FilterDamagedPassportsStatisticsSpecification : BaseSpecification<D
         Guid? officeId = null,
         Guid? governorateId = null,
         Guid? damagedTypeId = null,
-        DateTime? date = null)
+        DateTime? startDate = null,
+        DateTime? endDate = null)
         : base(x =>
             (!officeId.HasValue || x.OfficeId == officeId.Value) &&
             (!governorateId.HasValue || x.GovernorateId == governorateId.Value) &&
             (!damagedTypeId.HasValue || x.DamagedTypeId == damagedTypeId.Value) &&
-            (x.Date == date)  // Match the exact date
-        )
+            (!startDate.HasValue || x.Date >= startDate.Value) &&
+            (!endDate.HasValue || x.Date <= endDate.Value)        )
     {
         // Include related entities (if necessary)
         AddInclude(x => x.Office);  
         AddInclude(x => x.Governorate); 
 
-        // Apply ordering
-        ApplyOrderByDescending(x => x.Date);
     }
+}
 }

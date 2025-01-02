@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.Offices;
 using OMSV1.Application.Dtos.Offices;
@@ -55,6 +56,7 @@ namespace OMSV1.Application.Controllers.Offices
 
         // POST: api/Office
         [HttpPost]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> CreateOffice([FromBody] CreateOfficeDto officeDto)
         {
             try
@@ -102,6 +104,7 @@ namespace OMSV1.Application.Controllers.Offices
 
         // PUT: api/Office/{id}
         [HttpPut("{id:Guid}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> UpdateOffice(Guid id, [FromBody] UpdateOfficeCommand command)
         {
             try
@@ -127,6 +130,7 @@ namespace OMSV1.Application.Controllers.Offices
 
         // DELETE: api/Office/{id}
         [HttpDelete("{id:Guid}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> DeleteOffice(Guid id)
         {
             try

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.DamagedDevices;
@@ -25,6 +26,7 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Get all damaged devices with pagination
         [HttpGet]
+        [RequirePermission("DDr")]
         public async Task<IActionResult> GetAllDamagedDevices([FromQuery] PaginationParams paginationParams)
         {
             try
@@ -50,7 +52,7 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Get damaged devices by governorate with optional date filters
         [HttpGet("governorate/{governorateId}")]
-        [RequirePermission("DamagedDevice:read")]
+        [RequirePermission("DDr")]
 
         public async Task<IActionResult> GetByGovernorate(
             Guid governorateId, 
@@ -80,7 +82,7 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Get damaged devices by office with optional date filters
         [HttpGet("office/{officeId}")]
-        [RequirePermission("DamagedDevice:read")]
+        [RequirePermission("DDr")]
 
         public async Task<IActionResult> GetByOffice(
             Guid officeId, 
@@ -110,7 +112,7 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Get damaged device by serial number
         [HttpGet("serial/{serialNumber}")]
-        [RequirePermission("DamagedDevice:read")]
+        [RequirePermission("DDr")]
 
         public async Task<IActionResult> GetBySerialNumber(string serialNumber)
         {
@@ -137,7 +139,7 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Get damaged device by ID
         [HttpGet("{id}")]
-        [RequirePermission("DamagedDevice:read")]
+        [RequirePermission("DDr")]
 
         public async Task<IActionResult> GetDamagedDeviceById(Guid id)
         {
@@ -163,7 +165,7 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Add a new damaged device
         [HttpPost]
-        [RequirePermission("DamagedDevice:create")]
+        [RequirePermission("DDc")]
 
         public async Task<IActionResult> AddDamagedDevice([FromBody] AddDamagedDeviceCommand command)
         {

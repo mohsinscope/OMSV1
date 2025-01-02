@@ -12,8 +12,8 @@ using OMSV1.Infrastructure.Persistence;
 namespace OMSV1.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241230122317_userRolePermsions")]
-    partial class userRolePermsions
+    [Migration("20250102112158_AttachementAdded")]
+    partial class AttachementAdded
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -758,6 +758,12 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("RefreshTokenExpiry")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");

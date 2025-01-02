@@ -5,7 +5,7 @@ using OMSV1.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using OMSV1.Domain.SeedWork;
 using Microsoft.EntityFrameworkCore;
-using OMSV1.Application.Queries.Profiles;
+using OMSV1.Application.CQRS.Profiles.Queries;
 
 namespace OMSV1.Application.CQRS.Queries.Profiles
 {

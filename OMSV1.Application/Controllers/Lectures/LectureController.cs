@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.Lectures;
@@ -129,6 +130,7 @@ namespace OMSV1.Application.Controllers.Lectures
         // Search for lectures with filters
         [HttpPost("search")]
         [RequirePermission("Lecture:read")]
+        
         public async Task<IActionResult> GetLectures([FromBody] GetLectureQuery query)
         {
             try

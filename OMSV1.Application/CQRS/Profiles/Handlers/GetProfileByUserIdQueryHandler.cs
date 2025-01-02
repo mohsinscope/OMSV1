@@ -3,9 +3,9 @@ using OMSV1.Application.Dtos.Profiles;
 using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Application.Helpers;
 using OMSV1.Domain.SeedWork;
-using OMSV1.Application.Queries.Profiles;
 using OMSV1.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using OMSV1.Application.CQRS.Profiles.Queries;
 
 namespace OMSV1.Application.CQRS.Queries.Profiles
 {

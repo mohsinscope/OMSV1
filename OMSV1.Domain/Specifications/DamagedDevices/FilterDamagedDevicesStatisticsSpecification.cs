@@ -10,13 +10,14 @@ public class FilterDamagedDevicesStatisticsSpecification : BaseSpecification<Dam
         Guid? officeId = null,
         Guid? governorateId = null,
         Guid? damagedDeviceTypeId = null,
-        DateTime? date = null)
+        DateTime? startDate = null,
+        DateTime? endDate = null)
         : base(x =>
             (!officeId.HasValue || x.OfficeId == officeId.Value) &&
             (!governorateId.HasValue || x.GovernorateId == governorateId.Value) &&
             (!damagedDeviceTypeId.HasValue || x.DamagedDeviceTypeId == damagedDeviceTypeId.Value) &&
-            (x.Date == date)  // Match the exact date
-        )
+            (!startDate.HasValue || x.Date >= startDate.Value) &&
+            (!endDate.HasValue || x.Date <= endDate.Value)        )
     {
         // Include related entities (if necessary)
         AddInclude(x => x.Office);  

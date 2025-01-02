@@ -7,6 +7,7 @@ using OMSV1.Application.Queries.Governorates;
 using OMSV1.Infrastructure.Extensions;
 using System.Net;
 using OMSV1.Application.CQRS.Governorates;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OMSV1.Application.Controllers.Governorates
 {
@@ -95,6 +96,7 @@ namespace OMSV1.Application.Controllers.Governorates
 
         // POST: api/Governorate
         [HttpPost]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> CreateGovernorate([FromBody] CreateGovernorateDto governorateDto)
         {
             if (!ModelState.IsValid)
@@ -115,6 +117,7 @@ namespace OMSV1.Application.Controllers.Governorates
 
         // PUT: api/Governorate/{id}
         [HttpPut("{id:Guid}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> UpdateGovernorate(Guid id, [FromBody] UpdateGovernorateCommand command)
         {
             if (id != command.Id)
@@ -166,6 +169,7 @@ namespace OMSV1.Application.Controllers.Governorates
 
         // DELETE: api/Governorate/{id}
         [HttpDelete("{id:Guid}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> DeleteGovernorate(Guid id)
         {
             try

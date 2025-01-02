@@ -34,9 +34,10 @@ namespace OMSV1.Application.Queries.DamagedDevices
                 var damagedDeviceQuery = _damagedDeviceRepo.ListAsQueryable(new FilterDamagedDevicesStatisticsSpecification(
                     officeId: request.OfficeId,
                     governorateId: request.GovernorateId,
-                    damagedDeviceTypeId: request.DamagedDeviceTypeId,
                     startDate: request.StartDate,
-                    endDate: request.EndDate
+                    endDate: request.EndDate,
+                    damagedDeviceTypeId: request.DamagedDeviceTypeId
+
                 ));
 
                 // Aggregate the data by office
