@@ -7,6 +7,8 @@ using OMSV1.Application.CQRS.Attendances;
 using OMSV1.Infrastructure.Extensions;
 using System.Net;
 using OMSV1.Application.Controllers;
+using OMSV1.Application.CQRS.Attendance.Handlers;
+using OMSV1.Application.CQRS.Attendance.Queries;
 
 namespace OMSV1.API.Controllers
 {
@@ -109,6 +111,20 @@ namespace OMSV1.API.Controllers
             {
                 // Return 500 Internal Server Error with a detailed message
                 return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while processing your request.", new[] { ex.Message });
+            }
+        }
+
+        [HttpPost("statistics/office")]
+        public async Task<IActionResult> GetAttendanceStatistics([FromBody] GetAttendanceStatisticsInOfficeQuery query)
+        {
+            try
+            {
+                var result = await _mediator.Send(query);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
             }
         }
 

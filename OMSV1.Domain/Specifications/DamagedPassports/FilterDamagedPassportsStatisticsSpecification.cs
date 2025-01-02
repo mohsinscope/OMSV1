@@ -4,27 +4,25 @@ using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Domain.Specifications.DamagedPassports
 {
-public class FilterDamagedPassportsStatisticsSpecification : BaseSpecification<DamagedPassport>
-{
-    public FilterDamagedPassportsStatisticsSpecification(
-        int? officeId = null,
-        int? governorateId = null,
-        int? damagedTypeId = null,
-        DateTime? date = null)
-        : base(x =>
-            (!officeId.HasValue || x.OfficeId == officeId.Value) &&
-            (!governorateId.HasValue || x.GovernorateId == governorateId.Value) &&
-            (!damagedTypeId.HasValue || x.DamagedTypeId == damagedTypeId.Value) &&
-            (!date.HasValue || x.Date == date.Value) // Show all data if date is null
-        )
+    public class FilterDamagedPassportsStatisticsSpecification : BaseSpecification<DamagedPassport>
     {
-        // Include related entities (if necessary)
-        AddInclude(x => x.Office);  
-        AddInclude(x => x.Governorate); 
-
-        // Apply ordering
-        ApplyOrderByDescending(x => x.Date);
+        public FilterDamagedPassportsStatisticsSpecification(
+            int? officeId = null,
+            int? governorateId = null,
+            int? damagedTypeId = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null)
+            : base(x =>
+                (!officeId.HasValue || x.OfficeId == officeId.Value) &&
+                (!governorateId.HasValue || x.GovernorateId == governorateId.Value) &&
+                (!damagedTypeId.HasValue || x.DamagedTypeId == damagedTypeId.Value) &&
+                (!startDate.HasValue || x.Date >= startDate.Value) &&
+                (!endDate.HasValue || x.Date <= endDate.Value)
+            )
+        {
+            // Include related entities (if necessary)
+            AddInclude(x => x.Office);
+            AddInclude(x => x.Governorate);
+        }
     }
-}
-
 }

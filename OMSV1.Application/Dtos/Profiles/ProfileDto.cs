@@ -12,4 +12,5 @@ public class ProfileDto
     public int OfficeId { get; set; }
     public string OfficeName { get; set; }
     public int UserId { get; set; }
+    public string Username {get;set;}
 }

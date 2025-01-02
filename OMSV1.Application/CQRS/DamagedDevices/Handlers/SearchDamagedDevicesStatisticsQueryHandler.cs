@@ -6,6 +6,10 @@ using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Specifications.DamagedDevices;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OMSV1.Application.Queries.DamagedDevices
 {
@@ -31,7 +35,8 @@ namespace OMSV1.Application.Queries.DamagedDevices
                     officeId: request.OfficeId,
                     governorateId: request.GovernorateId,
                     damagedDeviceTypeId: request.DamagedDeviceTypeId,
-                    date: request.Date
+                    startDate: request.StartDate,
+                    endDate: request.EndDate
                 ));
 
                 // Aggregate the data by office
@@ -40,8 +45,13 @@ namespace OMSV1.Application.Queries.DamagedDevices
                     .Select(group => new
                     {
                         OfficeId = group.Key,
-                        AvailableDamagedDevices = group.Count(d => !request.Date.HasValue || d.Date.Date == request.Date.Value.Date),
-                        AvailableSpecificDamagedDevices = group.Count(d => d.DamagedDeviceTypeId == request.DamagedDeviceTypeId && (!request.Date.HasValue || d.Date.Date == request.Date.Value.Date))
+                        AvailableDamagedDevices = group.Count(d =>
+                            (!request.StartDate.HasValue || d.Date >= request.StartDate.Value) &&
+                            (!request.EndDate.HasValue || d.Date <= request.EndDate.Value)),
+                        AvailableSpecificDamagedDevices = group.Count(d =>
+                            d.DamagedDeviceTypeId == request.DamagedDeviceTypeId &&
+                            (!request.StartDate.HasValue || d.Date >= request.StartDate.Value) &&
+                            (!request.EndDate.HasValue || d.Date <= request.EndDate.Value))
                     })
                     .ToListAsync(cancellationToken);
 

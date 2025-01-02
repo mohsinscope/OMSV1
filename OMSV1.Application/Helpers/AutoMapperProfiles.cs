@@ -62,6 +62,9 @@ public class AutoMapperProfiles : Profile
             CreateMap<Lecture,LectureAllDto>();
             // Profile Mapping
             CreateMap<Profile, ProfileDto>();
+            CreateMap<OMSV1.Domain.Entities.Profiles.Profile,ProfileWithUserAndRolesDto>();
+            CreateMap<OMSV1.Domain.Entities.Profiles.Profile,ProfileDto>();
+
             //Attendance Mapping
             CreateMap<Attendance, AttendanceDto>();
             CreateMap<Attendance, AttendanceAllDto>();

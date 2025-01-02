@@ -4,26 +4,25 @@ using OMSV1.Domain.Enums;
 
 namespace OMSV1.Domain.Specifications.Attendances
 {
-    public class FilterAttendanceStatisticsSpecification : BaseSpecification<Attendance>
+    public class FilterAttendanceInOfficesStatisticsSpecification : BaseSpecification<Attendance>
     {
-        public FilterAttendanceStatisticsSpecification(
+        public FilterAttendanceInOfficesStatisticsSpecification(
             int? workingHours = null,
             DateTime? date = null,
-            int? officeId = null,
-            int? governorateId = null)
+            int? officeId = null)
             : base(x =>
                 (workingHours == null || 
                 (workingHours.Value == (int)WorkingHours.Both) || 
                 x.WorkingHours == (WorkingHours)workingHours.Value) &&
 
                 (x.Date == date)&&  // Match the exact date
-                (!officeId.HasValue || x.OfficeId == officeId.Value) &&
-                (!governorateId.HasValue || x.GovernorateId == governorateId.Value))
+                (!officeId.HasValue || x.OfficeId == officeId.Value))
         {
             // Include only necessary relationships
             AddInclude(x => x.Office);
-            AddInclude(x => x.Governorate);
 
+            // Apply ordering
+            ApplyOrderByDescending(x => x.Date);
         }
     }
 }
