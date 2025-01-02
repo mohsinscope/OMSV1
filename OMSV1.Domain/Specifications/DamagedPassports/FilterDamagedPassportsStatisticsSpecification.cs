@@ -26,5 +26,3 @@ public class FilterDamagedPassportsStatisticsSpecification : BaseSpecification<D
         ApplyOrderByDescending(x => x.Date);
     }
 }
-
-}

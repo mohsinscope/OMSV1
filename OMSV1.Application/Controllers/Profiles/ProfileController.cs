@@ -76,5 +76,24 @@ namespace OMSV1.Application.Controllers.Profiles
                 return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving the profile.", new[] { ex.Message });
             }
         }
+            [HttpPost("search")]
+            public async Task<IActionResult> SearchProfiles([FromBody] SearchProfilesQuery query)
+            {
+                try
+                {
+                    var result = await _mediator.Send(query);
+                    Response.AddPaginationHeader(result);
+                    return Ok(result);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new
+                    {
+                        message = "An error occurred while processing your request.",
+                        details = ex.InnerException?.Message ?? ex.Message
+                    });
+                }
+            }
+
     }
 }

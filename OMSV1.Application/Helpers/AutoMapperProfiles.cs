@@ -62,12 +62,9 @@ public class AutoMapperProfiles : Profile
             CreateMap<Lecture,LectureAllDto>();
             // Profile Mapping
             CreateMap<Profile, ProfileDto>();
-            CreateMap<OMSV1.Domain.Entities.Profiles.Profile, ProfileWithUserAndRolesDto>();
+            CreateMap<OMSV1.Domain.Entities.Profiles.Profile,ProfileWithUserAndRolesDto>();
+            CreateMap<OMSV1.Domain.Entities.Profiles.Profile,ProfileDto>();
 
-            //CreateMap<Profile, ProfileWithUserAndRolesDto>()
-            //.ForMember(dest => dest.GovernorateName, opt => opt.MapFrom(src => src.Governorate.Name))
-            //.ForMember(dest => dest.OfficeName, opt => opt.MapFrom(src => src.Office.Name))
-            //.ForMember(dest => dest.Roles, opt => opt.Ignore()); // Roles need to be populated separately
             //Attendance Mapping
             CreateMap<Attendance, AttendanceDto>();
             CreateMap<Attendance, AttendanceAllDto>();

@@ -6,6 +6,10 @@ using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Domain.Specifications.DamagedDevices;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OMSV1.Application.Queries.DamagedDevices
 {
@@ -26,37 +30,14 @@ namespace OMSV1.Application.Queries.DamagedDevices
         {
             try
             {
-                IQueryable<DamagedDevice> damagedDeviceQuery;
-
-                // Determine which query to execute based on the filters provided
-                if (!request.GovernorateId.HasValue)
-                {
-                    // Fetch all damaged devices in all offices and governorates
-                    damagedDeviceQuery = _damagedDeviceRepo.ListAsQueryable(new FilterDamagedDevicesStatisticsSpecification(
-                        officeId: request.OfficeId,
-                        damagedDeviceTypeId: request.DamagedDeviceTypeId,
-                        date: request.Date
-                    ));
-                }
-                else if (request.OfficeId.HasValue)
-                {
-                    // Fetch damaged devices filtered by both governorate and office
-                    damagedDeviceQuery = _damagedDeviceRepo.ListAsQueryable(new FilterDamagedDevicesStatisticsSpecification(
-                        officeId: request.OfficeId,
-                        governorateId: request.GovernorateId,
-                        damagedDeviceTypeId: request.DamagedDeviceTypeId,
-                        date: request.Date
-                    ));
-                }
-                else
-                {
-                    // Fetch damaged devices filtered by governorate (for all offices in that governorate)
-                    damagedDeviceQuery = _damagedDeviceRepo.ListAsQueryable(new FilterDamagedDevicesStatisticsSpecification(
-                        governorateId: request.GovernorateId,
-                        damagedDeviceTypeId: request.DamagedDeviceTypeId,
-                        date: request.Date
-                    ));
-                }
+                // Use the specification to filter damaged devices
+                var damagedDeviceQuery = _damagedDeviceRepo.ListAsQueryable(new FilterDamagedDevicesStatisticsSpecification(
+                    officeId: request.OfficeId,
+                    governorateId: request.GovernorateId,
+                    damagedDeviceTypeId: request.DamagedDeviceTypeId,
+                    startDate: request.StartDate,
+                    endDate: request.EndDate
+                ));
 
                 // Aggregate the data by office
                 var totalDamagedDevices = await damagedDeviceQuery
@@ -64,9 +45,13 @@ namespace OMSV1.Application.Queries.DamagedDevices
                     .Select(group => new
                     {
                         OfficeId = group.Key,
-                        // Directly compare dates without time truncation
-                        AvailableDamagedDevices = group.Count(d => d.Date.Date == request.Date.Value.Date),
-                        AvailableSpecificDamagedDevices = group.Count(d => d.DamagedDeviceTypeId == request.DamagedDeviceTypeId && d.Date.Date == request.Date.Value.Date)
+                        AvailableDamagedDevices = group.Count(d =>
+                            (!request.StartDate.HasValue || d.Date >= request.StartDate.Value) &&
+                            (!request.EndDate.HasValue || d.Date <= request.EndDate.Value)),
+                        AvailableSpecificDamagedDevices = group.Count(d =>
+                            d.DamagedDeviceTypeId == request.DamagedDeviceTypeId &&
+                            (!request.StartDate.HasValue || d.Date >= request.StartDate.Value) &&
+                            (!request.EndDate.HasValue || d.Date <= request.EndDate.Value))
                     })
                     .ToListAsync(cancellationToken);
 
@@ -80,13 +65,17 @@ namespace OMSV1.Application.Queries.DamagedDevices
                     })
                     .ToListAsync(cancellationToken);
 
-                // Calculate total and available damaged devices across all offices
+                // Calculate totals
                 var availableDamagedDevicesCount = totalDamagedDevices.Sum(d => d.AvailableDamagedDevices);
                 var availableSpecificDamagedDevicesCount = totalDamagedDevices.Sum(d => d.AvailableSpecificDamagedDevices);
 
-                // If a specific office is provided, calculate the totals for that office
-                var officeSpecificTotal = totalDamagedDevices.Where(d => d.OfficeId == request.OfficeId).Sum(d => d.AvailableDamagedDevices);
-                var officeSpecificAvailable = totalDamagedDevices.Where(d => d.OfficeId == request.OfficeId).Sum(d => d.AvailableSpecificDamagedDevices);
+                var officeSpecificTotal = totalDamagedDevices
+                    .Where(d => d.OfficeId == request.OfficeId)
+                    .Sum(d => d.AvailableDamagedDevices);
+
+                var officeSpecificAvailable = totalDamagedDevices
+                    .Where(d => d.OfficeId == request.OfficeId)
+                    .Sum(d => d.AvailableSpecificDamagedDevices);
 
                 return new DamagedDevicesStatisticsDto
                 {
@@ -98,7 +87,8 @@ namespace OMSV1.Application.Queries.DamagedDevices
             }
             catch (Exception ex)
             {
-                // Handle the exception (log it if needed)
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
                 throw new HandlerException("An error occurred while processing the request for damaged devices statistics.", ex);
             }
         }

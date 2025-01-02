@@ -10,102 +10,96 @@ using OMSV1.Application.CQRS.Queries.Users;
 using OMSV1.Application.Dtos.User;
 using OMSV1.Infrastructure.Identity;
 using OMSV1.Infrastructure.Interfaces;
-using OMSV1.Infrastructure.Persistence; // Ensure AppDbContext namespace is included
-
+using OMSV1.Application.CQRS.Users.Commands;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 namespace OMSV1.Application.Controllers.User;
 
-public class AccountController(
-    UserManager<ApplicationUser> userManager,
-    ITokenService tokenService,
-    IMediator mediator,
-    AppDbContext context // Add AppDbContext
-) : BaseApiController
-{
-    private readonly AppDbContext _context = context;
 
-    // Admin Add Users
-    [Authorize(Policy = "RequireAdminRole")]
+public class AccountController : BaseApiController
+{
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ITokenService _tokenService;
+    private readonly IMediator _mediator;
+
+    public AccountController(UserManager<ApplicationUser> userManager, 
+                           ITokenService tokenService, 
+                           IMediator mediator)
+    {
+        _userManager = userManager;
+        _tokenService = tokenService;
+        _mediator = mediator;
+    }
+
+    [Authorize(Policy = "RequireAdminRole")] 
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterUserCommand command)
     {
-        var result = await mediator.Send(command);
+        var result = await _mediator.Send(command);
         return result;
     }
 
-    // Login Endpoint
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        var user = await userManager.Users
+        var user = await _userManager.Users
             .AsQueryable()
             .FirstOrDefaultAsync(x => x.NormalizedUserName == loginDto.UserName.ToUpper());
 
-        if (user == null || user.UserName == null) return Unauthorized("Invalid Username");
+        if(user == null || user.UserName == null) 
+            return Unauthorized("Invalid Username");
+        
+        var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
 
-        var result = await userManager.CheckPasswordAsync(user, loginDto.Password);
-        if (!result) return Unauthorized();
+        if(!result) return Unauthorized();
+
+        var (accessToken, refreshToken, accessTokenExpires, refreshTokenExpires) = 
+            await _tokenService.CreateToken(user);
 
         return new UserDto
         {
             Username = user.UserName,
-            Token = await tokenService.CreateToken(user),
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            AccessTokenExpires = accessTokenExpires,
+            RefreshTokenExpires = refreshTokenExpires
+        }; 
+    }
+
+    [HttpPost("refresh-token")]
+    public async Task<ActionResult<UserDto>> RefreshToken(RefreshTokenRequest request)
+    {
+        var tokenResult = await _tokenService.RefreshToken(request.AccessToken, request.RefreshToken);
+        
+        if (tokenResult == null) return Unauthorized("Invalid token");
+
+        var (accessToken, refreshToken, accessTokenExpires, refreshTokenExpires) = tokenResult.Value;
+
+        // Get the username from the token claims
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(accessToken);
+        var username = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name || c.Type == "unique_name")?.Value;
+
+        // if (username == null) return BadRequest("Invalid token structure");
+
+        return new UserDto
+        {
+            Username = username,
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            AccessTokenExpires = accessTokenExpires,
+            RefreshTokenExpires = refreshTokenExpires
         };
     }
 
-    // Get User Permissions
-    [Authorize(Policy = "RequireAdminRole")]
-    [HttpGet("{userId:Guid}/permissions")]
-    public async Task<IActionResult> GetUserPermissions(Guid userId)
-    {
-        try
-        {
-            var query = new GetUserPermissionsQuery(userId);
-            var permissions = await mediator.Send(query);
 
-            return Ok(permissions);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "Internal Server Error", details = ex.Message });
-        }
-    }
-    //Update User Permissions
-    [HttpPut("{userId}/permissions")]
-    [Authorize(Policy = "RequireAdminRole")]
-
-    public async Task<IActionResult> UpdateUserPermissions(Guid userId, [FromBody] List<string> permissions)
-    {
-        try
-        {
-            var command = new UpdateUserPermissionsCommand(userId, permissions);
-            var result = await mediator.Send(command);
-
-            if (result)
-            {
-                return Ok(new { message = "Permissions updated successfully." });
-            }
-
-            return BadRequest(new { message = "Failed to update permissions." });
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "Internal Server Error", details = ex.Message });
-        }
-    }
-       // Get All Profiles With Roles Assigned To the User
+ 
+    // Get All Profiles With Roles Assigned To the User
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("profiles-with-users-and-roles")]
     public async Task<ActionResult> GetProfilesWithUsersAndRoles()
     {
-        var profiles = await mediator.Send(new GetProfilesWithUsersAndRolesQuery());
+        var profiles = await _mediator.Send(new GetProfilesWithUsersAndRolesQuery());
         return Ok(profiles);
     }
 
@@ -114,82 +108,35 @@ public class AccountController(
     [Authorize(Policy = "RequireAdminRole")]
     public async Task<IActionResult> AddPermissionsToUser(Guid userId, [FromBody] List<string> permissions)
     {
-        try
-        {
-            // Validate user existence
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null)
-            {
-                return NotFound(new { message = $"User with ID '{userId}' not found." });
-            }
+        if (id != command.UserId)
+            return BadRequest("User ID mismatch between route and body.");
 
-            // Fetch existing user-specific permissions
-            var existingPermissions = await _context.UserPermissions
-                .Where(up => up.UserId == userId)
-                .Select(up => up.Permission)
-                .ToListAsync();
-
-            // Add only new permissions
-            foreach (var permission in permissions)
-            {
-                if (!existingPermissions.Contains(permission))
-                {
-                    _context.UserPermissions.Add(new UserPermission
-                    {
-                        UserId = userId,
-                        Permission = permission
-                    });
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return Ok(new { message = "Permissions added successfully." });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "Internal Server Error", details = ex.Message });
-        }
+        return await _mediator.Send(command);
     }
 
-    // Add Permissions to Role
-    [HttpPost("{roleName}/permissions")]
-    [Authorize(Policy = "RequireAdminRole")]
-    public async Task<IActionResult> AddPermissionsToRole(string roleName, [FromBody] List<string> permissions)
+
+    // Change Password
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordCommand command)
     {
-        try
-        {
-            // Fetch the role
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
-            if (role == null)
-            {
-                return NotFound(new { message = $"Role '{roleName}' not found." });
-            }
-
-            // Fetch existing permissions for the role
-            var existingPermissions = await _context.RolePermissions
-                .Where(rp => rp.RoleId == role.Id)
-                .Select(rp => rp.Permission)
-                .ToListAsync();
-
-            // Add only new permissions
-            foreach (var permission in permissions)
-            {
-                if (!existingPermissions.Contains(permission))
-                {
-                    _context.RolePermissions.Add(new AppRolePermission
-                    {
-                        RoleId = role.Id,
-                        Permission = permission
-                    });
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return Ok(new { message = "Permissions added successfully." });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "Internal Server Error", details = ex.Message });
-        }
+        return await _mediator.Send(command);
     }
+
+
+
+    // Reset Password 
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordCommand command)
+    {
+        return await _mediator.Send(command);
+    }
+
 }
+
+
+
+
+
+ 
+ 

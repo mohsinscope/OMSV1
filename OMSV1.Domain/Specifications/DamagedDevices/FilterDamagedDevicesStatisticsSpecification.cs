@@ -22,9 +22,6 @@ public class FilterDamagedDevicesStatisticsSpecification : BaseSpecification<Dam
         AddInclude(x => x.Office);  
         AddInclude(x => x.Governorate); 
 
-        // Apply ordering
-        ApplyOrderByDescending(x => x.Date);
+        }
     }
-}
-
 }

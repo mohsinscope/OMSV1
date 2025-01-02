@@ -11,8 +11,7 @@ public class ApplicationUser :IdentityUser<Guid>
 {
     public DateTime Created { get; set; } = DateTime.UtcNow;
     public DateTime LastActive { get; set; } = DateTime.UtcNow;
-
+    public string? RefreshToken { get; set; }
+    public DateTime RefreshTokenExpiry { get; set; }
     public ICollection<AppUserRole> UserRoles { get; set; } = [];
-
-
 }

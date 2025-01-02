@@ -28,6 +28,6 @@ public class FilterDamagedPassportsSpecification : BaseSpecification<DamagedPass
         AddInclude(x => x.Profile);
 
            // Apply ordering
-         ApplyOrderByDescending(x => x.Date);
+         ApplyOrderByDescending(x => x.DateCreated);
     }
 }
