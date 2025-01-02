@@ -32,11 +32,11 @@ public class Attendance(
 
                      WorkingHours workingHours,
 
-                     int governorateId,
+                     Guid governorateId,
 
-                     int officeId,
+                     Guid officeId,
 
-                     int profileId) : Entity
+                     Guid profileId) : Entity
 
 {
 
@@ -56,11 +56,11 @@ public class Attendance(
 
      public WorkingHours WorkingHours { get; private set; } = workingHours;
 
-    public int OfficeId { get; private set; } = officeId;
+    public Guid OfficeId { get; private set; } = officeId;
 
-     public int GovernorateId { get; private set; } = governorateId;
+     public Guid GovernorateId { get; private set; } = governorateId;
 
-     public int ProfileId { get; private set; } = profileId;
+     public Guid ProfileId { get; private set; } = profileId;
 
   
   
@@ -93,11 +93,11 @@ public class Attendance(
 
         WorkingHours workingHours,
 
-        int governorateId,
+        Guid governorateId,
 
-        int officeId,
+        Guid officeId,
 
-        int profileId)
+        Guid profileId)
 
     {
 

@@ -41,7 +41,7 @@ namespace OMSV1.Application.Controllers
 
         // GET Damaged Device Type by ID
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetDamagedDeviceType(int id)
+        public async Task<IActionResult> GetDamagedDeviceType(Guid id)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace OMSV1.Application.Controllers
 
         // UPDATE Damaged Device Type
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDamagedDeviceType(int id, [FromBody] UpdateDamagedDeviceTypeCommand command)
+        public async Task<IActionResult> UpdateDamagedDeviceType(Guid id, [FromBody] UpdateDamagedDeviceTypeCommand command)
         {
             try
             {
@@ -111,7 +111,7 @@ namespace OMSV1.Application.Controllers
 
         // DELETE Damaged Device Type
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDamagedDeviceType(int id)
+        public async Task<IActionResult> DeleteDamagedDeviceType(Guid id)
         {
             try
             {

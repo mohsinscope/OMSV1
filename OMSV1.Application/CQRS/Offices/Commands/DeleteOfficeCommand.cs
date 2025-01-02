@@ -4,9 +4,9 @@ namespace OMSV1.Application.Commands.Offices
 {
     public class DeleteOfficeCommand : IRequest<bool>
     {
-        public int OfficeId { get; }
+        public Guid OfficeId { get; }
 
-        public DeleteOfficeCommand(int officeId)
+        public DeleteOfficeCommand(Guid officeId)
         {
             OfficeId = officeId;
         }

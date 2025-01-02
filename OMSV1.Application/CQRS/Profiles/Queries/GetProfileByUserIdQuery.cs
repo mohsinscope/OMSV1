@@ -5,9 +5,9 @@ namespace OMSV1.Application.Queries.Profiles
 {
     public class GetProfileByUserIdQuery : IRequest<ProfileDto>
     {
-        public int UserId { get; }
+        public Guid UserId { get; }
 
-        public GetProfileByUserIdQuery(int userId)
+        public GetProfileByUserIdQuery(Guid userId)
         {
             UserId = userId;
         }

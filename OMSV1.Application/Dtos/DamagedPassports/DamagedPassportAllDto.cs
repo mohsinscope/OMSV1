@@ -2,7 +2,7 @@ namespace OMSV1.Application.Dtos
 {
     public class DamagedPassportAllDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string PassportNumber { get; set; }
         public DateTime Date { get; set; }
         public string DamagedTypeName { get; set; }  // Assuming this is populated from the DamagedType entity

@@ -2,7 +2,7 @@ namespace OMSV1.Application.Dtos.Attendances
 {
     public class AttendanceAllDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         
         // Integer properties for staff
         public int ReceivingStaff { get; set; }

@@ -5,9 +5,9 @@ namespace OMSV1.Application.Queries.Attendances
 {
     public class GetAttendanceByIdQuery : IRequest<AttendanceDto?>
     {
-        public int Id { get; }
+        public Guid Id { get; }
 
-        public GetAttendanceByIdQuery(int id)
+        public GetAttendanceByIdQuery(Guid id)
         {
             Id = id;
         }

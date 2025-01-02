@@ -5,9 +5,9 @@ namespace OMSV1.Application.Queries.Governorates
 {
     public class GetGovernoratesWithOfficesForDropdownQuery : IRequest<List<GovernorateWithOfficesDropdownDto>>
     {
-        public int? GovernorateId { get; set; } // Make it nullable
+        public Guid? GovernorateId { get; set; } // Make it nullable
 
-        public GetGovernoratesWithOfficesForDropdownQuery(int? governorateId = null)
+        public GetGovernoratesWithOfficesForDropdownQuery(Guid? governorateId = null)
         {
             GovernorateId = governorateId;
         }

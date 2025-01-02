@@ -5,7 +5,7 @@ using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Application.Helpers;  // Assuming HandlerException is defined in this namespace
 
-public class AddGovernorateCommandHandler : IRequestHandler<AddGovernorateCommand, int>
+public class AddGovernorateCommandHandler : IRequestHandler<AddGovernorateCommand, Guid>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
@@ -16,7 +16,7 @@ public class AddGovernorateCommandHandler : IRequestHandler<AddGovernorateComman
         _mapper = mapper;
     }
 
-    public async Task<int> Handle(AddGovernorateCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(AddGovernorateCommand request, CancellationToken cancellationToken)
     {
         try
         {

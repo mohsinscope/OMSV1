@@ -4,6 +4,8 @@ using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using OMSV1.Domain.SeedWork;
+using Microsoft.EntityFrameworkCore;
+using OMSV1.Application.Queries.Profiles;
 
 namespace OMSV1.Application.CQRS.Queries.Profiles
 {
@@ -18,38 +20,47 @@ namespace OMSV1.Application.CQRS.Queries.Profiles
             _userManager = userManager;
         }
 
-        public async Task<List<ProfileWithUserAndRolesDto>> Handle(GetProfilesWithUsersAndRolesQuery request, CancellationToken cancellationToken)
+public async Task<List<ProfileWithUserAndRolesDto>> Handle(GetProfilesWithUsersAndRolesQuery request, CancellationToken cancellationToken)
+{
+    // Fetch profiles with related Governorate and Office entities
+  var profiles = await _unitOfWork.Repository<Profile>()
+    .GetAllAsQueryable() // Use GetAllAsQueryable for no specification
+    .Include(p => p.Governorate)
+    .Include(p => p.Office)
+    .ToListAsync(cancellationToken);
+
+
+    var profileWithUserRoles = new List<ProfileWithUserAndRolesDto>();
+
+    foreach (var profile in profiles)
+    {
+        // Fetch the user associated with the profile
+        var user = await _userManager.FindByIdAsync(profile.UserId.ToString());
+
+        if (user != null)
         {
-            // Fetch profiles using IUnitOfWork repository pattern (no cancellation token here)
-            var profiles = await _unitOfWork.Repository<Profile>().GetAllAsync();
-
-            var profileWithUserRoles = new List<ProfileWithUserAndRolesDto>();
-
-            foreach (var profile in profiles)
+            // Map the profile and related user data into the DTO
+            var profileWithRoles = new ProfileWithUserAndRolesDto
             {
-                var user = await _userManager.FindByIdAsync(profile.UserId.ToString());
+                Id = profile.Id,
+                FullName = profile.FullName,
+                Position = profile.Position.ToString(),
+                GovernorateId = profile.GovernorateId,
+                GovernorateName = profile.Governorate?.Name, // Fetch Governorate name
+                OfficeId = profile.OfficeId,
+                OfficeName = profile.Office?.Name, // Fetch Office name
+                UserId = user.Id,
+                Username = user.UserName,
+                Roles = (await _userManager.GetRolesAsync(user)).ToList() // Fetch roles
+            };
 
-                if (user != null)
-                {
-                    var profileWithRoles = new ProfileWithUserAndRolesDto
-                    {
-                        Id = profile.Id,
-                        FullName = profile.FullName,
-                        Position = profile.Position.ToString(),
-                        GovernorateId = profile.GovernorateId,
-                        GovernorateName = profile.Governorate?.Name,
-                        OfficeId = profile.OfficeId,
-                        OfficeName = profile.Office?.Name,
-                        UserId = user.Id,
-                        Username = user.UserName,
-                        Roles = (await _userManager.GetRolesAsync(user)).ToList() // Convert IList<string> to List<string>
-                    };
-
-                    profileWithUserRoles.Add(profileWithRoles);
-                }
-            }
-
-            return profileWithUserRoles;
+            profileWithUserRoles.Add(profileWithRoles);
         }
+    }
+
+    return profileWithUserRoles;
+}
+
+
     }
 }

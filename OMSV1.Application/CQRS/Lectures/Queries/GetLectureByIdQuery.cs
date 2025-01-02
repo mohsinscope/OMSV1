@@ -5,9 +5,9 @@ namespace OMSV1.Application.Queries.Lectures
 {
     public class GetLectureByIdQuery : IRequest<LectureDto?>  // Query now returns LectureDto
     {
-        public int Id { get; }
+        public Guid Id { get; }
 
-        public GetLectureByIdQuery(int id)
+        public GetLectureByIdQuery(Guid id)
         {
             Id = id;
         }

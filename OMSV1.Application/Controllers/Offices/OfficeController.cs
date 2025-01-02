@@ -35,8 +35,8 @@ namespace OMSV1.Application.Controllers.Offices
         }
 
         // GET: api/Office/{id}
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetOfficeById(int id)
+        [HttpGet("{id:Guid}")]
+        public async Task<IActionResult> GetOfficeById(Guid id)
         {
             try
             {
@@ -101,8 +101,8 @@ namespace OMSV1.Application.Controllers.Offices
         }
 
         // PUT: api/Office/{id}
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateOffice(int id, [FromBody] UpdateOfficeCommand command)
+        [HttpPut("{id:Guid}")]
+        public async Task<IActionResult> UpdateOffice(Guid id, [FromBody] UpdateOfficeCommand command)
         {
             try
             {
@@ -126,8 +126,8 @@ namespace OMSV1.Application.Controllers.Offices
         }
 
         // DELETE: api/Office/{id}
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteOffice(int id)
+        [HttpDelete("{id:Guid}")]
+        public async Task<IActionResult> DeleteOffice(Guid id)
         {
             try
             {

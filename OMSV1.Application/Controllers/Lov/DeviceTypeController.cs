@@ -53,7 +53,7 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Get DeviceType by Id
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetDeviceTypeById(int id)
+        public async Task<IActionResult> GetDeviceTypeById(Guid id)
         {
             try
             {
@@ -75,7 +75,7 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Update DeviceType
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDeviceType(int id, [FromBody] UpdateDeviceTypeCommand command)
+        public async Task<IActionResult> UpdateDeviceType(Guid id, [FromBody] UpdateDeviceTypeCommand command)
         {
             try
             {
@@ -101,7 +101,7 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Delete DeviceType
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDeviceType(int id)
+        public async Task<IActionResult> DeleteDeviceType(Guid id)
         {
             try
             {

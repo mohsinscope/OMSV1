@@ -10,9 +10,9 @@ public class FilterAttendanceSpecification : BaseSpecification<Attendance>
         int? workingHours = null,
         DateTime? startDate = null,
         DateTime? endDate = null,
-        int? officeId = null,
-        int? governorateId = null,
-        int? profileId = null)
+        Guid? officeId = null,
+        Guid? governorateId = null,
+        Guid? profileId = null)
         : base(x =>
         
             (workingHours == null || 

@@ -11,7 +11,7 @@ namespace OMSV1.Domain.Entities.Profiles;
     {
     private Profile() { }
 
-    public Profile(int userId, string fullName,  Position position,int officeId,int governorateId)
+    public Profile(Guid userId, string fullName,  Position position,Guid officeId,Guid governorateId)
     {
         UserId = userId;
         FullName = fullName;
@@ -21,9 +21,9 @@ namespace OMSV1.Domain.Entities.Profiles;
     }
         public string FullName { get; private set; }
         public Position Position { get; private set; }
-        public int UserId { get; private set; }
-        public int OfficeId { get; private set; } 
-        public int GovernorateId { get; private set; } 
+        public Guid UserId { get; private set; }
+        public Guid OfficeId { get; private set; } 
+        public Guid GovernorateId { get; private set; } 
         public Office? Office { get; private set; }      
         public Governorate? Governorate { get; private set; }
         
@@ -32,7 +32,7 @@ namespace OMSV1.Domain.Entities.Profiles;
 
 
 
-    public void UpdateProfile(string fullName, Position position, int officeId, int governorateId)
+    public void UpdateProfile(string fullName, Position position, Guid officeId, Guid governorateId)
     {
         FullName = fullName;
         Position = position;

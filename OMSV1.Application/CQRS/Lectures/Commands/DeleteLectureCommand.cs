@@ -4,9 +4,9 @@ namespace OMSV1.Application.Commands.Lectures
 {
     public class DeleteLectureCommand : IRequest<bool>
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
-        public DeleteLectureCommand(int id)
+        public DeleteLectureCommand(Guid id)
         {
             Id = id;
         }

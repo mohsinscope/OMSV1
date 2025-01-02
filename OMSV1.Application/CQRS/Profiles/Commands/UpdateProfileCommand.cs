@@ -5,11 +5,11 @@ namespace OMSV1.Application.CQRS.Queries.Profiles;
 
 public class UpdateProfileCommand : IRequest<ProfileDto>
 {
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
 
-    public int ProfileId { get; set; }
+    public Guid ProfileId { get; set; }
     public string FullName { get; set; }
     public string Position { get; set; }
-    public int OfficeId { get; set; }
-    public int GovernorateId { get; set; }
+    public Guid OfficeId { get; set; }
+    public Guid GovernorateId { get; set; }
 }

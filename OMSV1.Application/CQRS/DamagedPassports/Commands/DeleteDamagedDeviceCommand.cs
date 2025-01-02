@@ -4,9 +4,9 @@ namespace OMSV1.Application.Commands.DamagedPassports
 {
     public class DeleteDamagedPassportCommand : IRequest<bool>
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
-        public DeleteDamagedPassportCommand(int id)
+        public DeleteDamagedPassportCommand(Guid id)
         {
             Id = id;
         }

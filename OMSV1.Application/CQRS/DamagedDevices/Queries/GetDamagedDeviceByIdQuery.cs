@@ -5,9 +5,9 @@ namespace OMSV1.Application.Queries.DamagedDevices
 {
     public class GetDamagedDeviceByIdQuery : IRequest<DamagedDeviceDto?>  // Query now returns DamagedDeviceDto
     {
-        public int Id { get; }
+        public Guid Id { get; }
 
-        public GetDamagedDeviceByIdQuery(int id)
+        public GetDamagedDeviceByIdQuery(Guid id)
         {
             Id = id;
         }

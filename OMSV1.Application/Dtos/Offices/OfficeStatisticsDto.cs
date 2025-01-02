@@ -2,7 +2,7 @@ namespace OMSV1.Application.Dtos.Offices
 {
     public class OfficeStatisticsDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public int ReceivingStaff { get; set; }
         public int AccountStaff { get; set; }

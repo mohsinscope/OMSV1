@@ -4,11 +4,11 @@ namespace OMSV1.Application.Commands.Governorates
 {
     public class UpdateGovernorateCommand : IRequest<bool>
     {
-        public int Id { get; }
+        public Guid Id { get; }
         public string Name { get; }
         public string Code { get; }
 
-        public UpdateGovernorateCommand(int id, string name, string code)
+        public UpdateGovernorateCommand(Guid id, string name, string code)
         {
             Id = id;
             Name = name;

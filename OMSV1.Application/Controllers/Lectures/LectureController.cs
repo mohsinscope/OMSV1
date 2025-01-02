@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.Lectures;
 using OMSV1.Application.CQRS.Lectures.Queries;
 using OMSV1.Application.Helpers;
@@ -20,6 +21,8 @@ namespace OMSV1.Application.Controllers.Lectures
 
         // Get All Lectures with Pagination
         [HttpGet]
+        [RequirePermission("Lecture:read")]
+
         public async Task<IActionResult> GetAllLectures([FromQuery] PaginationParams paginationParams)
         {
             try
@@ -41,7 +44,9 @@ namespace OMSV1.Application.Controllers.Lectures
 
         // GET method to retrieve a lecture by ID
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetLectureById(int id)
+        [RequirePermission("Lecture:read")]
+
+        public async Task<IActionResult> GetLectureById(Guid id)
         {
             try
             {
@@ -63,6 +68,8 @@ namespace OMSV1.Application.Controllers.Lectures
 
         // POST method to add a new lecture
         [HttpPost]
+        [RequirePermission("Lecture:create")]
+
         public async Task<IActionResult> AddLecture([FromBody] AddLectureCommand command)
         {
             try
@@ -78,7 +85,9 @@ namespace OMSV1.Application.Controllers.Lectures
 
         // PUT method to update the lecture
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateLecture(int id, [FromBody] UpdateLectureCommand command)
+        [RequirePermission("Lecture:update")]
+
+        public async Task<IActionResult> UpdateLecture(Guid id, [FromBody] UpdateLectureCommand command)
         {
             try
             {
@@ -99,7 +108,8 @@ namespace OMSV1.Application.Controllers.Lectures
 
         // DELETE method to delete the lecture
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteLecture(int id)
+        [RequirePermission("Lecture:delete")]
+        public async Task<IActionResult> DeleteLecture(Guid id)
         {
             try
             {
@@ -118,6 +128,7 @@ namespace OMSV1.Application.Controllers.Lectures
 
         // Search for lectures with filters
         [HttpPost("search")]
+        [RequirePermission("Lecture:read")]
         public async Task<IActionResult> GetLectures([FromBody] GetLectureQuery query)
         {
             try

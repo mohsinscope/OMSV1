@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.DamagedDevices;
 using OMSV1.Application.CQRS.Commands.DamagedDevices;
 using OMSV1.Application.CQRS.DamagedDevices.Queries;
@@ -49,8 +50,10 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Get damaged devices by governorate with optional date filters
         [HttpGet("governorate/{governorateId}")]
+        [RequirePermission("DamagedDevice:read")]
+
         public async Task<IActionResult> GetByGovernorate(
-            int governorateId, 
+            Guid governorateId, 
             [FromQuery] DateTime? startDate,  
             [FromQuery] DateTime? endDate)
         {
@@ -77,8 +80,10 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Get damaged devices by office with optional date filters
         [HttpGet("office/{officeId}")]
+        [RequirePermission("DamagedDevice:read")]
+
         public async Task<IActionResult> GetByOffice(
-            int officeId, 
+            Guid officeId, 
             [FromQuery] DateTime? startDate,  
             [FromQuery] DateTime? endDate)
         {
@@ -105,6 +110,8 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Get damaged device by serial number
         [HttpGet("serial/{serialNumber}")]
+        [RequirePermission("DamagedDevice:read")]
+
         public async Task<IActionResult> GetBySerialNumber(string serialNumber)
         {
             try
@@ -130,7 +137,9 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Get damaged device by ID
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetDamagedDeviceById(int id)
+        [RequirePermission("DamagedDevice:read")]
+
+        public async Task<IActionResult> GetDamagedDeviceById(Guid id)
         {
             try
             {
@@ -154,6 +163,8 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Add a new damaged device
         [HttpPost]
+        [RequirePermission("DamagedDevice:create")]
+
         public async Task<IActionResult> AddDamagedDevice([FromBody] AddDamagedDeviceCommand command)
         {
             try
@@ -174,7 +185,9 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Update a damaged device
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDamagedDevice(int id, [FromBody] UpdateDamagedDeviceCommand command)
+        [RequirePermission("DamagedDevice:Update")]
+
+        public async Task<IActionResult> UpdateDamagedDevice(Guid id, [FromBody] UpdateDamagedDeviceCommand command)
         {
             if (id != command.Id) return BadRequest("Mismatched DamagedDevice ID.");
 
@@ -188,7 +201,9 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Delete a damaged device
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDamagedDevice(int id)
+        [RequirePermission("DamagedDevice:Delete")]
+
+        public async Task<IActionResult> DeleteDamagedDevice(Guid id)
         {
             try
             {
@@ -212,6 +227,8 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Search damaged devices with filters
         [HttpPost("search")]
+        [RequirePermission("DamagedDevice:read")]
+
         public async Task<IActionResult> GetDamagedDevices([FromBody] GetDamagedDevicesQuery query)
         {
             try
@@ -230,6 +247,8 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Get statistics for damaged devices
         [HttpPost("search/statistics")]
+        [RequirePermission("DamagedDevice:read")]
+
         public async Task<IActionResult> GetDamagedDeviceStatistics([FromBody] SearchDamagedDevicesStatisticsQuery query)
         {
             try

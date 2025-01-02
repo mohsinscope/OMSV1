@@ -22,10 +22,10 @@ namespace OMSV1.Domain.SeedWork
           // Add this method for first or default functionality
         Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
         Task DeleteAsync(T entity); // Return Task, not void
-        Task<T?> GetByIdAsync(int id);
+        Task<T?> GetByIdAsync(Guid id);
         Task<IReadOnlyList<T>> GetAllAsync();
         Task UpdateAsync(T entity);
-        Task<T?> GetByIdWithIncludesAsync(int id, params Expression<Func<T, object>>[] includes);
+        Task<T?> GetByIdWithIncludesAsync(Guid id, params Expression<Func<T, object>>[] includes);
          // Add the AnyAsync method
         Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken);
     }

@@ -5,14 +5,14 @@ namespace OMSV1.Application.Commands.DamagedDevices
 {
     public class UpdateDamagedDeviceCommand : IRequest<bool>
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string? SerialNumber { get; set; }
         public DateTime Date { get; set; }
-        public int DamagedDeviceTypeId { get; set; }
-        public int DeviceTypeId { get; set; }
+        public Guid DamagedDeviceTypeId { get; set; }
+        public Guid DeviceTypeId { get; set; }
         public string? Note { get; set; }
-        public int OfficeId { get; set; }
-        public int GovernorateId { get; set; }
-        public int ProfileId { get; set; }
+        public Guid OfficeId { get; set; }
+        public Guid GovernorateId { get; set; }
+        public Guid ProfileId { get; set; }
     }
 }

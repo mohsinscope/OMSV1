@@ -54,12 +54,12 @@ public static class IdentityServiceExtensions
         
         services.AddAuthorizationBuilder()
             .AddPolicy("RequireAdminRole",policy => policy.RequireRole("Admin"))
-            .AddPolicy("RequireSupervisorRole", policy => policy.RequireRole("Admin","Supervisor"))
-            .AddPolicy("RequireDamageDeviceRole", policy => policy.RequireRole("DamageDevice","Supervisor"))
-            .AddPolicy("RequireDamagePassportRole", policy => policy.RequireRole("DamagePassport","Supervisor"))
-            .AddPolicy("RequireLectureRole", policy => policy.RequireRole("Lecture","Supervisor"))
-            .AddPolicy("RequireAttendanceRole", policy => policy.RequireRole("Attendance","Supervisor"))
-            .AddPolicy("RequireExpenseRole", policy => policy.RequireRole("Expense","Supervisor"));
+            .AddPolicy("RequireSupervisorRole", policy => policy.RequireRole("Admin","Supervisor"));
+           // .AddPolicy("RequireDamageDeviceRole", policy => policy.RequireRole("DamageDevice","Supervisor"))
+          //  .AddPolicy("RequireDamagePassportRole", policy => policy.RequireRole("DamagePassport","Supervisor"))
+            //.AddPolicy("RequireLectureRole", policy => policy.RequireRole("Lecture","Supervisor"))
+           // .AddPolicy("RequireAttendanceRole", policy => policy.RequireRole("Attendance","Supervisor"))
+            //.AddPolicy("RequireExpenseRole", policy => policy.RequireRole("Expense","Supervisor"));
 
         
 

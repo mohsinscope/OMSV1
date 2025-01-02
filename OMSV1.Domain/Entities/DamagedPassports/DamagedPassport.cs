@@ -7,15 +7,15 @@ namespace OMSV1.Domain.Entities.DamagedPassport;
 
 public class DamagedPassport : Entity
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string PassportNumber { get; private set; }
     public DateTime Date { get; private set; }
-    public int DamagedTypeId { get; private set; }
+    public Guid DamagedTypeId { get; private set; }
     public string Note { get; private set; }
 
-    public int OfficeId { get; private set; }
-    public int GovernorateId { get; private set; }
-    public int ProfileId { get; private set; }
+    public Guid OfficeId { get; private set; }
+    public Guid GovernorateId { get; private set; }
+    public Guid ProfileId { get; private set; }
 
     public Governorate? Governorate { get; private set; }
     public Profile? Profile { get; private set; }
@@ -24,8 +24,8 @@ public class DamagedPassport : Entity
 
     // Main constructor that handles all properties
     public DamagedPassport(string passportNumber, DateTime date, string note,
-                            int officeId, int governorateId, 
-                            int damagedTypeId, int profileId) : base()
+                            Guid officeId, Guid governorateId, 
+                            Guid damagedTypeId, Guid profileId) : base()
     {
         PassportNumber = passportNumber;
         Date = date;
@@ -44,11 +44,11 @@ public class DamagedPassport : Entity
         public void UpdateDeviceDetails(
             string passportNumber,
             DateTime date,
-            int damagedTypeId,
+            Guid damagedTypeId,
             string note,
-            int officeId,
-            int governorateId,
-            int profileId)
+            Guid officeId,
+            Guid governorateId,
+            Guid profileId)
         {
             // Update the properties of the DamagedPassport entity with the new values
             PassportNumber = passportNumber;

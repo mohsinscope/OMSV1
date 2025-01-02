@@ -7,9 +7,9 @@ namespace OMSV1.Domain.Specifications.DamagedPassports
 public class FilterDamagedPassportsStatisticsSpecification : BaseSpecification<DamagedPassport>
 {
     public FilterDamagedPassportsStatisticsSpecification(
-        int? officeId = null,
-        int? governorateId = null,
-        int? damagedTypeId = null,
+        Guid? officeId = null,
+        Guid? governorateId = null,
+        Guid? damagedTypeId = null,
         DateTime? date = null)
         : base(x =>
             (!officeId.HasValue || x.OfficeId == officeId.Value) &&

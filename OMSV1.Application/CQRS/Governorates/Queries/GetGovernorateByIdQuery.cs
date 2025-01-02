@@ -5,9 +5,9 @@ namespace OMSV1.Application.Queries.Governorates
 {
     public class GetGovernorateByIdQuery : IRequest<GovernorateDto>
     {
-        public int Id { get; }
+        public Guid Id { get; }
 
-        public GetGovernorateByIdQuery(int id)
+        public GetGovernorateByIdQuery(Guid id)
         {
             Id = id;
         }

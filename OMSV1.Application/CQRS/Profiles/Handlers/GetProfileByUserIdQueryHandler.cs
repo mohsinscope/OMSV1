@@ -4,16 +4,19 @@ using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Application.Helpers;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Application.Queries.Profiles;
+using OMSV1.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace OMSV1.Application.CQRS.Queries.Profiles
 {
     public class GetProfileByUserIdQueryHandler : IRequestHandler<GetProfileByUserIdQuery, ProfileDto>
     {
         private readonly IUnitOfWork _unitOfWork;
-
-        public GetProfileByUserIdQueryHandler(IUnitOfWork unitOfWork)
+        private readonly AppDbContext _context;
+        public GetProfileByUserIdQueryHandler(IUnitOfWork unitOfWork,AppDbContext context)
         {
             _unitOfWork = unitOfWork;
+            _context = context;
         }
 
         public async Task<ProfileDto> Handle(GetProfileByUserIdQuery request, CancellationToken cancellationToken)
@@ -21,8 +24,10 @@ namespace OMSV1.Application.CQRS.Queries.Profiles
             try
             {
                 // Fetch the profile entity with related Governorate and Office
-                var profile = await _unitOfWork.Repository<Profile>()
-                    .GetByIdAsync(request.UserId); // Assuming GetByIdAsync is adjusted to fetch by UserId
+            var profile = await _context.Profiles
+                .Include(p => p.Governorate)
+                .Include(p => p.Office)
+                .FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);// Assuming GetByIdAsync is adjusted to fetch by UserId
 
                 if (profile == null)
                 {
@@ -38,8 +43,8 @@ namespace OMSV1.Application.CQRS.Queries.Profiles
                     GovernorateName = profile.Governorate?.Name, // Null check to prevent NRE
                     OfficeName = profile.Office?.Name, // Null check to prevent NRE
                     UserId = request.UserId,
-                    GovernorateId = profile.Governorate?.Id ?? 0, // Fallback if Governorate is null
-                    OfficeId = profile.Office?.Id ?? 0 // Fallback if Office is null
+                    GovernorateId = profile.Governorate?.Id ?? Guid.Empty, // Fallback if Governorate is null
+                    OfficeId = profile.Office?.Id ?? Guid.Empty// Fallback if Office is null
                 };
 
                 return profileDto;

@@ -8,12 +8,12 @@ using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Application.Handlers.DamagedDevices
 {
-    public class AddDamagedDeviceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper) : IRequestHandler<AddDamagedDeviceCommand, int>
+    public class AddDamagedDeviceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper) : IRequestHandler<AddDamagedDeviceCommand, Guid>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IMapper _mapper = mapper;
 
-public async Task<int> Handle(AddDamagedDeviceCommand request, CancellationToken cancellationToken)
+public async Task<Guid> Handle(AddDamagedDeviceCommand request, CancellationToken cancellationToken)
     {
         try{
         // Validate if the OfficeId belongs to the GovernorateId using AnyAsync

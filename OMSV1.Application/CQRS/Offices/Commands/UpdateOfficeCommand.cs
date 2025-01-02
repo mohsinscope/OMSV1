@@ -4,7 +4,7 @@ namespace OMSV1.Application.Commands.Offices
 {
     public class UpdateOfficeCommand : IRequest<bool>
     {
-        public int OfficeId { get; set; }
+        public Guid OfficeId { get; set; }
         public string Name { get; set; } = null!;
         public int Code { get; set; }
         public int ReceivingStaff { get; set; }

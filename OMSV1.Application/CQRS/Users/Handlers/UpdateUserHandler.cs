@@ -42,7 +42,7 @@ public class UpdateUserHandler : IRequestHandler<UpdateUserCommand, IActionResul
         if (request == null)
             return ResponseHelper.CreateErrorResponse(HttpStatusCode.BadRequest, "Invalid request.");
 
-        if (request.UserId <= 0)
+         if (request.UserId == Guid.Empty)
             return ResponseHelper.CreateErrorResponse(HttpStatusCode.BadRequest, "Invalid User ID.");
 
         // Find the user

@@ -21,9 +21,9 @@ public class GetAttendanceQuery : IRequest<PagedList<AttendanceDto>>
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
         //Others
-    public int? GovernorateId { get; set; }
-    public int? OfficeId { get; set; }
-    public int? ProfileId { get; set; }
+    public Guid? GovernorateId { get; set; }
+    public Guid? OfficeId { get; set; }
+    public Guid? ProfileId { get; set; }
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;
     public PaginationParams PaginationParams { get;set; }

@@ -7,7 +7,7 @@ namespace OMSV1.Domain.Specifications.DamagedDevices
     public class DamagedDevicesByOfficeSpecification : BaseSpecification<DamagedDevice>
     {
         public DamagedDevicesByOfficeSpecification(
-            int officeId, 
+            Guid officeId, 
             DateTime? startDate = null, 
             DateTime? endDate = null, 
             int pageNumber = 1, 

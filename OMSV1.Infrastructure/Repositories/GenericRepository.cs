@@ -61,7 +61,7 @@ namespace OMSV1.Infrastructure.Repositories
             
             }
 
-        public async Task<T?> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(Guid id)
             {
                 return await _context.Set<T>().FindAsync(id); // Lazy loading
             }
@@ -85,7 +85,7 @@ namespace OMSV1.Infrastructure.Repositories
 
 
         // Eager loading method with optional includes
-       public async Task<T?> GetByIdWithIncludesAsync(int id, params Expression<Func<T, object>>[] includes)
+       public async Task<T?> GetByIdWithIncludesAsync(Guid id, params Expression<Func<T, object>>[] includes)
             {
                 IQueryable<T> query = _context.Set<T>();
 

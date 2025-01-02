@@ -5,9 +5,9 @@ namespace OMSV1.Application.Queries.Offices
 {
     public class GetOfficeByIdQuery : IRequest<OfficeDto>
     {
-        public int OfficeId { get; }
+        public Guid OfficeId { get; }
 
-        public GetOfficeByIdQuery(int officeId)
+        public GetOfficeByIdQuery(Guid officeId)
         {
             OfficeId = officeId;
         }

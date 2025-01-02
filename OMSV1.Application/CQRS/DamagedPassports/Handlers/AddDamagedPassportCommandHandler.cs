@@ -8,7 +8,7 @@ using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Application.Handlers.DamagedPassports
 {
-    public class AddDamagedPassportCommandHandler : IRequestHandler<AddDamagedPassportCommand, int>
+    public class AddDamagedPassportCommandHandler : IRequestHandler<AddDamagedPassportCommand, Guid>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -19,7 +19,7 @@ namespace OMSV1.Application.Handlers.DamagedPassports
             _mapper = mapper;
         }
 
-        public async Task<int> Handle(AddDamagedPassportCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(AddDamagedPassportCommand request, CancellationToken cancellationToken)
         {
             try
             {

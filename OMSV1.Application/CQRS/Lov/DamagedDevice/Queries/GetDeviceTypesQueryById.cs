@@ -5,9 +5,9 @@ namespace OMSV1.Application.CQRS.Lov.DamagedDevice
 {
     public class GetDeviceTypesQueryById : IRequest<DeviceTypeDto> 
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
-        public GetDeviceTypesQueryById(int id)
+        public GetDeviceTypesQueryById(Guid id)
         {
             Id = id;
         }

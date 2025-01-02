@@ -1,5 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using OMSV1.Application.Authorization.Handlers;
+using OMSV1.Application.Authorization.Providers;
+using OMSV1.Application.Authorization.Requirements;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Middleware;
 using OMSV1.Domain.SeedWork;
@@ -17,7 +21,29 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Services.AddIdentityServices(builder.Configuration);
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, DynamicPermissionPolicyProvider>();
 
+// builder.Services.AddAuthorization(options =>
+// {
+//     // Dynamically add policies for permissions
+//     var permissions = new[]
+//     {
+//         "DamagedDevice:create",
+//         "DamagedDevice:read",
+//         "DamagedDevice:update",
+//         "DamagedDevice:delete"
+//     };
+
+//     foreach (var permission in permissions)
+//     {
+//         options.AddPolicy($"RequirePermission:{permission}", policy =>
+//         {
+//             policy.Requirements.Add(new PermissionRequirement(permission));
+//         });
+//     }
+// });
+
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -82,14 +108,14 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
     // Create roles
-    // var roles = new[] { "Admin", "Supervisor", "DamageDevice","DamagePassport" ,"Lecture" ,"Attendance","Expense"};
-    // foreach (var role in roles)
-    // {
-    //     if (!await roleManager.RoleExistsAsync(role))
-    //     {
-    //         await roleManager.CreateAsync(new AppRole { Name = role });
-    //     }
-    // }
+    var roles = new[] { "Admin", "Supervisor", "DamageDevice","DamagePassport" ,"Lecture" ,"Attendance","Expense"};
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new AppRole { Name = role });
+        }
+    }
 
     // Create an admin user
     var adminEmail = "admin";

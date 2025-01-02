@@ -5,9 +5,9 @@ namespace OMSV1.Application.CQRS.Lov.DamagedPassport
 {
     public class GetDamagedTypeByIdQuery : IRequest<DamagedTypeDto>
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
-        public GetDamagedTypeByIdQuery(int id)
+        public GetDamagedTypeByIdQuery(Guid id)
         {
             Id = id;
         }

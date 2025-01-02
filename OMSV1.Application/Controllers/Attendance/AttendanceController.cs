@@ -41,7 +41,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAttendanceById(int id)
+        public async Task<IActionResult> GetAttendanceById(Guid id)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAttendance(int id, [FromBody] UpdateAttendanceCommand command)
+        public async Task<IActionResult> UpdateAttendance(Guid id, [FromBody] UpdateAttendanceCommand command)
         {
             if (id != command.Id)
                 return BadRequest("ID mismatch");
@@ -89,7 +89,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAttendance(int id)
+        public async Task<IActionResult> DeleteAttendance(Guid id)
         {
             var command = new DeleteAttendanceCommand(id);
             await _mediator.Send(command);

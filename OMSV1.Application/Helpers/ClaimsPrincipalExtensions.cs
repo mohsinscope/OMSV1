@@ -21,7 +21,7 @@ namespace OMSV1.Application.Helpers
         /// Retrieves the user ID (NameIdentifier) from the ClaimsPrincipal.
         /// Throws an exception if the claim is not found or invalid.
         /// </summary>
-        public static int GetUserId(this ClaimsPrincipal user)
+        public static Guid GetUserId(this ClaimsPrincipal user)
         {
             var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -29,7 +29,7 @@ namespace OMSV1.Application.Helpers
                 throw new Exception("Cannot get user ID from token");
 
             // Parsing user ID to an integer
-            if (!int.TryParse(userIdClaim, out var userId))
+            if (!Guid.TryParse(userIdClaim, out var userId))
                 throw new Exception("User ID from token is not a valid integer");
 
             return userId;

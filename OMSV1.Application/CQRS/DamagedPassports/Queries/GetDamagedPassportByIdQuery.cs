@@ -4,9 +4,9 @@ namespace OMSV1.Application.Queries.DamagedPassports
 {
     public class GetDamagedPassportByIdQuery : IRequest<DamagedPassportDto?>
     {
-        public int Id { get; }
+        public Guid Id { get; }
 
-        public GetDamagedPassportByIdQuery(int id)
+        public GetDamagedPassportByIdQuery(Guid id)
         {
             Id = id;
         }

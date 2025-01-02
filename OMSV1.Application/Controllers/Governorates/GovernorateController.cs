@@ -39,8 +39,8 @@ namespace OMSV1.Application.Controllers.Governorates
         
 
         // GET: api/Governorate/{id}
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetGovernorateById(int id)
+        [HttpGet("{id:Guid}")]
+        public async Task<IActionResult> GetGovernorateById(Guid id)
         {
             try
             {
@@ -73,7 +73,7 @@ namespace OMSV1.Application.Controllers.Governorates
 
         // GET: api/Governorate/Dropdown/{governorateId}
         [HttpGet("Dropdown/{governorateId}")]
-        public async Task<IActionResult> GetOfficesByGovernorate(int governorateId)
+        public async Task<IActionResult> GetOfficesByGovernorate(Guid governorateId)
         {
             try
             {
@@ -114,8 +114,8 @@ namespace OMSV1.Application.Controllers.Governorates
         }
 
         // PUT: api/Governorate/{id}
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateGovernorate(int id, [FromBody] UpdateGovernorateCommand command)
+        [HttpPut("{id:Guid}")]
+        public async Task<IActionResult> UpdateGovernorate(Guid id, [FromBody] UpdateGovernorateCommand command)
         {
             if (id != command.Id)
             {
@@ -132,8 +132,8 @@ namespace OMSV1.Application.Controllers.Governorates
         }
 
         // GET: api/Governorate/{id}/with-offices
-        [HttpGet("{id:int}/with-offices")]
-        public async Task<IActionResult> GetGovernorateWithOffices(int id)
+        [HttpGet("{id:Guid}/with-offices")]
+        public async Task<IActionResult> GetGovernorateWithOffices(Guid id)
         {
             try
             {
@@ -165,8 +165,8 @@ namespace OMSV1.Application.Controllers.Governorates
 
 
         // DELETE: api/Governorate/{id}
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteGovernorate(int id)
+        [HttpDelete("{id:Guid}")]
+        public async Task<IActionResult> DeleteGovernorate(Guid id)
         {
             try
             {

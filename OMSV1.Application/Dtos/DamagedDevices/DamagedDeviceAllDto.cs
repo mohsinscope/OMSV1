@@ -4,7 +4,7 @@ namespace OMSV1.Application.Dtos.DamagedDevices;
 
 public class DamagedDeviceAllDto
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string? SerialNumber { get; set; }
     public DateTime Date { get; set; }
     public string? DeviceTypeName { get; set; }

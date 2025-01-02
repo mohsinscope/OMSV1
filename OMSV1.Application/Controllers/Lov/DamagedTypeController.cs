@@ -53,7 +53,7 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Get a Specific Damaged Type by ID
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetDamagedTypeById(int id)
+        public async Task<IActionResult> GetDamagedTypeById(Guid id)
         {
             try
             {
@@ -73,7 +73,7 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Update Damaged Type
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateDamagedType(int id, [FromBody] UpdateDamagedTypeCommand command)
+        public async Task<IActionResult> UpdateDamagedType(Guid id, [FromBody] UpdateDamagedTypeCommand command)
         {
             try
             {
@@ -93,7 +93,7 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Delete Damaged Type
         [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteDamagedType(int id)
+        public async Task<IActionResult> DeleteDamagedType(Guid id)
         {
             try
             {

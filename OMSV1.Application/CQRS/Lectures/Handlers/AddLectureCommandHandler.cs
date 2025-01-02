@@ -8,7 +8,7 @@ using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Application.Handlers.Lectures
 {
-    public class AddLectureCommandHandler : IRequestHandler<AddLectureCommand, int>
+    public class AddLectureCommandHandler : IRequestHandler<AddLectureCommand, Guid>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -19,7 +19,7 @@ namespace OMSV1.Application.Handlers.Lectures
             _mapper = mapper;
         }
 
-        public async Task<int> Handle(AddLectureCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(AddLectureCommand request, CancellationToken cancellationToken)
         {
             try
             {

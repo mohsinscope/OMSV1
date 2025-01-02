@@ -9,11 +9,11 @@ namespace OMSV1.Domain.Entities.DamagedDevices
     {
         public string SerialNumber { get; private set; }
         public DateTime Date { get; private set; }
-        public int DamagedDeviceTypeId { get; private set; }
-        public int DeviceTypeId { get; private set; }
-        public int OfficeId { get; private set; }
-        public int GovernorateId { get; private set; }
-        public int ProfileId { get; private set; }
+        public Guid DamagedDeviceTypeId { get; private set; }
+        public Guid DeviceTypeId { get; private set; }
+        public Guid OfficeId { get; private set; }
+        public Guid GovernorateId { get; private set; }
+        public Guid ProfileId { get; private set; }
         public string? Note { get; private set; }
         
         // Navigation properties (optional nullability)
@@ -24,8 +24,8 @@ namespace OMSV1.Domain.Entities.DamagedDevices
         public Profile? Profile { get; private set; }
 
         // Constructor for full initialization
-        public DamagedDevice(string serialNumber, DateTime date, int damagedDeviceTypeId, string note,
-                             int deviceTypeId, int officeId, int governorateId, int profileId) : base()
+        public DamagedDevice(string serialNumber, DateTime date, Guid damagedDeviceTypeId, string note,
+                             Guid deviceTypeId, Guid officeId, Guid governorateId, Guid profileId) : base()
         {
             SerialNumber = serialNumber;
             Date = date;
@@ -39,13 +39,12 @@ namespace OMSV1.Domain.Entities.DamagedDevices
 
         // Constructor with default values (optional parameters)
         public DamagedDevice(string serialNumber, DateTime date)
-            : this(serialNumber, date, 0, string.Empty, 0, 0, 0, 0)
+            : this(serialNumber, date, default, default, default, default,default,default)
         {
         }
-
         // Method to update the device details
-        public void UpdateDeviceDetails(string serialNumber, DateTime date, int damagedDeviceTypeId, int deviceTypeId,
-                                        int officeId, string note, int governorateId, int profileId)
+        public void UpdateDeviceDetails(string serialNumber, DateTime date, Guid damagedDeviceTypeId, Guid deviceTypeId,
+                                        Guid officeId, string note, Guid governorateId, Guid profileId)
         {
             if (string.IsNullOrEmpty(serialNumber)) throw new ArgumentException("Serial number cannot be null or empty", nameof(serialNumber));
 

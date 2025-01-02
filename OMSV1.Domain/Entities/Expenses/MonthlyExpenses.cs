@@ -7,16 +7,16 @@ using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Domain.Entities.Expenses;
 
-public class MonthlyExpenses(Status status, decimal totalAmount, string notes, int officeId, int governorateId, int profileId) : Entity
+public class MonthlyExpenses(Status status, decimal totalAmount, string notes, Guid officeId, Guid governorateId, Guid profileId) : Entity
 {
 
     public decimal TotalAmount { get; private set; } = totalAmount;
     public Status Status { get; private set; } = status;
     public string Notes { get; private set; } = notes;
 
-    public int OfficeId { get; private set; } = officeId;
-    public int GovernorateId { get; private set; } = governorateId;
-    public int ProfileId { get; private set; } = profileId;
+    public Guid OfficeId { get; private set; } = officeId;
+    public Guid GovernorateId { get; private set; } = governorateId;
+    public Guid ProfileId { get; private set; } = profileId;
 
     public Governorate? Governorate { get; private set; }
     public Office? Office { get; private set; }

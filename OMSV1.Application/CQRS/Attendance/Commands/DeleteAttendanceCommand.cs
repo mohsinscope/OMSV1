@@ -4,9 +4,9 @@ namespace OMSV1.Application.Commands.Attendances
 {
     public class DeleteAttendanceCommand : IRequest<Unit>
     {
-        public int Id { get; }
+        public Guid Id { get; }
 
-        public DeleteAttendanceCommand(int id)
+        public DeleteAttendanceCommand(Guid id)
         {
             Id = id;
         }

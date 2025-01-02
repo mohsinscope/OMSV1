@@ -2,7 +2,7 @@
 
 namespace OMSV1.Application.Commands.Offices
 {
-    public class AddOfficeCommand : IRequest<int>
+    public class AddOfficeCommand : IRequest<Guid>
     {
         public required string Name { get; set; }
         public int Code { get; set; }
@@ -11,7 +11,7 @@ namespace OMSV1.Application.Commands.Offices
         public int PrintingStaff { get; set; }
         public int QualityStaff { get; set; }
         public int DeliveryStaff { get; set; }
-        public int GovernorateId { get; set; }
+        public Guid GovernorateId { get; set; }
     }
 
 }

@@ -5,9 +5,9 @@ namespace OMSV1.Application.Queries.DamagedDevices
 {
     public class SearchDamagedDevicesStatisticsQuery : IRequest<DamagedDevicesStatisticsDto>
     {
-        public int? OfficeId { get; set; }            // Filter by specific office (optional)
-        public int? GovernorateId { get; set; }       // Filter by governorate (optional)
+        public Guid? OfficeId { get; set; }            // Filter by specific office (optional)
+        public Guid? GovernorateId { get; set; }       // Filter by governorate (optional)
         public DateTime? Date { get; set; }           // Filter by a specific date (optional)
-        public int? DamagedDeviceTypeId { get; set; } // Filter by a specific damaged device type (optional)
+        public Guid? DamagedDeviceTypeId { get; set; } // Filter by a specific damaged device type (optional)
     }
 }

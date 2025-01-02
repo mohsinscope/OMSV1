@@ -11,7 +11,7 @@ public class Office(string name,
                     int printingStaff,
                     int qualityStaff,
                     int deliveryStaff,
-                    int GovernorateId) : Entity
+                    Guid GovernorateId) : Entity
 {
     public string Name { get; private set; } = name;
     public int Code { get; private set; } = code;
@@ -20,7 +20,7 @@ public class Office(string name,
     public int PrintingStaff { get; private set; } = printingStaff;
     public int QualityStaff { get; private set; } = qualityStaff;
     public int DeliveryStaff { get; private set; } = deliveryStaff;
-    public int GovernorateId { get; private set; } = GovernorateId;
+    public Guid GovernorateId { get; private set; } = GovernorateId;
     public Governorate? Governorate { get; private set; }
 
     public void UpdateCode(int code)

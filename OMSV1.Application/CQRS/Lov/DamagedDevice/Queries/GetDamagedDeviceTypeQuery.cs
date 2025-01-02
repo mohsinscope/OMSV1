@@ -4,6 +4,6 @@ namespace OMSV1.Application.Queries.LOV
 {
     public class GetDamagedDeviceTypeQuery : IRequest<DamagedDeviceTypeDto>
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
     }
 }

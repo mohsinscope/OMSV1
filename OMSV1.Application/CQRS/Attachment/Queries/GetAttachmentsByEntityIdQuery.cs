@@ -6,10 +6,10 @@ namespace OMSV1.Application.Queries.Attachments
 {
     public class GetAttachmentsByEntityIdQuery : IRequest<List<AttachmentDto>>
     {
-        public int EntityId { get; set; }
+        public Guid EntityId { get; set; }
         public EntityType EntityType { get; set; }
 
-        public GetAttachmentsByEntityIdQuery(int entityId, EntityType entityType)
+        public GetAttachmentsByEntityIdQuery(Guid entityId, EntityType entityType)
         {
             EntityId = entityId;
             EntityType = entityType;

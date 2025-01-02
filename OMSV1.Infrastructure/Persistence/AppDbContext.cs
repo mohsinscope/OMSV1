@@ -16,9 +16,9 @@ using OMSV1.Infrastructure.Identity;
 namespace OMSV1.Infrastructure.Persistence;
 
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<ApplicationUser, AppRole, int,
-    IdentityUserClaim<int>, AppUserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>,
-    IdentityUserToken<int>>(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<ApplicationUser, AppRole, Guid,
+    IdentityUserClaim<Guid>, AppUserRole, IdentityUserLogin<Guid>, IdentityRoleClaim<Guid>,
+    IdentityUserToken<Guid>>(options)
 {
         public DbSet<DamagedDevice> DamagedDevices { get; set; }
         public DbSet<Lecture> Lectures { get; set; }
@@ -42,12 +42,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 
 
         public  DbSet<ApplicationUser> ApplicationUser { get; set; } 
+        //Permissions
+        public DbSet<AppRolePermission> RolePermissions { get; set; }
+        public DbSet<UserPermission> UserPermissions { get; set; }
+
+
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             
         base.OnModelCreating(modelBuilder);
+       
 
         modelBuilder.Entity<ApplicationUser>()
             .HasMany(ur => ur.UserRoles)
@@ -60,6 +66,40 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
             .WithOne(u => u.Role)
             .HasForeignKey(ur => ur.RoleId)
             .IsRequired();
+
+        modelBuilder.Entity<AppRolePermission>(entity =>
+            {
+            entity.HasKey(rp => rp.Id);
+            entity.HasOne(rp => rp.Role)
+            .WithMany(r => r.RolePermissions)
+            .HasForeignKey(rp => rp.RoleId)
+            .OnDelete(DeleteBehavior.Cascade);
+             });
+             
+        modelBuilder.Entity<UserPermission>(entity =>
+        {
+        // Configure the primary key
+        entity.HasKey(up => up.Id);
+
+        // Ensure the Id column generates UUIDs by default
+        entity.Property(up => up.Id)
+            .HasDefaultValueSql("gen_random_uuid()"); // PostgreSQL's UUID generator
+
+        // Configure the foreign key relationship with the User entity
+        entity.HasOne(up => up.User)
+            .WithMany()
+            .HasForeignKey(up => up.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure the Permission property
+        entity.Property(up => up.Permission)
+            .IsRequired()
+            .HasMaxLength(255);
+
+        // Additional configuration (if necessary)
+        });
+
+            
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }

@@ -4,7 +4,7 @@ namespace OMSV1.Application.Commands.Attendances
 {
     public class UpdateAttendanceCommand : IRequest<Unit>
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public int ReceivingStaff { get; set; }
         public int AccountStaff { get; set; }
         public int PrintingStaff { get; set; }
@@ -16,8 +16,8 @@ namespace OMSV1.Application.Commands.Attendances
         // Change to integer, as it is stored as integer in the entity
         public int WorkingHours { get; set; } // Using integer instead of enum
         
-        public int GovernorateId { get; set; }
-        public int OfficeId { get; set; }
-        public int ProfileId { get; set; }
+        public Guid GovernorateId { get; set; }
+        public Guid OfficeId { get; set; }
+        public Guid ProfileId { get; set; }
     }
 }

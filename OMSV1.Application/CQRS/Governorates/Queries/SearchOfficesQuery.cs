@@ -5,6 +5,6 @@ namespace OMSV1.Application.CQRS.Governorates
 {
     public class SearchOfficesQuery : IRequest<List<OfficeCountDto>>
     {
-        public int? GovernorateId { get; set; } // Optional GovernorateId
+        public Guid? GovernorateId { get; set; } // Optional GovernorateId
     }
 }

@@ -2,7 +2,7 @@ using MediatR;
 
 namespace OMSV1.Application.Commands.Governorates
 {
-    public class AddGovernorateCommand : IRequest<int>
+    public class AddGovernorateCommand : IRequest<Guid>
     {
         public string Name { get; }
         public string Code { get; }

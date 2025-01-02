@@ -4,9 +4,9 @@ namespace OMSV1.Application.Commands.Governorates
 {
     public class DeleteGovernorateCommand : IRequest<bool>
     {
-        public int Id { get; }
+        public Guid Id { get; }
 
-        public DeleteGovernorateCommand(int id)
+        public DeleteGovernorateCommand(Guid id)
         {
             Id = id;
         }

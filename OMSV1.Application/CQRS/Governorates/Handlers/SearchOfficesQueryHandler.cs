@@ -39,7 +39,7 @@ namespace OMSV1.Application.CQRS.Governorates
                     .GroupBy(o => 1)  // Grouping by a constant value to get the total count
                     .Select(g => new OfficeCountDto
                     {
-                        GovernorateId = 0, // No specific governorate for total count
+                        GovernorateId = Guid.Empty, // Use Guid.Empty for no specific governorate
                         NumberOfOffices = g.Count()
                     })
                     .ToListAsync(cancellationToken);

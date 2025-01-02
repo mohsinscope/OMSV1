@@ -9,11 +9,11 @@ public class FilterDamagedDevicesSpecification : BaseSpecification<DamagedDevice
         string? serialNumber = null,
         DateTime? startDate = null,
         DateTime? endDate = null,
-        int? damagedDeviceTypeId = null,
-        int? deviceTypeId = null,
-        int? officeId = null,
-        int? governorateId = null,
-        int? profileId = null)
+        Guid? damagedDeviceTypeId = null,
+        Guid? deviceTypeId = null,
+        Guid? officeId = null,
+        Guid? governorateId = null,
+        Guid? profileId = null)
         : base(x =>
             (string.IsNullOrEmpty(serialNumber) || x.SerialNumber.Contains(serialNumber)) &&
             (!startDate.HasValue || x.Date >= startDate.Value) &&

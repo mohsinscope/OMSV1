@@ -20,7 +20,8 @@ namespace OMSV1.Application.Controllers
         }
         // Get Attachments by Entity ID and Entity Type
         [HttpGet("{entityType}/{id}")]
-        public async Task<IActionResult> GetAttachmentsById(int id, string entityType)
+
+        public async Task<IActionResult> GetAttachmentsById(Guid id, string entityType)
         {
             // Map string to Enum (EntityType)
             if (!Enum.TryParse(entityType, true, out EntityType parsedEntityType))
@@ -40,9 +41,9 @@ namespace OMSV1.Application.Controllers
         }
           // PUT: api/attachment/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAttachment(int id, 
+        public async Task<IActionResult> UpdateAttachment(Guid id, 
             [FromForm] IFormFile file, 
-            [FromForm] int entityId, 
+            [FromForm] Guid entityId, 
             [FromForm] OMSV1.Domain.Enums.EntityType entityType)
         {
             if (file == null || file.Length == 0)
@@ -86,7 +87,7 @@ namespace OMSV1.Application.Controllers
 
          // POST: api/Attachment/add-attachment
         [HttpPost("add-attachment")]
-        public async Task<IActionResult> AddAttachment([FromForm] IFormFile file, [FromForm] int entityId, [FromForm] OMSV1.Domain.Enums.EntityType entityType)
+        public async Task<IActionResult> AddAttachment([FromForm] IFormFile file, [FromForm] Guid entityId, [FromForm] OMSV1.Domain.Enums.EntityType entityType)
         {
             try
             {

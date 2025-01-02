@@ -9,9 +9,9 @@ public class FilterLecturesSpecification : BaseSpecification<Lecture>
         string? title = null,
         DateTime? startDate = null,
         DateTime? endDate = null,
-        int? officeId = null,
-        int? governorateId = null,
-        int? profileId = null)
+        Guid? officeId = null,
+        Guid? governorateId = null,
+        Guid? profileId = null)
         : base(x =>
             (string.IsNullOrEmpty(title) || x.Title.Contains(title)) &&
             (!startDate.HasValue || x.Date >= startDate.Value) &&

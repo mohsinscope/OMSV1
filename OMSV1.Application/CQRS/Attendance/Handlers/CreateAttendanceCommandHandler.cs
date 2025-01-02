@@ -8,7 +8,7 @@ using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Application.Handlers.Attendances
 {
-    public class CreateAttendanceCommandHandler : IRequestHandler<CreateAttendanceCommand, int>
+    public class CreateAttendanceCommandHandler : IRequestHandler<CreateAttendanceCommand, Guid>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -20,7 +20,7 @@ namespace OMSV1.Application.Handlers.Attendances
             _mapper = mapper;
         }
 
-        public async Task<int> Handle(CreateAttendanceCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(CreateAttendanceCommand request, CancellationToken cancellationToken)
         {
             try
             {

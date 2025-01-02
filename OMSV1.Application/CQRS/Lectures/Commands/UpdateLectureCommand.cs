@@ -5,17 +5,17 @@ namespace OMSV1.Application.Commands.Lectures
 {
     public class UpdateLectureCommand : IRequest<bool> // Returns a boolean indicating success
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Title { get; set; }
         public string? Note { get; set; }
 
         public DateTime Date { get; set; }
-        public int OfficeId { get; set; }
-        public int GovernorateId { get; set; }
-        public int ProfileId { get; set; }
+        public Guid OfficeId { get; set; }
+        public Guid GovernorateId { get; set; }
+        public Guid ProfileId { get; set; }
 
         // Constructor to initialize the properties
-        public UpdateLectureCommand(int id, string title, DateTime date,string note, int officeId, int governorateId, int profileId)
+        public UpdateLectureCommand(Guid id, string title, DateTime date,string note, Guid officeId, Guid governorateId, Guid profileId)
         {
             Id = id;
             Title = title;

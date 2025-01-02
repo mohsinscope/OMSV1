@@ -9,8 +9,8 @@ namespace OMSV1.Domain.Specifications.Attendances
         public FilterAttendanceStatisticsSpecification(
             int? workingHours = null,
             DateTime? date = null,
-            int? officeId = null,
-            int? governorateId = null)
+            Guid? officeId = null,
+            Guid? governorateId = null)
             : base(x =>
                 (workingHours == null || 
                 (workingHours.Value == (int)WorkingHours.Both) || 

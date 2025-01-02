@@ -9,10 +9,10 @@ public class FilterDamagedPassportsSpecification : BaseSpecification<DamagedPass
         string? passportNumber = null,
         DateTime? startDate = null,
         DateTime? endDate = null,
-        int? damagedTypeId = null,
-        int? officeId = null,
-        int? governorateId = null,
-        int? profileId = null)
+        Guid? damagedTypeId = null,
+        Guid? officeId = null,
+        Guid? governorateId = null,
+        Guid? profileId = null)
         : base(x =>
             (string.IsNullOrEmpty(passportNumber) || x.PassportNumber.Contains(passportNumber)) &&
             (!startDate.HasValue || x.Date >= startDate.Value) &&

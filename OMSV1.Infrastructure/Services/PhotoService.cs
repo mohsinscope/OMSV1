@@ -20,7 +20,7 @@ public class PhotoService : IPhotoService
             _webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));
 
     }
-    public async Task<PhotoUploadResult> AddPhotoAsync(IFormFile file, int entityId, EntityType entityType)
+    public async Task<PhotoUploadResult> AddPhotoAsync(IFormFile file, Guid entityId, EntityType entityType)
     {
         if (file == null || file.Length == 0)
             throw new ArgumentException("No file uploaded.");

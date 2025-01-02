@@ -6,10 +6,10 @@ namespace OMSV1.Domain.Specifications.DamagedDevices;
 public class DamagedDevicesByGovernorateSpecification : BaseSpecification<DamagedDevice>
 {
     public DamagedDevicesByGovernorateSpecification(
-        int governorateId, 
+        Guid governorateId, 
         DateTime? startDate = null, 
         DateTime? endDate = null, 
-        int? deviceTypeId = null, 
+        Guid? deviceTypeId = null, 
         int pageNumber = 1, 
         int pageSize = 10) 
         : base(x => 

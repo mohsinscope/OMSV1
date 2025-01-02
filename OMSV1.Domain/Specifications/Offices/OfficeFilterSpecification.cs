@@ -5,7 +5,7 @@ namespace OMSV1.Domain.Specifications.Offices;
 
 public class FilterOfficeSpecification : BaseSpecification<Office>
 {
-    public FilterOfficeSpecification(int? governorateId = null, int? officeId = null)
+    public FilterOfficeSpecification(Guid? governorateId = null, int? officeId = null)
         : base(x =>
             (!governorateId.HasValue || x.GovernorateId == governorateId.Value) &&
             (!officeId.HasValue || x.Code == officeId.Value))

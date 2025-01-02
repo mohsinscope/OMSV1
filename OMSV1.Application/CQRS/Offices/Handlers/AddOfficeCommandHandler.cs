@@ -6,7 +6,7 @@ using OMSV1.Application.Helpers; // Assuming HandlerException is defined here
 
 namespace OMSV1.Application.Commands.Offices
 {
-    public class AddOfficeCommandHandler : IRequestHandler<AddOfficeCommand, int>
+    public class AddOfficeCommandHandler : IRequestHandler<AddOfficeCommand, Guid>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -17,7 +17,7 @@ namespace OMSV1.Application.Commands.Offices
             _mapper = mapper;
         }
 
-        public async Task<int> Handle(AddOfficeCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(AddOfficeCommand request, CancellationToken cancellationToken)
         {
             try
             {
