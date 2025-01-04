@@ -151,7 +151,7 @@ namespace OMSV1.Application.Controllers.DamagedPassports
 
         // POST method for statistics related to damaged passports
         [HttpPost("search/statistics")]
-        [RequirePermission("DPr")]
+        [RequirePermission("Rr")]
 
         public async Task<IActionResult> GetDamagedPassportStatistics([FromBody] SearchDamagedPassportsStatisticsQuery query)
         {
