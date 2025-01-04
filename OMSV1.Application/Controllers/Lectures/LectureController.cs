@@ -1,5 +1,4 @@
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.Lectures;

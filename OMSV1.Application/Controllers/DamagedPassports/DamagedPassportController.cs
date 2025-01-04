@@ -7,7 +7,6 @@ using OMSV1.Application.Helpers;
 using OMSV1.Application.CQRS.DamagedPassports.Queries;
 using System.Net;
 using OMSV1.Application.Authorization.Attributes;
-using Microsoft.AspNetCore.Authorization;
 namespace OMSV1.Application.Controllers.DamagedPassports
 {
     [ApiController]

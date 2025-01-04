@@ -181,7 +181,7 @@ public class AccountController : BaseApiController
 
 
     // Update Profile And User Together 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:Guid}")]
     [Authorize(Policy = "RequireAdminRole")]
     public async Task<IActionResult> UpdateUser(Guid id, UpdateUserCommand command)
     {

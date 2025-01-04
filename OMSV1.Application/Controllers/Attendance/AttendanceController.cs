@@ -7,9 +7,7 @@ using OMSV1.Application.CQRS.Attendances;
 using OMSV1.Infrastructure.Extensions;
 using System.Net;
 using OMSV1.Application.Controllers;
-using OMSV1.Application.CQRS.Attendance.Handlers;
 using OMSV1.Application.CQRS.Attendance.Queries;
-using Microsoft.AspNetCore.Authorization;
 using OMSV1.Application.Authorization.Attributes;
 
 namespace OMSV1.API.Controllers
