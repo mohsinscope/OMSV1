@@ -107,7 +107,7 @@ public class AccountController : BaseApiController
         var jwtToken = handler.ReadJwtToken(accessToken);
         var username = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name || c.Type == "unique_name")?.Value;
 
-        // if (username == null) return BadRequest("Invalid token structure");
+        if (username == null) return BadRequest("Invalid token structure");
 
         return new UserDto
         {
@@ -129,10 +129,12 @@ public class AccountController : BaseApiController
         var profiles = await _mediator.Send(new GetProfilesWithUsersAndRolesQuery());
         return Ok(profiles);
     }
-      //Update User Permissions
+
+
+
+    //Update User Permissions
     [HttpPut("{userId}/permissions")]
     [Authorize(Policy = "RequireAdminRole")]
-
     public async Task<IActionResult> UpdateUserPermissions(Guid userId, [FromBody] List<string> permissions)
     {
         try
@@ -156,7 +158,8 @@ public class AccountController : BaseApiController
             return StatusCode(500, new { message = "Internal Server Error", details = ex.Message });
         }
     }
-        // Update Profile Only
+
+    // Update Profile Only
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPut("{id}")]
     public async Task<ActionResult<ProfileDto>> UpdateProfile(Guid id, [FromBody] UpdateProfileCommand command)
@@ -192,7 +195,7 @@ public class AccountController : BaseApiController
     }
 
 
-  //add permissions to a user id
+    //add permissions to a user id
     [HttpPost("{userId}/add-permissions")]
     [Authorize(Policy = "RequireAdminRole")]
     public async Task<IActionResult> AddPermissionsToUser(Guid userId, [FromBody] List<string> permissions)
@@ -233,6 +236,8 @@ public class AccountController : BaseApiController
             return StatusCode(500, new { message = "Internal Server Error", details = ex.Message });
         }
     }
+
+
     // Change Password
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword(ChangePasswordCommand command)
@@ -249,6 +254,8 @@ public class AccountController : BaseApiController
     {
         return await _mediator.Send(command);
     }
+
+    
     //Add Permissions To Role
     [HttpPost("{roleName}/permissions")]
     [Authorize(Policy = "RequireAdminRole")]

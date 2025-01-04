@@ -188,7 +188,6 @@ namespace OMSV1.Application.Controllers.DamagedDevices
         // Update a damaged device
         [HttpPut("{id}")]
         [RequirePermission("DamagedDevice:Update")]
-
         public async Task<IActionResult> UpdateDamagedDevice(Guid id, [FromBody] UpdateDamagedDeviceCommand command)
         {
             if (id != command.Id) return BadRequest("Mismatched DamagedDevice ID.");
