@@ -61,7 +61,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpPost]
-        [RequirePermission("Ap")]
+        [RequirePermission("Ac")]
 
         public async Task<IActionResult> CreateAttendance([FromBody] CreateAttendanceCommand command)
         {
