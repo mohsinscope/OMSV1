@@ -187,7 +187,7 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Update a damaged device
         [HttpPut("{id}")]
-        [RequirePermission("DamagedDevice:Update")]
+        [RequirePermission("DDu")]
 
         public async Task<IActionResult> UpdateDamagedDevice(Guid id, [FromBody] UpdateDamagedDeviceCommand command)
         {
@@ -203,7 +203,7 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Delete a damaged device
         [HttpDelete("{id}")]
-        [RequirePermission("DamagedDevice:Delete")]
+        [RequirePermission("DDd")]
 
         public async Task<IActionResult> DeleteDamagedDevice(Guid id)
         {
@@ -229,7 +229,7 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Search damaged devices with filters
         [HttpPost("search")]
-        [RequirePermission("DamagedDevice:read")]
+        [RequirePermission("DDr")]
 
         public async Task<IActionResult> GetDamagedDevices([FromBody] GetDamagedDevicesQuery query)
         {
@@ -249,7 +249,7 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Get statistics for damaged devices
         [HttpPost("search/statistics")]
-        [RequirePermission("DamagedDevice:read")]
+        [RequirePermission("DDr")]
 
         public async Task<IActionResult> GetDamagedDeviceStatistics([FromBody] SearchDamagedDevicesStatisticsQuery query)
         {
