@@ -7,7 +7,6 @@ using OMSV1.Application.Helpers;
 using OMSV1.Application.CQRS.DamagedPassports.Queries;
 using System.Net;
 using OMSV1.Application.Authorization.Attributes;
-using Microsoft.AspNetCore.Authorization;
 namespace OMSV1.Application.Controllers.DamagedPassports
 {
     [ApiController]
@@ -23,7 +22,7 @@ namespace OMSV1.Application.Controllers.DamagedPassports
 
         // Get All damaged passports with Pagination
         [HttpGet]
-        [RequirePermission("DamagedPassport:read")]
+        [RequirePermission("DPr")]
 
         public async Task<IActionResult> GetAllDamagedPassports([FromQuery] PaginationParams paginationParams)
         {
@@ -49,7 +48,7 @@ namespace OMSV1.Application.Controllers.DamagedPassports
 
         // GET method to retrieve a damaged passport by ID
         [HttpGet("{id}")]
-        [RequirePermission("DamagedPassport:read")]
+        [RequirePermission("DPr")]
 
         public async Task<IActionResult> GetDamagedPassportById(Guid id)
         {
@@ -71,7 +70,7 @@ namespace OMSV1.Application.Controllers.DamagedPassports
 
         // POST method to add a new damaged passport
         [HttpPost]
-        [RequirePermission("DamagedPassport:create")]
+        [RequirePermission("DPc")]
 
         public async Task<IActionResult> AddDamagedPassport([FromBody] AddDamagedPassportCommand command)
         {
@@ -89,7 +88,7 @@ namespace OMSV1.Application.Controllers.DamagedPassports
 
         // PUT method to update the damaged passport
         [HttpPut("{id}")]
-        [RequirePermission("DamagedPassport:update")]
+        [RequirePermission("DPu")]
 
         public async Task<IActionResult> UpdateDamagedPassport(Guid id, [FromBody] UpdateDamagedPassportCommand command)
         {
@@ -110,7 +109,7 @@ namespace OMSV1.Application.Controllers.DamagedPassports
 
         // DELETE method to delete the damaged passport
         [HttpDelete("{id}")]
-        [RequirePermission("DamagedPassport:delete")]
+        [RequirePermission("DPd")]
 
         public async Task<IActionResult> DeleteDamagedPassport(Guid id)
         {
@@ -133,7 +132,7 @@ namespace OMSV1.Application.Controllers.DamagedPassports
 
         // POST method for searching damaged passports with filters
         [HttpPost("search")]
-        [RequirePermission("DamagedPassport:read")]
+        [RequirePermission("DPr")]
 
         public async Task<IActionResult> GetDamagedPassports([FromBody] GetDamagedPassportQuery query)
         {
@@ -152,7 +151,7 @@ namespace OMSV1.Application.Controllers.DamagedPassports
 
         // POST method for statistics related to damaged passports
         [HttpPost("search/statistics")]
-        [RequirePermission("DamagedPassport:read")]
+        [RequirePermission("Rr")]
 
         public async Task<IActionResult> GetDamagedPassportStatistics([FromBody] SearchDamagedPassportsStatisticsQuery query)
         {

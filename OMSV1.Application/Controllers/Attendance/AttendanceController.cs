@@ -7,9 +7,7 @@ using OMSV1.Application.CQRS.Attendances;
 using OMSV1.Infrastructure.Extensions;
 using System.Net;
 using OMSV1.Application.Controllers;
-using OMSV1.Application.CQRS.Attendance.Handlers;
 using OMSV1.Application.CQRS.Attendance.Queries;
-using Microsoft.AspNetCore.Authorization;
 using OMSV1.Application.Authorization.Attributes;
 
 namespace OMSV1.API.Controllers
@@ -63,7 +61,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpPost]
-        [RequirePermission("Ap")]
+        [RequirePermission("Ac")]
 
         public async Task<IActionResult> CreateAttendance([FromBody] CreateAttendanceCommand command)
         {
@@ -126,7 +124,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpPost("statistics/office")]
-        [RequirePermission("Ar")]
+        [RequirePermission("Rr")]
         public async Task<IActionResult> GetAttendanceStatistics([FromBody] GetAttendanceStatisticsInOfficeQuery query)
         {
             try
@@ -141,7 +139,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpPost("search/statistics")]
-        [RequirePermission("Ar")]
+        [RequirePermission("Rr")]
         public async Task<IActionResult> GetAttendanceStatistics([FromBody] SearchAttendanceStatisticsQuery query)
         {
             try

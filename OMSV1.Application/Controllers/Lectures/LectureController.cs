@@ -1,5 +1,4 @@
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.Lectures;
@@ -22,7 +21,7 @@ namespace OMSV1.Application.Controllers.Lectures
 
         // Get All Lectures with Pagination
         [HttpGet]
-        [RequirePermission("Lecture:read")]
+        [RequirePermission("Lr")]
 
         public async Task<IActionResult> GetAllLectures([FromQuery] PaginationParams paginationParams)
         {
@@ -45,7 +44,7 @@ namespace OMSV1.Application.Controllers.Lectures
 
         // GET method to retrieve a lecture by ID
         [HttpGet("{id}")]
-        [RequirePermission("Lecture:read")]
+        [RequirePermission("Lr")]
 
         public async Task<IActionResult> GetLectureById(Guid id)
         {
@@ -69,7 +68,7 @@ namespace OMSV1.Application.Controllers.Lectures
 
         // POST method to add a new lecture
         [HttpPost]
-        [RequirePermission("Lecture:create")]
+        [RequirePermission("Lc")]
 
         public async Task<IActionResult> AddLecture([FromBody] AddLectureCommand command)
         {
@@ -86,7 +85,7 @@ namespace OMSV1.Application.Controllers.Lectures
 
         // PUT method to update the lecture
         [HttpPut("{id}")]
-        [RequirePermission("Lecture:update")]
+        [RequirePermission("Lu")]
 
         public async Task<IActionResult> UpdateLecture(Guid id, [FromBody] UpdateLectureCommand command)
         {
@@ -109,7 +108,7 @@ namespace OMSV1.Application.Controllers.Lectures
 
         // DELETE method to delete the lecture
         [HttpDelete("{id}")]
-        [RequirePermission("Lecture:delete")]
+        [RequirePermission("Ld")]
         public async Task<IActionResult> DeleteLecture(Guid id)
         {
             try
@@ -129,7 +128,7 @@ namespace OMSV1.Application.Controllers.Lectures
 
         // Search for lectures with filters
         [HttpPost("search")]
-        [RequirePermission("Lecture:read")]
+        [RequirePermission("Lr")]
         
         public async Task<IActionResult> GetLectures([FromBody] GetLectureQuery query)
         {
