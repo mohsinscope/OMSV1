@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.Companies;
 using OMSV1.Application.Commands.LectureTypes;
@@ -24,6 +25,7 @@ namespace OMSV1.WebApi.Controllers
 
         // POST api/company
         [HttpPost("add")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> AddCompany([FromBody] AddCompanyCommand command)
         {
             try
@@ -58,6 +60,8 @@ namespace OMSV1.WebApi.Controllers
 
         // POST api/company/lecture-type
         [HttpPost("add-lecture-type")]
+        [Authorize(Policy = "RequireAdminRole")]
+
         public async Task<IActionResult> AddLectureTypeToCompany([FromBody] AddLectureTypeToCompanyCommand command)
         {
             try
