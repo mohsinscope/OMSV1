@@ -6,9 +6,7 @@ using OMSV1.Application.Commands.LectureTypes;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Companies;
 using OMSV1.Infrastructure.Extensions;
-using System;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace OMSV1.WebApi.Controllers
 {
@@ -55,6 +53,83 @@ namespace OMSV1.WebApi.Controllers
             catch (Exception ex)
             {
                 return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving companies.", new[] { ex.Message });
+            }
+        }
+       // DELETE: api/company/lectureType/{lectureTypeId}
+        [HttpDelete("lectureType/{lectureTypeId}")]
+        public async Task<IActionResult> DeleteLectureType(Guid lectureTypeId)
+        {
+            var command = new DeleteLectureTypeCommand(lectureTypeId);
+
+            try
+            {
+                bool result = await _mediator.Send(command);
+
+                if (result)
+                {
+                    return NoContent(); // Return 204 No Content if successfully deleted
+                }
+                else
+                {
+                    return NotFound($"Lecture type with ID {lectureTypeId} not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+                // DELETE: api/company/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCompany(Guid id)
+        {
+            var command = new DeleteCompanyCommand(id);
+
+            try
+            {
+                // Send the command to MediatR to delete the company
+                bool result = await _mediator.Send(command);
+
+                if (result)
+                {
+                    return NoContent(); // Return 204 No Content if successfully deleted
+                }
+                else
+                {
+                    return NotFound($"Company with ID {id} not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (optional) and return a BadRequest response
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+        // PUT: api/company/lectureType/{lectureTypeId}
+        [HttpPut("lectureType/{lectureTypeId}")]
+        public async Task<IActionResult> UpdateLectureType(Guid lectureTypeId, [FromBody] UpdateLectureTypeCommand command)
+        {
+            // Ensure the command has the correct LectureTypeId
+            command.LectureTypeId = lectureTypeId;
+
+            try
+            {
+                // Send the command to MediatR to update the LectureType
+                bool result = await _mediator.Send(command);
+
+                if (result)
+                {
+                    return NoContent(); // Return 204 No Content if successfully updated
+                }
+                else
+                {
+                    return NotFound($"Lecture type with ID {lectureTypeId} not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (optional) and return a BadRequest response
+                return BadRequest($"Error: {ex.Message}");
             }
         }
 
