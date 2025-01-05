@@ -12,7 +12,7 @@ using OMSV1.Infrastructure.Persistence;
 namespace OMSV1.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250102112158_AttachementAdded")]
+    [Migration("20250103112443_AttachementAdded")]
     partial class AttachementAdded
     {
         /// <inheritdoc />
