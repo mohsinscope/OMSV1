@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OMSV1.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using OMSV1.Infrastructure.Persistence;
 namespace OMSV1.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250105065744_Attemended")]
+    partial class Attemended
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -282,7 +285,8 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasIndex("ProfileId");
 
-                    b.HasIndex("SerialNumber");
+                    b.HasIndex("SerialNumber")
+                        .IsUnique();
 
                     b.ToTable("DamagedDevices", (string)null);
                 });
@@ -377,7 +381,8 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasIndex("OfficeId");
 
-                    b.HasIndex("PassportNumber");
+                    b.HasIndex("PassportNumber")
+                        .IsUnique();
 
                     b.HasIndex("ProfileId");
 
@@ -614,7 +619,8 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasIndex("ProfileId");
 
-                    b.HasIndex("Title");
+                    b.HasIndex("Title")
+                        .IsUnique();
 
                     b.ToTable("Lectures", (string)null);
                 });

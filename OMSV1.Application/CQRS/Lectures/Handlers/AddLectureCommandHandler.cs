@@ -3,6 +3,7 @@ using MediatR;
 using OMSV1.Application.Commands.Lectures;
 using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.Lectures;
+using OMSV1.Domain.Entities.Companies;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
 
@@ -33,21 +34,38 @@ namespace OMSV1.Application.Handlers.Lectures
                     throw new Exception($"Office ID {request.OfficeId} does not belong to Governorate ID {request.GovernorateId}.");
                 }
 
-                // Step 2: Map the command to the Lecture entity
+                // Step 2: Validate if the CompanyId exists and the LectureTypeId belongs to the specified Company
+                var company = await _unitOfWork.Repository<Company>()
+                    .FirstOrDefaultAsync(c => c.Id == request.CompanyId);
+
+                if (company == null)
+                {
+                    throw new Exception($"Company ID {request.CompanyId} does not exist.");
+                }
+
+                var lectureType = await _unitOfWork.Repository<LectureType>()
+                    .FirstOrDefaultAsync(lt => lt.Id == request.LectureTypeId && lt.CompanyId == request.CompanyId);
+
+                if (lectureType == null)
+                {
+                    throw new Exception($"LectureType ID {request.LectureTypeId} does not belong to Company ID {request.CompanyId}.");
+                }
+
+                // Step 3: Map the command to the Lecture entity
                 var lecture = _mapper.Map<Lecture>(request);
 
                 // Optionally, set any additional properties or perform transformations before saving
 
-                // Step 3: Add the lecture entity to the repository using AddAsync
+                // Step 4: Add the lecture entity to the repository using AddAsync
                 await _unitOfWork.Repository<Lecture>().AddAsync(lecture);
 
-                // Step 4: Save changes to the database
+                // Step 5: Save changes to the database
                 if (!await _unitOfWork.SaveAsync(cancellationToken))
                 {
                     throw new Exception("Failed to save the lecture to the database.");
                 }
 
-                // Step 5: Return the ID of the newly created lecture
+                // Step 6: Return the ID of the newly created lecture
                 return lecture.Id;
             }
             catch (Exception ex)

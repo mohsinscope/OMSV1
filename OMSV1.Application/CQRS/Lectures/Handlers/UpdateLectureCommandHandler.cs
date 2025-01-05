@@ -1,8 +1,10 @@
 using MediatR;
 using OMSV1.Application.Commands.Lectures;
 using OMSV1.Domain.Entities.Lectures;
+using OMSV1.Domain.Entities.Companies;
 using OMSV1.Domain.SeedWork;
-using OMSV1.Application.Helpers; // Assuming HandlerException is defined here
+using OMSV1.Application.Helpers;
+using System;
 
 namespace OMSV1.Application.Handlers.Lectures
 {
@@ -24,6 +26,19 @@ namespace OMSV1.Application.Handlers.Lectures
 
                 if (lecture == null) return false; // Lecture not found
 
+                // Validate CompanyId and LectureTypeId
+                var company = await _unitOfWork.Repository<Company>().FirstOrDefaultAsync(c => c.Id == request.CompanyId);
+                if (company == null)
+                {
+                    throw new Exception($"Company ID {request.CompanyId} does not exist.");
+                }
+
+                var lectureType = await _unitOfWork.Repository<LectureType>().FirstOrDefaultAsync(lt => lt.Id == request.LectureTypeId && lt.CompanyId == request.CompanyId);
+                if (lectureType == null)
+                {
+                    throw new Exception($"LectureType ID {request.LectureTypeId} does not belong to Company ID {request.CompanyId}.");
+                }
+
                 // Update the lecture details
                 lecture.UpdateLectureDetails(
                     request.Title,
@@ -31,7 +46,9 @@ namespace OMSV1.Application.Handlers.Lectures
                     request.Note,
                     request.OfficeId,
                     request.GovernorateId,
-                    request.ProfileId
+                    request.ProfileId,
+                    request.CompanyId,
+                    request.LectureTypeId
                 );
 
                 // Update the entity using the repository inside unit of work

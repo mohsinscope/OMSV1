@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OMSV1.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using OMSV1.Infrastructure.Persistence;
 namespace OMSV1.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250104125812_Lecturdded")]
+    partial class Lecturdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -282,8 +285,6 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasIndex("ProfileId");
 
-                    b.HasIndex("SerialNumber");
-
                     b.ToTable("DamagedDevices", (string)null);
                 });
 
@@ -376,8 +377,6 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasIndex("GovernorateId");
 
                     b.HasIndex("OfficeId");
-
-                    b.HasIndex("PassportNumber");
 
                     b.HasIndex("ProfileId");
 
@@ -613,8 +612,6 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasIndex("OfficeId");
 
                     b.HasIndex("ProfileId");
-
-                    b.HasIndex("Title");
 
                     b.ToTable("Lectures", (string)null);
                 });

@@ -6,7 +6,7 @@ using OMSV1.Application.Dtos.Lectures;
 using OMSV1.Application.Helpers;
 
 namespace OMSV1.Application.CQRS.Lectures.Queries;
-public class GetLectureQuery : IRequest <PagedList<LectureDto>>
+public class GetLectureQuery : IRequest <PagedList<LectureAllDto>>
 {
     public string Title { get; set; }
     public DateTime? StartDate { get; set; }
@@ -14,6 +14,8 @@ public class GetLectureQuery : IRequest <PagedList<LectureDto>>
     public Guid? OfficeId { get; set; }
     public Guid? GovernorateId { get; set; }
     public Guid? ProfileId { get; set; }
+    public Guid? CompanyId {get;set;}
+    public Guid? LectureTypeId {get;set;}
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;
     public PaginationParams PaginationParams { get;set; }

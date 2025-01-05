@@ -8,22 +8,25 @@ namespace OMSV1.Application.Commands.Lectures
         public Guid Id { get; set; }
         public string Title { get; set; }
         public string? Note { get; set; }
-
         public DateTime Date { get; set; }
         public Guid OfficeId { get; set; }
         public Guid GovernorateId { get; set; }
         public Guid ProfileId { get; set; }
+        public Guid CompanyId { get; set; } // New property
+        public Guid LectureTypeId { get; set; } // New property
 
         // Constructor to initialize the properties
-        public UpdateLectureCommand(Guid id, string title, DateTime date,string note, Guid officeId, Guid governorateId, Guid profileId)
+        public UpdateLectureCommand(Guid id, string title, DateTime date, string? note, Guid officeId, Guid governorateId, Guid profileId, Guid companyId, Guid lectureTypeId)
         {
             Id = id;
             Title = title;
-            Note= note;
+            Note = note;
             Date = date;
             OfficeId = officeId;
             GovernorateId = governorateId;
             ProfileId = profileId;
+            CompanyId = companyId;
+            LectureTypeId = lectureTypeId;
         }
     }
 }

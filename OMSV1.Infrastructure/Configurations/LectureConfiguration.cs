@@ -16,6 +16,10 @@ public class LectureConfiguration : IEntityTypeConfiguration<Lecture>
         builder.Property(l => l.Title)
             .IsRequired()
             .HasMaxLength(200); // Adjust length as necessary
+                          // Add index on Title
+            builder.HasIndex(dd => dd.Title)
+                .IsUnique(false); // Set to true if you want a unique index
+            
 
         builder.Property(l => l.Date)
             .IsRequired();

@@ -13,6 +13,9 @@ public class DamagedDeviceConfiguration : IEntityTypeConfiguration<DamagedDevice
         builder.Property(dd => dd.SerialNumber)
             .IsRequired()
             .HasMaxLength(100); // Adjust length as needed.
+                 // Add index on SerialNumber
+            builder.HasIndex(dd => dd.SerialNumber)
+                .IsUnique(false); // Set to true if you want a unique index
 
           builder.Property(d => d.Date)
             .IsRequired(); // Ensures the column is not nullable
