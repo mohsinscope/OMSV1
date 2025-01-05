@@ -57,6 +57,7 @@ namespace OMSV1.WebApi.Controllers
         }
        // DELETE: api/company/lectureType/{lectureTypeId}
         [HttpDelete("lectureType/{lectureTypeId}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> DeleteLectureType(Guid lectureTypeId)
         {
             var command = new DeleteLectureTypeCommand(lectureTypeId);
@@ -81,6 +82,7 @@ namespace OMSV1.WebApi.Controllers
         }
                 // DELETE: api/company/{id}
         [HttpDelete("{id}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> DeleteCompany(Guid id)
         {
             var command = new DeleteCompanyCommand(id);
@@ -107,6 +109,7 @@ namespace OMSV1.WebApi.Controllers
         }
         // PUT: api/company/lectureType/{lectureTypeId}
         [HttpPut("lectureType/{lectureTypeId}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> UpdateLectureType(Guid lectureTypeId, [FromBody] UpdateLectureTypeCommand command)
         {
             // Ensure the command has the correct LectureTypeId
