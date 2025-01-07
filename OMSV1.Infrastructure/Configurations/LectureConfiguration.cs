@@ -36,6 +36,12 @@ public class LectureConfiguration : IEntityTypeConfiguration<Lecture>
         builder.Property(l => l.ProfileId)
             .IsRequired();
 
+        // Set CompanyId and LectureTypeId to be nullable
+        builder.Property(l => l.CompanyId)
+            .IsRequired(false);  // Company is optional
+        builder.Property(l => l.LectureTypeId)
+            .IsRequired(false);  // LectureType is optional
+
         builder.HasOne(l => l.Governorate) 
             .WithMany()  
             .HasForeignKey(l => l.GovernorateId)
@@ -50,6 +56,18 @@ public class LectureConfiguration : IEntityTypeConfiguration<Lecture>
             .WithMany()  
             .HasForeignKey(l => l.ProfileId)
             .OnDelete(DeleteBehavior.Restrict); 
+        // Optional Company and LectureType relationships (foreign keys are nullable)
+        builder.HasOne(l => l.Company)
+            .WithMany()  
+            .HasForeignKey(l => l.CompanyId)
+            .OnDelete(DeleteBehavior.SetNull) // Set null when the related entity is deleted
+            .IsRequired(false); // Company is optional
+
+        builder.HasOne(l => l.LectureType)
+            .WithMany()  
+            .HasForeignKey(l => l.LectureTypeId)
+            .OnDelete(DeleteBehavior.SetNull) // Set null when the related entity is deleted
+            .IsRequired(false); // LectureType is optional
 
 
 

@@ -27,7 +27,11 @@ project.lock.json
 # Exclude system files
 *.DS_Store
 *.Thumbs.db
-#Exclude Migrations
-/Migrations/
-#Exclude Migrations
+
+# Exclude Migrations
+.Migrations/
+Migrations/
+
+# Exclude publish folder
 /publish/
+

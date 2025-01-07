@@ -227,11 +227,12 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Company");
+                    b.ToTable("Company", (string)null);
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.DamagedDevices.DamagedDevice", b =>
@@ -571,7 +572,7 @@ namespace OMSV1.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CompanyId")
+                    b.Property<Guid?>("CompanyId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("Date")
@@ -583,7 +584,7 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Property<Guid>("GovernorateId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("LectureTypeId")
+                    b.Property<Guid?>("LectureTypeId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Note")
@@ -633,13 +634,14 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("LectureType");
+                    b.ToTable("LectureType", (string)null);
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Offices.Office", b =>
@@ -1085,8 +1087,7 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasOne("OMSV1.Domain.Entities.Companies.Company", "Company")
                         .WithMany()
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("OMSV1.Domain.Entities.Governorates.Governorate", "Governorate")
                         .WithMany()
@@ -1097,8 +1098,7 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasOne("OMSV1.Domain.Entities.Lectures.LectureType", "LectureType")
                         .WithMany()
                         .HasForeignKey("LectureTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("OMSV1.Domain.Entities.Offices.Office", "Office")
                         .WithMany()
