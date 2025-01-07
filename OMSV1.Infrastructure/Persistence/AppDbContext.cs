@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Domain.Entities.Attachments;
+using OMSV1.Domain.Entities.Companies;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.DamagedPassport;
 using OMSV1.Domain.Entities.Expenses;
@@ -45,6 +46,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         //Permissions
         public DbSet<AppRolePermission> RolePermissions { get; set; }
         public DbSet<UserPermission> UserPermissions { get; set; }
+        public DbSet<Company> Company { get; set; }
+        public DbSet<LectureType> LectureType { get; set; }
+
+
 
 
 
