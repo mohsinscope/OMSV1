@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 using OMSV1.Application.Authorization.Handlers;
 using OMSV1.Application.Authorization.Providers;
-using OMSV1.Application.Authorization.Requirements;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Middleware;
 using OMSV1.Domain.SeedWork;
@@ -11,40 +12,42 @@ using OMSV1.Infrastructure.Extensions;
 using OMSV1.Infrastructure.Identity;
 using OMSV1.Infrastructure.Persistence;
 using OMSV1.Infrastructure.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Add rate limiting services
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("api", config =>
+    {
+        config.PermitLimit = 50;
+        config.Window = TimeSpan.FromSeconds(10);
+        config.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        config.QueueLimit = 20;
+    });
+
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        context.HttpContext.Response.Headers.RetryAfter = "10";
+        
+        await context.HttpContext.Response.WriteAsJsonAsync(new 
+        {
+            error = "Too many requests. Please try again later.",
+            retryAfter = 10
+        }, token);
+    };
+});
 
 // Add DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, DynamicPermissionPolicyProvider>();
-
-// builder.Services.AddAuthorization(options =>
-// {
-//     // Dynamically add policies for permissions
-//     var permissions = new[]
-//     {
-//         "DamagedDevice:create",
-//         "DamagedDevice:read",
-//         "DamagedDevice:update",
-//         "DamagedDevice:delete"
-//     };
-
-//     foreach (var permission in permissions)
-//     {
-//         options.AddPolicy($"RequirePermission:{permission}", policy =>
-//         {
-//             policy.Requirements.Add(new PermissionRequirement(permission));
-//         });
-//     }
-// });
-
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
-
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -52,24 +55,14 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddApplicationServices(builder.Configuration);
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-
-// var builder1 = WebApplication.CreateBuilder(new WebApplicationOptions
-// {
-//     WebRootPath = "wwwroot", // Set the desired web root path
-//     ContentRootPath = AppContext.BaseDirectory // Ensure proper content root path
-// });
-
-
-
-
 builder.Services.AddControllers();
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-
+// Add rate limiting middleware - place it early in the pipeline
+app.UseRateLimiter();
 
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors(x => x
@@ -82,23 +75,13 @@ app.UseCors(x => x
         "http://localhost:5173"
     )
 );
-// builder.Services.AddCors(options =>
-// {
-//     options.AddPolicy("AllowSpecificOrigins", policy =>
-//     {
-//         policy.WithOrigins("https://oms.scopesky.org")
-//               .AllowAnyHeader()
-//               .AllowAnyMethod()
-//               .AllowCredentials();
-//     });
-// });
-
-// app.UseCors("AllowSpecificOrigins");
-
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
+
+// Apply rate limiting to all API endpoints
+app.MapControllers().RequireRateLimiting("api");
+
 app.UseStaticFiles();
 
 using (var scope = app.Services.CreateScope())

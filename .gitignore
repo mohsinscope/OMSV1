@@ -31,7 +31,6 @@ project.lock.json
 # Exclude Migrations
 .Migrations/
 Migrations/
-
 # Exclude publish folder
 /publish/
 

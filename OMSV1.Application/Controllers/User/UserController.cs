@@ -16,8 +16,8 @@ using System.Security.Claims;
 using OMSV1.Infrastructure.Persistence;
 using OMSV1.Application.CQRS.Profiles.Queries;
 using OMSV1.Application.Dtos.Profiles;
-namespace OMSV1.Application.Controllers.User;
 
+namespace OMSV1.Application.Controllers.User;
 
 public class AccountController : BaseApiController
 {
@@ -26,15 +26,15 @@ public class AccountController : BaseApiController
     private readonly IMediator _mediator;
     private readonly AppDbContext _context;
 
-
     public AccountController(UserManager<ApplicationUser> userManager, 
                            ITokenService tokenService, 
-                           IMediator mediator,AppDbContext context)
+                           IMediator mediator,
+                           AppDbContext context)
     {
         _userManager = userManager;
         _tokenService = tokenService;
         _mediator = mediator;
-        _context=context;
+        _context = context;
     }
 
     [Authorize(Policy = "RequireAdminRole")] 
@@ -44,7 +44,7 @@ public class AccountController : BaseApiController
         var result = await _mediator.Send(command);
         return result;
     }
-      // Get User Permissions
+
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("{userId:Guid}/permissions")]
     public async Task<IActionResult> GetUserPermissions(Guid userId)
@@ -74,11 +74,51 @@ public class AccountController : BaseApiController
             .FirstOrDefaultAsync(x => x.NormalizedUserName == loginDto.UserName.ToUpper());
 
         if(user == null || user.UserName == null) 
-            return Unauthorized("Invalid Username");
-        
+            return Unauthorized(new { message = "Invalid Username" });
+
+        // Check if user is locked out
+        if (await _userManager.IsLockedOutAsync(user))
+        {
+            var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+            return Unauthorized(new
+            {
+                message = "Account is temporarily locked due to multiple failed attempts",
+                lockoutEnd = lockoutEnd,
+                remainingMinutes = Math.Round((lockoutEnd.Value - DateTime.UtcNow).TotalMinutes)
+            });
+        }
+
         var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
 
-        if(!result) return Unauthorized();
+        if(!result)
+        {
+            // Record failed attempt and check if should lock out
+            await _userManager.AccessFailedAsync(user);
+            
+            var failedAttempts = await _userManager.GetAccessFailedCountAsync(user);
+            var maxAttempts = _userManager.Options.Lockout.MaxFailedAccessAttempts;
+            var remainingAttempts = maxAttempts - failedAttempts;
+
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                return Unauthorized(new
+                {
+                    message = "Account has been locked due to too many failed attempts",
+                    lockoutEnd = lockoutEnd,
+                    remainingMinutes = Math.Round((lockoutEnd.Value - DateTime.UtcNow).TotalMinutes)
+                });
+            }
+
+            return Unauthorized(new
+            {
+                message = "Invalid password  or username",
+                remainingAttempts = remainingAttempts
+            });
+        }
+
+        // Reset failed attempts count on successful login
+        await _userManager.ResetAccessFailedCountAsync(user);
 
         var (accessToken, refreshToken, accessTokenExpires, refreshTokenExpires) = 
             await _tokenService.CreateToken(user);
@@ -91,6 +131,39 @@ public class AccountController : BaseApiController
             AccessTokenExpires = accessTokenExpires,
             RefreshTokenExpires = refreshTokenExpires
         }; 
+    }
+
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("unlock-account/{userId}")]
+    public async Task<IActionResult> UnlockAccount(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) 
+            return NotFound(new { message = "User not found" });
+
+        // Reset lockout and access failed count
+        await _userManager.SetLockoutEndDateAsync(user, null);
+        await _userManager.ResetAccessFailedCountAsync(user);
+
+        return Ok(new { message = "Account unlocked successfully" });
+    }
+
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet("locked-accounts")]
+    public async Task<IActionResult> GetLockedAccounts()
+    {
+        var lockedUsers = await _userManager.Users
+            .Where(u => u.LockoutEnd != null && u.LockoutEnd > DateTime.UtcNow)
+            .Select(u => new
+            {
+                u.Id,
+                u.UserName,
+                LockoutEnd = u.LockoutEnd,
+                RemainingMinutes = Math.Round((u.LockoutEnd.Value - DateTime.UtcNow).TotalMinutes)
+            })
+            .ToListAsync();
+
+        return Ok(lockedUsers);
     }
 
     [HttpPost("refresh-token")]

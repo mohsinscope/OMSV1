@@ -17,6 +17,10 @@ public static class IdentityServiceExtensions
         services.AddIdentityCore<ApplicationUser>(opt =>
         {
             opt.Password.RequireNonAlphanumeric = false;
+            // Account lockout settings
+            opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+            opt.Lockout.MaxFailedAccessAttempts = 3;
+            opt.Lockout.AllowedForNewUsers = true;
         })
             .AddRoles<AppRole>()
             .AddRoleManager<RoleManager<AppRole>>()
@@ -34,7 +38,8 @@ public static class IdentityServiceExtensions
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.Zero,
+                    
 
                 };
 
