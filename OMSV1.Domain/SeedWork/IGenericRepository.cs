@@ -24,6 +24,7 @@ namespace OMSV1.Domain.SeedWork
         Task DeleteAsync(T entity); // Return Task, not void
         Task<T?> GetByIdAsync(Guid id);
         Task<IReadOnlyList<T>> GetAllAsync();
+        IQueryable<T> Where(Expression<Func<T, bool>> predicate);
         Task UpdateAsync(T entity);
         Task<T?> GetByIdWithIncludesAsync(Guid id, params Expression<Func<T, object>>[] includes);
          // Add the AnyAsync method

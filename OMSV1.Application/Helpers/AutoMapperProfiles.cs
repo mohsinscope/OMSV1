@@ -61,7 +61,9 @@ public class AutoMapperProfiles : Profile
 
             //Lecture
             CreateMap<AddLectureCommand,Lecture>();
-            CreateMap<Lecture,LectureDto>();
+             CreateMap<Lecture, LectureDto>()
+            .ForMember(dest => dest.LectureTypeNames, opt => opt.MapFrom(src =>
+                src.LectureLectureTypes.Select(llt => llt.LectureType.Name).ToList()));
             CreateMap<Lecture,LectureAllDto>();
             CreateMap <Company,CompanyDto>();
             CreateMap <LectureType,LectureTypeDto>();

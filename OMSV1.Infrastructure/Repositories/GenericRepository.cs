@@ -82,6 +82,10 @@ namespace OMSV1.Infrastructure.Repositories
             {
                 return await _context.Set<T>().FirstOrDefaultAsync(predicate);
             }
+             public IQueryable<T> Where(Expression<Func<T, bool>> predicate)
+    {
+        return _dbSet.Where(predicate);
+    }
 
 
         // Eager loading method with optional includes

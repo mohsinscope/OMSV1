@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace OMSV1.Application.Dtos.Lectures
 {
@@ -10,32 +11,35 @@ namespace OMSV1.Application.Dtos.Lectures
         public string? Note { get; set; }
 
         public Guid OfficeId { get; set; }
-        public string OfficeName { get; set; } // Assuming you want to include Office Name
+        public string OfficeName { get; set; }
         public Guid GovernorateId { get; set; }
-        public string GovernorateName { get; set; } // Assuming you want to include Governorate Name
+        public string GovernorateName { get; set; }
         public Guid ProfileId { get; set; }
-        public string ProfileFullName { get; set; } // Assuming you want to include Profile Full Name
-        public Guid CompanyId {get;set;}
-        public string CompanyName { get; set; } // Added Company Name
-        public Guid LectureTypeId {get;set;}
-        public string LectureTypeName { get; set; } // Added Lecture Type Name
+        public string ProfileFullName { get; set; }
+        public Guid CompanyId { get; set; }
+        public string CompanyName { get; set; }
+        public List<string> LectureTypeNames { get; set; }  // Assuming multiple Lecture Types
 
-        public LectureDto(string title, DateTime date,string note, Guid officeId, string officeName, Guid governorateId, 
-                          string governorateName, Guid profileId, string profileFullName,Guid companyId,string companyName,Guid lectureTypeId,string lectureTypeName)
+        // Default constructor (parameterless)
+        public LectureDto() { }
+
+        // Constructor with parameters for manual initialization
+        public LectureDto(string title, DateTime date, string note, Guid officeId, string officeName, 
+                          Guid governorateId, string governorateName, Guid profileId, string profileFullName, 
+                          Guid companyId, string companyName, List<string> lectureTypeNames)
         {
             Title = title;
             Date = date;
-            Note= note;
+            Note = note;
             OfficeId = officeId;
             OfficeName = officeName;
             GovernorateId = governorateId;
             GovernorateName = governorateName;
             ProfileId = profileId;
             ProfileFullName = profileFullName;
-            CompanyId=companyId;
-            CompanyName=companyName;
-            LectureTypeId=lectureTypeId;
-            LectureTypeName=lectureTypeName;
+            CompanyId = companyId;
+            CompanyName = companyName;
+            LectureTypeNames = lectureTypeNames ?? new List<string>(); // Default to an empty list if null
         }
     }
 }

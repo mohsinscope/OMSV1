@@ -1,10 +1,9 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Commands.Lectures;
-using OMSV1.Domain.Entities.Lectures;
-using OMSV1.Domain.Entities.Companies;
-using OMSV1.Domain.SeedWork;
 using OMSV1.Application.Helpers;
-using System;
+using OMSV1.Domain.Entities.Lectures;
+using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Application.Handlers.Lectures
 {
@@ -21,25 +20,11 @@ namespace OMSV1.Application.Handlers.Lectures
         {
             try
             {
-                // Get the lecture using the repository inside unit of work
+                // Get the lecture
                 var lecture = await _unitOfWork.Repository<Lecture>().GetByIdAsync(request.Id);
+                if (lecture == null) return false; // Return false if not found
 
-                if (lecture == null) return false; // Lecture not found
-
-                // Validate CompanyId and LectureTypeId
-                var company = await _unitOfWork.Repository<Company>().FirstOrDefaultAsync(c => c.Id == request.CompanyId);
-                if (company == null)
-                {
-                    throw new Exception($"Company ID {request.CompanyId} does not exist.");
-                }
-
-                var lectureType = await _unitOfWork.Repository<LectureType>().FirstOrDefaultAsync(lt => lt.Id == request.LectureTypeId && lt.CompanyId == request.CompanyId);
-                if (lectureType == null)
-                {
-                    throw new Exception($"LectureType ID {request.LectureTypeId} does not belong to Company ID {request.CompanyId}.");
-                }
-
-                // Update the lecture details
+                // Update lecture details
                 lecture.UpdateLectureDetails(
                     request.Title,
                     request.Date,
@@ -48,19 +33,32 @@ namespace OMSV1.Application.Handlers.Lectures
                     request.GovernorateId,
                     request.ProfileId,
                     request.CompanyId,
-                    request.LectureTypeId
+                    null // Clear existing LectureTypes
                 );
 
-                // Update the entity using the repository inside unit of work
-                await _unitOfWork.Repository<Lecture>().UpdateAsync(lecture);
+                // Remove existing LectureLectureTypes
+                var existingLectureTypes = await _unitOfWork.Repository<LectureLectureType>()
+                    .GetAllAsQueryable()
+                    .Where(llt => llt.LectureId == request.Id)
+                    .ToListAsync(cancellationToken);
 
-                // Save the changes using unit of work
-                if (await _unitOfWork.SaveAsync(cancellationToken))
+                foreach (var existing in existingLectureTypes)
                 {
-                    return true;
+                    await _unitOfWork.Repository<LectureLectureType>().DeleteAsync(existing);
                 }
 
-                return false;
+                // Add the new LectureTypes
+                foreach (var lectureTypeId in request.LectureTypeIds)
+                {
+                    var lectureLectureType = new LectureLectureType(request.Id, lectureTypeId);
+                    await _unitOfWork.Repository<LectureLectureType>().AddAsync(lectureLectureType);
+                }
+
+                // Update the lecture entity in the repository
+                await _unitOfWork.Repository<Lecture>().UpdateAsync(lecture);
+
+                // Save changes to the database
+                return await _unitOfWork.SaveAsync(cancellationToken);
             }
             catch (Exception ex)
             {

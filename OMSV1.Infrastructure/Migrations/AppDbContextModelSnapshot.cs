@@ -584,9 +584,6 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Property<Guid>("GovernorateId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("LectureTypeId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -609,8 +606,6 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasIndex("GovernorateId");
 
-                    b.HasIndex("LectureTypeId");
-
                     b.HasIndex("OfficeId");
 
                     b.HasIndex("ProfileId");
@@ -618,6 +613,27 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasIndex("Title");
 
                     b.ToTable("Lectures", (string)null);
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Lectures.LectureLectureType", b =>
+                {
+                    b.Property<Guid>("LectureId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("LectureTypeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("LectureId", "LectureTypeId");
+
+                    b.HasIndex("LectureTypeId");
+
+                    b.ToTable("LectureLectureTypes", (string)null);
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Lectures.LectureType", b =>
@@ -1095,11 +1111,6 @@ namespace OMSV1.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("OMSV1.Domain.Entities.Lectures.LectureType", "LectureType")
-                        .WithMany()
-                        .HasForeignKey("LectureTypeId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("OMSV1.Domain.Entities.Offices.Office", "Office")
                         .WithMany()
                         .HasForeignKey("OfficeId")
@@ -1116,11 +1127,28 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.Navigation("Governorate");
 
-                    b.Navigation("LectureType");
-
                     b.Navigation("Office");
 
                     b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Lectures.LectureLectureType", b =>
+                {
+                    b.HasOne("OMSV1.Domain.Entities.Lectures.Lecture", "Lecture")
+                        .WithMany("LectureLectureTypes")
+                        .HasForeignKey("LectureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OMSV1.Domain.Entities.Lectures.LectureType", "LectureType")
+                        .WithMany("LectureLectureTypes")
+                        .HasForeignKey("LectureTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lecture");
+
+                    b.Navigation("LectureType");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Lectures.LectureType", b =>
@@ -1215,6 +1243,16 @@ namespace OMSV1.Infrastructure.Migrations
             modelBuilder.Entity("OMSV1.Domain.Entities.Governorates.Governorate", b =>
                 {
                     b.Navigation("Offices");
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Lectures.Lecture", b =>
+                {
+                    b.Navigation("LectureLectureTypes");
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Lectures.LectureType", b =>
+                {
+                    b.Navigation("LectureLectureTypes");
                 });
 
             modelBuilder.Entity("OMSV1.Infrastructure.Identity.AppRole", b =>

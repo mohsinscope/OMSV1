@@ -21,15 +21,13 @@ namespace OMSV1.Domain.Specifications.Lectures
                 (!officeId.HasValue || x.OfficeId == officeId.Value) &&
                 (!governorateId.HasValue || x.GovernorateId == governorateId.Value) &&
                 (!profileId.HasValue || x.ProfileId == profileId.Value) &&
-                (!companyId.HasValue || x.CompanyId == companyId.Value) && // Filter by CompanyId
-                (!lectureTypeId.HasValue || x.LectureTypeId == lectureTypeId.Value)) // Filter by LectureTypeId
+                (!companyId.HasValue || x.CompanyId == companyId.Value) )// Filter by CompanyId
         {
             // Include related entities for eager loading
             AddInclude(x => x.Governorate);
             AddInclude(x => x.Office);
             AddInclude(x => x.Profile);
             AddInclude(x => x.Company); // Include Company
-            AddInclude(x => x.LectureType); // Include LectureType
 
             // Apply ordering by date (descending)
             ApplyOrderByDescending(x => x.Date);

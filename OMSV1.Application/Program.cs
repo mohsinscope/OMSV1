@@ -108,24 +108,24 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
     // Create roles
-    // var roles = new[] { "Admin", "Supervisor", "Manager"};
-    // foreach (var role in roles)
-    // {
-    //     if (!await roleManager.RoleExistsAsync(role))
-    //     {
-    //         await roleManager.CreateAsync(new AppRole { Name = role });
-    //     }
-    // }
+    var roles = new[] { "Admin", "Supervisor", "Manager"};
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new AppRole { Name = role });
+        }
+    }
 
     // Create an admin user
-    // var adminEmail = "admin";
-    // var adminUser = await userManager.FindByEmailAsync(adminEmail);
-    // if (adminUser == null)
-    // {
-    //     var user = new ApplicationUser { UserName = adminEmail, Email = adminEmail };
-    //     await userManager.CreateAsync(user, "Admin@123");
-    //     await userManager.AddToRoleAsync(user, "Admin");
-    // }
+    var adminEmail = "admin";
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    if (adminUser == null)
+    {
+        var user = new ApplicationUser { UserName = adminEmail, Email = adminEmail };
+        await userManager.CreateAsync(user, "Admin@123");
+        await userManager.AddToRoleAsync(user, "Admin");
+    }
 }
 
 
