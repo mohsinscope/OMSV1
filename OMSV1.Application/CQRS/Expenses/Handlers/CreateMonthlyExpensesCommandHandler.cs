@@ -1,5 +1,3 @@
-namespace OMSV1.Application.Handlers.Expenses;
-
 using AutoMapper;
 using MediatR;
 using OMSV1.Application.Commands.Expenses;
@@ -24,19 +22,39 @@ public class CreateMonthlyExpensesCommandHandler : IRequestHandler<CreateMonthly
         try
         {
             // Validate input
-            if (request.TotalAmount <= -1)
+            if (request.TotalAmount < 0)
             {
-                throw new ArgumentException("TotalAmount must be greater than zero.");
+                throw new ArgumentException("TotalAmount must be greater than or equal to zero.");
             }
 
-            // Map request to entity
+            // Fetch all thresholds
+            var thresholds = await _unitOfWork.Repository<Threshold>().GetAllAsync();
+            if (thresholds == null || !thresholds.Any())
+            {
+                throw new InvalidOperationException("No thresholds have been defined.");
+            }
+
+            // Determine the appropriate threshold
+            var threshold = thresholds.FirstOrDefault(t =>
+                request.TotalAmount >= t.MinValue && request.TotalAmount <= t.MaxValue);
+
+            if (threshold == null)
+            {
+                throw new InvalidOperationException("No matching threshold found for the given TotalAmount.");
+            }
+
+            // Create MonthlyExpenses with the assigned threshold
             var monthlyExpenses = new MonthlyExpenses(
                 (Status)request.Status,
                 request.TotalAmount,
                 request.Notes,
                 request.OfficeId,
                 request.GovernorateId,
-                request.ProfileId);
+                request.ProfileId
+            );
+
+            // Assign the determined threshold
+            monthlyExpenses.AssignThreshold(threshold);
 
             // Add entity to the repository
             await _unitOfWork.Repository<MonthlyExpenses>().AddAsync(monthlyExpenses);
@@ -49,10 +67,9 @@ public class CreateMonthlyExpensesCommandHandler : IRequestHandler<CreateMonthly
 
             return monthlyExpenses.Id;
         }
-     catch (Exception ex)
-{
-    throw new HandlerException($"An error occurred while creating the MonthlyExpenses. Details: {ex.Message}", ex);
-}
-
+        catch (Exception ex)
+        {
+            throw new HandlerException($"An error occurred while creating the MonthlyExpenses. Details: {ex.Message}", ex);
+        }
     }
 }

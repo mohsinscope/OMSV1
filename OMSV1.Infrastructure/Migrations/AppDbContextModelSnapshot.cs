@@ -415,8 +415,10 @@ namespace OMSV1.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("ActionType")
-                        .HasColumnType("integer");
+                    b.Property<string>("ActionType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
@@ -433,6 +435,8 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ActionType");
 
                     b.HasIndex("MonthlyExpensesId");
 
@@ -528,6 +532,9 @@ namespace OMSV1.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("ThresholdId")
+                        .HasColumnType("uuid");
+
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -539,7 +546,34 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasIndex("ProfileId");
 
+                    b.HasIndex("ThresholdId");
+
                     b.ToTable("MonthlyExpenses", (string)null);
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.Threshold", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("MaxValue")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("MinValue")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Thresholds", (string)null);
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Governorates.Governorate", b =>
@@ -1091,11 +1125,18 @@ namespace OMSV1.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("OMSV1.Domain.Entities.Expenses.Threshold", "Threshold")
+                        .WithMany()
+                        .HasForeignKey("ThresholdId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Governorate");
 
                     b.Navigation("Office");
 
                     b.Navigation("Profile");
+
+                    b.Navigation("Threshold");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Lectures.Lecture", b =>

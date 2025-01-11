@@ -1,4 +1,3 @@
-using System;
 using System.Linq.Expressions;
 using OMSV1.Domain.SeedWork;
 
@@ -11,6 +10,9 @@ public interface ISpecification<T> where T : Entity
     List<string> IncludeStrings { get; }
     Expression<Func<T, object>> OrderBy { get; }
     Expression<Func<T, object>> OrderByDescending { get; }
+    Expression<Func<T, object>>? SecondaryOrderBy { get; }
+    Expression<Func<T, object>>? SecondaryOrderByDescending { get; }
+    bool IsSecondaryDescending { get; }
     int Take { get; }
     int Skip { get; }
     bool IsPagingEnabled { get; }

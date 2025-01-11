@@ -1,3 +1,5 @@
+using OMSV1.Domain.Entities.Expenses;
+
 namespace OMSV1.Application.DTOs.Expenses;
 
 public class MonthlyExpensesDto
@@ -15,5 +17,7 @@ public class MonthlyExpensesDto
 
     public Guid ProfileId { get; set; }
     public string ProfileFullName { get; set; } = string.Empty;
+    public string ThresholdName { get; set; } = string.Empty; // Only show the threshold name
+
     public DateTime DateCreated { get; set; } // Add this property
 }

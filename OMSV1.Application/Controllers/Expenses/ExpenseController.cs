@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.Expenses;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Expenses;
@@ -16,6 +17,7 @@ namespace OMSV1.Application.Controllers.Expenses
             _mediator = mediator;
         }
         [HttpGet]
+        [RequirePermission("EXr")]
         public async Task<IActionResult> GetAllMonthlyExpenses([FromQuery] PaginationParams paginationParams)
         {
             try
@@ -33,8 +35,29 @@ namespace OMSV1.Application.Controllers.Expenses
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet("{id}")]
+        [RequirePermission("EXr")]
+        public async Task<IActionResult> GetMonthlyExpensesById(Guid id)
+        {
+            try
+            {
+                var query = new GetMonthlyExpensesByIdQuery(id);
+                var result = await _mediator.Send(query);
+
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving the monthly expenses.", details = ex.Message });
+            }
+        }
 
         [HttpGet("{monthlyExpensesId}/daily-expenses")]
+        [RequirePermission("EXr")]
         public async Task<IActionResult> GetDailyExpensesByMonthlyExpensesId(Guid monthlyExpensesId)
         {
             try
@@ -49,6 +72,7 @@ namespace OMSV1.Application.Controllers.Expenses
         }
 
         [HttpPost ("MonthlyExpenses")]
+        [RequirePermission("EXc")]
         public async Task<IActionResult> AddMonthlyExpenses([FromBody] CreateMonthlyExpensesCommand command)
         {
             try
@@ -63,6 +87,7 @@ namespace OMSV1.Application.Controllers.Expenses
         }
         //Add Daily Expenses
         [HttpPost("{monthlyExpensesId}/daily-expenses")]
+        [RequirePermission("EXc")]
         public async Task<IActionResult> AddDailyExpense(Guid monthlyExpensesId, [FromBody] AddDailyExpensesCommand command)
         {
             try
@@ -78,6 +103,7 @@ namespace OMSV1.Application.Controllers.Expenses
         }
 
         [HttpPost("{id}/status")]
+        [RequirePermission("EXc")]
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateMonthlyExpensesStatusCommand command)
         {
             try
@@ -96,6 +122,7 @@ namespace OMSV1.Application.Controllers.Expenses
             }
         }
         [HttpPost("search")]
+        [RequirePermission("EXr")]
         public async Task<IActionResult> SearchMonthlyExpenses([FromBody] GetFilteredMonthlyExpensesQuery query)
         {
             try
@@ -109,8 +136,28 @@ namespace OMSV1.Application.Controllers.Expenses
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpPost("search-statistics")]
+        [RequirePermission("EXr")]
+        public async Task<IActionResult> SearchStatistics([FromBody] SearchExpensesStatisticsQuery query)
+        {
+            try
+            {
+                var result = await _mediator.Send(query);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception if needed
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while retrieving expenses statistics.",
+                    details = ex.Message
+                });
+            }
+        }
 
         [HttpPut("{id}")]
+        [RequirePermission("EXu")]
         public async Task<IActionResult> UpdateDailyExpense(Guid id, [FromBody] UpdateDailyExpensesCommand command)
         {
             try
@@ -132,6 +179,7 @@ namespace OMSV1.Application.Controllers.Expenses
         }
 
         [HttpDelete("{id}")]
+        [RequirePermission("EXd")]
         public async Task<IActionResult> DeleteDailyExpense(Guid id)
         {
             try

@@ -4,9 +4,12 @@ public enum Status
 {
     New = 0, // Initial state
     SentToProjectCoordinator = 1,
-    SentToManager = 2,
-    SentToDirector = 3,
-    SentToAccountant = 4,
-    ReturnedToSupervisor = 5,
-    Completed = 6
+    ReturnedToProjectCoordinator = 2,
+    SentToManager = 3,
+    ReturnedToManager = 3,
+    SentToDirector = 4,
+    SentToAccountant = 5,
+    ReturnedToSupervisor = 6,
+    RecievedBySupervisor = 7,
+    Completed = 8
 }

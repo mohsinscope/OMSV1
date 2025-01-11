@@ -48,6 +48,7 @@ public class AutoMapperProfiles : Profile
            CreateMap<ExpenseType,ExpenseTypeDto>();
             CreateMap<MonthlyExpenses, MonthlyExpensesDto>();
             CreateMap<DailyExpenses, DailyExpensesDto>();
+        CreateMap<OMSV1.Domain.Entities.Expenses.Action,ActionDto>();
 
            // Governorate mappings
             CreateMap<Governorate, GovernorateDto>();

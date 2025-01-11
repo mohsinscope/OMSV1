@@ -36,6 +36,15 @@ public class MonthlyExpensesConfiguration : IEntityTypeConfiguration<MonthlyExpe
             .WithMany()
             .HasForeignKey(me => me.ProfileId)
             .OnDelete(DeleteBehavior.Restrict);
+            
+        builder.Property(me => me.ThresholdId)
+            .IsRequired(false);
+
+        builder.HasOne(me => me.Threshold)
+            .WithMany()
+            .HasForeignKey(me => me.ThresholdId)
+            .OnDelete(DeleteBehavior.Restrict);
+            
 
         builder.Navigation(me => me.actions).HasField("_actions");
         builder.Navigation(me => me.dailyExpenses).HasField("_dailyExpenses");

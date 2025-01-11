@@ -21,6 +21,8 @@ public class MonthlyExpenses(Status status, decimal totalAmount, string notes, G
     public Governorate? Governorate { get; private set; }
     public Office? Office { get; private set; }
     public Profile? Profile { get; private set; }
+    public Guid? ThresholdId { get; private set; }
+    public Threshold? Threshold { get; private set; }
 
     private List<Action> _actions = new List<Action>();
     public IReadOnlyCollection<Action> actions => _actions.AsReadOnly();
@@ -40,13 +42,19 @@ public class MonthlyExpenses(Status status, decimal totalAmount, string notes, G
     // }
 
     // Method to add a daily expense
-    public void AddDailyExpense(DailyExpenses dailyExpense)
+    public void AddDailyExpense(DailyExpenses dailyExpense, IEnumerable<Threshold> thresholds)
     {
         if (Status == Status.Completed)
             throw new InvalidOperationException("Cannot add daily expenses to a completed MonthlyExpenses.");
 
+        if (dailyExpense == null)
+            throw new ArgumentNullException(nameof(dailyExpense));
+
         _dailyExpenses.Add(dailyExpense);
         TotalAmount += dailyExpense.Amount;
+
+        // Recalculate the threshold dynamically
+        RecalculateThreshold(thresholds);
     }
 
     // Method to update status
@@ -68,5 +76,26 @@ public class MonthlyExpenses(Status status, decimal totalAmount, string notes, G
 
         TotalAmount += adjustmentAmount;
     }
+    //Threshold Assignemnt
+         public void AssignThreshold(Threshold threshold)
+        {
+            if (TotalAmount < threshold.MinValue || TotalAmount > threshold.MaxValue)
+                throw new InvalidOperationException("The total amount does not match the provided threshold.");
+
+            ThresholdId = threshold.Id;
+            Threshold = threshold;
+        }
+        //Recalculate threshold
+    public void RecalculateThreshold(IEnumerable<Threshold> thresholds)
+    {
+        var matchingThreshold = thresholds.FirstOrDefault(t =>
+            TotalAmount >= t.MinValue && TotalAmount <= t.MaxValue);
+
+        if (matchingThreshold == null)
+            throw new InvalidOperationException("No matching threshold found for the updated TotalAmount.");
+
+        AssignThreshold(matchingThreshold);
+    }
+
 
 }
