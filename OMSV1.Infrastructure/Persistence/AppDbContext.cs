@@ -48,6 +48,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         public DbSet<UserPermission> UserPermissions { get; set; }
         public DbSet<Company> Company { get; set; }
         public DbSet<LectureType> LectureType { get; set; }
+        public DbSet<Threshold> Thresholds {get;set;}
 
 
 
