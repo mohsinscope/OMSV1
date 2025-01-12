@@ -54,6 +54,20 @@ namespace OMSV1.WebApi.Controllers
                 return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving companies.", new[] { ex.Message });
             }
         }
+        [HttpGet("lecture-types")]
+        public async Task<IActionResult> GetAllLectureTypes([FromQuery] PaginationParams paginationParams)
+        {
+            try
+            {
+                var lectureTypes = await _mediator.Send(new GetAllLectureTypesQuery(paginationParams));
+                Response.AddPaginationHeader(lectureTypes); // Adds pagination details to response headers
+                return Ok(lectureTypes); // Returns PagedList<LectureTypeDto>
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving lecture types.", new[] { ex.Message });
+            }
+        }
        // DELETE: api/company/lectureType/{lectureTypeId}
         [HttpDelete("lectureType/{lectureTypeId}")]
         [Authorize(Policy = "RequireAdminRole")]

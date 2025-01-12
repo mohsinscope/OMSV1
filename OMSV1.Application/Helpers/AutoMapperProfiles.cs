@@ -76,6 +76,8 @@ public class AutoMapperProfiles : Profile
             CreateMap<Lecture,LectureAllDto>();
             CreateMap <Company,CompanyDto>();
             CreateMap <LectureType,LectureTypeDto>();
+            CreateMap <LectureType,LectureTypeAllDto>();
+
 
             // Profile Mapping
             CreateMap<Profile, ProfileDto>();

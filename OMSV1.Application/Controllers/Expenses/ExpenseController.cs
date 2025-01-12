@@ -155,6 +155,25 @@ namespace OMSV1.Application.Controllers.Expenses
                 });
             }
         }
+        [HttpPost("compare-statistics")]
+        [RequirePermission("EXr")]
+        public async Task<IActionResult> CompareStatistics([FromBody] CompareMonthlyExpensesQuery query)
+        {
+            try
+            {
+                var result = await _mediator.Send(query);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception if needed
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while comparing monthly expenses statistics.",
+                    details = ex.Message
+                });
+            }
+        }
 
         [HttpPut("{id}")]
         [RequirePermission("EXu")]
