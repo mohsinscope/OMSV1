@@ -156,7 +156,7 @@ namespace OMSV1.Application.Controllers.Expenses
             }
         }
         [HttpPost("compare-statistics")]
-        [RequirePermission("EXr")]
+       // [RequirePermission("EXr")]
         public async Task<IActionResult> CompareStatistics([FromBody] CompareMonthlyExpensesQuery query)
         {
             try
@@ -174,6 +174,23 @@ namespace OMSV1.Application.Controllers.Expenses
                 });
             }
         }
+           [HttpPost("search-last-month")]
+            public async Task<IActionResult> SearchLastMonthExpenses([FromBody] GetLastMonthQuery query)
+            {
+                try
+                {
+                    var result = await _mediator.Send(query);
+
+                    if (result == null)
+                        return NotFound("No expenses found for the specified criteria.");
+
+                    return Ok(result);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new { message = "An error occurred while retrieving last month's expenses.", details = ex.Message });
+                }
+            }
 
         [HttpPut("{id}")]
         [RequirePermission("EXu")]

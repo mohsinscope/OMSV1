@@ -26,7 +26,7 @@ public class CompareMonthlyExpensesHandler : IRequestHandler<CompareMonthlyExpen
         try
         {
             // Define specifications for this month and last month
-            var thisMonthSpec = new FilterExpensesByThresholdSpecification(
+            var thisMonthSpec = new FilterLastMonthExpensesComparisonSpecification(
                 request.OfficeId,
                 request.GovernorateId,
                 request.ThresholdId,
@@ -34,7 +34,7 @@ public class CompareMonthlyExpensesHandler : IRequestHandler<CompareMonthlyExpen
                 request.EndDate
             );
 
-            var lastMonthSpec = new FilterExpensesByThresholdSpecification(
+            var lastMonthSpec = new FilterLastMonthExpensesComparisonSpecification(
                 request.OfficeId,
                 request.GovernorateId,
                 request.ThresholdId,
