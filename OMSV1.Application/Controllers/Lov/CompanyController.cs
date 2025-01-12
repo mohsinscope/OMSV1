@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.Companies;
 using OMSV1.Application.Commands.LectureTypes;
+using OMSV1.Application.Controllers;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Companies;
 using OMSV1.Infrastructure.Extensions;
@@ -10,9 +11,7 @@ using System.Net;
 
 namespace OMSV1.WebApi.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class CompanyController : ControllerBase
+    public class CompanyController : BaseApiController
     {
         private readonly IMediator _mediator;
 
