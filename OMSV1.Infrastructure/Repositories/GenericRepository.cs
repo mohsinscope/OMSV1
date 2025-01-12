@@ -152,7 +152,7 @@ namespace OMSV1.Infrastructure.Repositories
                 //         return query;
                 //     }
 
-            }
+            
             //sorting
        public IQueryable<T> ApplySorting(IQueryable<T> query, ISpecification<T> spec)
         {
@@ -178,7 +178,7 @@ namespace OMSV1.Infrastructure.Repositories
 
     
 }
-
+}
 
 
 
