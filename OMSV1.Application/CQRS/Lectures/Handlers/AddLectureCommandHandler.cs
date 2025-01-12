@@ -6,6 +6,7 @@ using OMSV1.Domain.Entities.Lectures;
 using OMSV1.Domain.Entities.Companies;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.SeedWork;
+using System.Linq;
 
 namespace OMSV1.Application.Handlers.Lectures
 {
@@ -24,17 +25,16 @@ namespace OMSV1.Application.Handlers.Lectures
         {
             try
             {
-                // Step 1: Validate if the OfficeId belongs to the GovernorateId using FirstOrDefaultAsync
+                // Step 1: Validate if the OfficeId belongs to the GovernorateId
                 var office = await _unitOfWork.Repository<Office>()
                     .FirstOrDefaultAsync(o => o.Id == request.OfficeId && o.GovernorateId == request.GovernorateId);
 
                 if (office == null)
                 {
-                    // If the office doesn't belong to the governorate, throw an exception
                     throw new Exception($"Office ID {request.OfficeId} does not belong to Governorate ID {request.GovernorateId}.");
                 }
 
-                // Step 2: Validate if the CompanyId exists and the LectureTypeId belongs to the specified Company
+                // Step 2: Validate if the CompanyId exists
                 var company = await _unitOfWork.Repository<Company>()
                     .FirstOrDefaultAsync(c => c.Id == request.CompanyId);
 
@@ -43,34 +43,52 @@ namespace OMSV1.Application.Handlers.Lectures
                     throw new Exception($"Company ID {request.CompanyId} does not exist.");
                 }
 
-                var lectureType = await _unitOfWork.Repository<LectureType>()
-                    .FirstOrDefaultAsync(lt => lt.Id == request.LectureTypeId && lt.CompanyId == request.CompanyId);
-
-                if (lectureType == null)
+                // Step 3: Validate all LectureTypes belong to the specified Company
+                var validLectureTypes = new List<LectureType>();
+                foreach (var lectureTypeId in request.LectureTypeIds)
                 {
-                    throw new Exception($"LectureType ID {request.LectureTypeId} does not belong to Company ID {request.CompanyId}.");
+                    var lectureType = await _unitOfWork.Repository<LectureType>()
+                        .FirstOrDefaultAsync(lt => lt.Id == lectureTypeId && lt.CompanyId == request.CompanyId);
+                    
+                    if (lectureType == null)
+                    {
+                        throw new Exception($"LectureType ID {lectureTypeId} does not exist or does not belong to Company ID {request.CompanyId}.");
+                    }
+                    
+                    validLectureTypes.Add(lectureType);
                 }
 
-                // Step 3: Map the command to the Lecture entity
-                var lecture = _mapper.Map<Lecture>(request);
+                // Step 4: Create the lecture without LectureTypes first
+                var lecture = new Lecture(
+                    request.Title,
+                    request.Date,
+                    request.Note,
+                    request.OfficeId,
+                    request.GovernorateId,
+                    request.ProfileId,
+                    request.CompanyId
+                );
 
-                // Optionally, set any additional properties or perform transformations before saving
-
-                // Step 4: Add the lecture entity to the repository using AddAsync
+                // Step 5: Add the lecture entity to the repository
                 await _unitOfWork.Repository<Lecture>().AddAsync(lecture);
 
-                // Step 5: Save changes to the database
+                // Step 6: Add LectureTypes to the lecture
+                foreach (var lectureTypeId in request.LectureTypeIds)
+                {
+                    lecture.AddLectureType(lectureTypeId);
+                }
+
+                // Step 7: Save changes to the database
                 if (!await _unitOfWork.SaveAsync(cancellationToken))
                 {
                     throw new Exception("Failed to save the lecture to the database.");
                 }
 
-                // Step 6: Return the ID of the newly created lecture
+                // Step 8: Return the ID of the newly created lecture
                 return lecture.Id;
             }
             catch (Exception ex)
             {
-                // Handle the exception and throw a custom HandlerException
                 throw new HandlerException("An error occurred while adding the lecture.", ex);
             }
         }

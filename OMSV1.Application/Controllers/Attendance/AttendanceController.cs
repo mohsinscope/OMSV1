@@ -75,7 +75,7 @@ namespace OMSV1.API.Controllers
             catch (HandlerException ex)
             {
                 // Return 400 BadRequest for specific business-related exceptions
-                return ResponseHelper.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message, [ex.InnerException?.Message]);
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message);
             }
             catch (Exception ex)
             {

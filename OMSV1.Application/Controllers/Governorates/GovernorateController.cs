@@ -11,8 +11,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace OMSV1.Application.Controllers.Governorates
 {
-    [ApiController]
-    [Route("api/[controller]")]
     public class GovernorateController : BaseApiController
     {
         private readonly IMediator _mediator;

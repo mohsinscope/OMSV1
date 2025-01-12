@@ -28,6 +28,12 @@ namespace OMSV1.Infrastructure.Repositories
             {
                 return ApplySpecification(spec);
             }
+            
+        public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
+
+            {
+                return await _context.Set<T>().AnyAsync(predicate);
+            }
 
 
         public IQueryable<T> GetAllAsQueryable()
@@ -82,6 +88,10 @@ namespace OMSV1.Infrastructure.Repositories
             {
                 return await _context.Set<T>().FirstOrDefaultAsync(predicate);
             }
+             public IQueryable<T> Where(Expression<Func<T, bool>> predicate)
+    {
+        return _dbSet.Where(predicate);
+    }
 
 
         // Eager loading method with optional includes
@@ -143,6 +153,27 @@ namespace OMSV1.Infrastructure.Repositories
                 //     }
 
             }
+            //sorting
+       public IQueryable<T> ApplySorting(IQueryable<T> query, ISpecification<T> spec)
+        {
+            if (spec.OrderBy != null)
+            {
+                query = query.OrderBy(spec.OrderBy);
+            }
+            else if (spec.OrderByDescending != null)
+            {
+                query = query.OrderByDescending(spec.OrderByDescending);
+            }
+
+            if (spec.SecondaryOrderByDescending != null)
+            {
+                query = ((IOrderedQueryable<T>)query).ThenByDescending(spec.SecondaryOrderByDescending);
+            }
+
+            return query;
+        }
+
+
 
 
     

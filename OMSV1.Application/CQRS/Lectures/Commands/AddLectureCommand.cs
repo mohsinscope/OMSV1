@@ -13,9 +13,17 @@ namespace OMSV1.Application.Commands.Lectures
         public Guid GovernorateId { get; set; }
         public Guid ProfileId { get; set; }
         public Guid CompanyId { get; set; } // New property for Company
-        public Guid LectureTypeId { get; set; } // New property for LectureType
+        public List<Guid> LectureTypeIds { get; set; } // Changed to List<Guid>
 
-        public AddLectureCommand(string title, DateTime date, string note, Guid officeId, Guid governorateId, Guid profileId, Guid companyId, Guid lectureTypeId)
+                public AddLectureCommand(
+            string title, 
+            DateTime date, 
+            string note, 
+            Guid officeId, 
+            Guid governorateId, 
+            Guid profileId, 
+            Guid companyId, 
+            List<Guid> lectureTypeIds)  // Updated parameter
         {
             Title = title;
             Date = date;
@@ -24,7 +32,7 @@ namespace OMSV1.Application.Commands.Lectures
             GovernorateId = governorateId;
             ProfileId = profileId;
             CompanyId = companyId;
-            LectureTypeId = lectureTypeId;
+            LectureTypeIds = lectureTypeIds;
         }
     }
 }

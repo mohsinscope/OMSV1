@@ -10,16 +10,19 @@ using OMSV1.Application.Dtos;
 using OMSV1.Application.Dtos.Attendances;
 using OMSV1.Application.Dtos.Companies;
 using OMSV1.Application.Dtos.DamagedDevices;
+using OMSV1.Application.Dtos.Expenses;
 using OMSV1.Application.Dtos.Governorates;
 using OMSV1.Application.Dtos.Lectures;
 using OMSV1.Application.Dtos.LectureTypes;
 using OMSV1.Application.Dtos.Offices;
 using OMSV1.Application.Dtos.Profiles;
+using OMSV1.Application.DTOs.Expenses;
 using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.Entities.Companies;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.DamagedPassport;
+using OMSV1.Domain.Entities.Expenses;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Lectures;
 using OMSV1.Domain.Entities.Offices;
@@ -41,6 +44,12 @@ public class AutoMapperProfiles : Profile
            CreateMap<CreateOfficeDto, Office>();
            CreateMap<UpdateOfficeCommand, Office>();
            CreateMap<AddOfficeCommand, Office>(); 
+           //Expenses Mappings
+           CreateMap<ExpenseType,ExpenseTypeDto>();
+            CreateMap<MonthlyExpenses, MonthlyExpensesDto>();
+            CreateMap<DailyExpenses, DailyExpensesDto>();
+        CreateMap<OMSV1.Domain.Entities.Expenses.Action,ActionDto>();
+
            // Governorate mappings
             CreateMap<Governorate, GovernorateDto>();
             CreateMap<CreateGovernorateDto, Governorate>();
@@ -61,7 +70,9 @@ public class AutoMapperProfiles : Profile
 
             //Lecture
             CreateMap<AddLectureCommand,Lecture>();
-            CreateMap<Lecture,LectureDto>();
+             CreateMap<Lecture, LectureDto>()
+            .ForMember(dest => dest.LectureTypeNames, opt => opt.MapFrom(src =>
+                src.LectureLectureTypes.Select(llt => llt.LectureType.Name).ToList()));
             CreateMap<Lecture,LectureAllDto>();
             CreateMap <Company,CompanyDto>();
             CreateMap <LectureType,LectureTypeDto>();

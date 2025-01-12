@@ -12,8 +12,7 @@ using System.Net;
 
 namespace OMSV1.Application.Controllers.DamagedDevices
 {
-    [ApiController]
-    [Route("api/[controller]")]
+
     public class DamagedDeviceController : BaseApiController
     {
         private readonly IMediator _mediator;

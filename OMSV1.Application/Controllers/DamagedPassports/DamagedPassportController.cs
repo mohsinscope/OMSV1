@@ -9,8 +9,7 @@ using System.Net;
 using OMSV1.Application.Authorization.Attributes;
 namespace OMSV1.Application.Controllers.DamagedPassports
 {
-    [ApiController]
-    [Route("api/[controller]")]
+
     public class DamagedPassportController : BaseApiController
     {
         private readonly IMediator _mediator;

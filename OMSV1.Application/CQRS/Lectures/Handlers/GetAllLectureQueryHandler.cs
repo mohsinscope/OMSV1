@@ -1,6 +1,7 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos.Lectures;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Lectures;
@@ -24,10 +25,11 @@ namespace OMSV1.Application.Handlers.Lectures
         {
             try
             {
-                // Retrieve the lectures as IQueryable
-                var lecturesQuery = _repository.GetAllAsQueryable();
-                // Apply ordering here - replace 'Date' with the field you want to order by
-                lecturesQuery = lecturesQuery.OrderByDescending(dp => dp.Date);  // Example: Order by Date in descending order
+                // Retrieve the lectures as IQueryable and include LectureLectureTypes and LectureTypes
+                var lecturesQuery = _repository.GetAllAsQueryable()
+                    .Include(l => l.LectureLectureTypes) // Include the many-to-many relationship
+                    .ThenInclude(llt => llt.LectureType); // Include the LectureType details
+
 
                 // Map to LectureAllDto using AutoMapper's ProjectTo
                 var mappedQuery = lecturesQuery.ProjectTo<LectureAllDto>(_mapper.ConfigurationProvider);
@@ -41,11 +43,12 @@ namespace OMSV1.Application.Handlers.Lectures
 
                 return pagedLectures;  // Return the paginated list
             }
-            catch (Exception ex)
-            {
-                // Handle the exception and throw a custom HandlerException
-                throw new HandlerException("An error occurred while fetching the lectures.", ex);
-            }
+          catch (Exception ex)
+{
+    // Log or examine the inner exception to get more details
+    throw new HandlerException($"An error occurred while fetching the lectures. {ex.Message}", ex);
+}
+
         }
     }
 }
