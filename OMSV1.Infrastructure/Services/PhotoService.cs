@@ -1,16 +1,16 @@
 using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
+using System.Threading.Tasks;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using OMSV1.Application.Dtos.Attachments;
-using OMSV1.Domain.Enums;
-using OMSV1.Infrastructure.Interfaces;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using OMSV1.Infrastructure.Interfaces;
+using OMSV1.Application.Dtos.Attachments;
+using OMSV1.Domain.Enums;
 
 namespace OMSV1.Infrastructure.Services;
 
@@ -18,8 +18,9 @@ public class PhotoService : IPhotoService, IDisposable
 {
     private readonly IWebHostEnvironment _webHostEnvironment;
     private readonly string _networkStoragePath = @"\\172.16.108.26\samba";
+    // private readonly string _networkStoragePath = @"C:\Uploads";
     private const int MaxImageDimension = 1920; // Max dimension for images
-    private const long MaxFileSize = 10 * 1024 * 1024; // 10MB max file size
+    private const long MaxFileSize = 2048; // 2MB max file size
     private const int ImageQuality = 75; // JPEG quality (0-100)
 
     public PhotoService(IWebHostEnvironment webHostEnvironment)
@@ -77,9 +78,9 @@ public class PhotoService : IPhotoService, IDisposable
         // Resize if necessary while maintaining aspect ratio
         if (image.Width > MaxImageDimension || image.Height > MaxImageDimension)
         {
-            var resizeOptions = new ResizeOptions
+            var resizeOptions = new SixLabors.ImageSharp.Processing.ResizeOptions
             {
-                Mode = ResizeMode.Max,
+                Mode = SixLabors.ImageSharp.Processing.ResizeMode.Max,
                 Size = new SixLabors.ImageSharp.Size(MaxImageDimension, MaxImageDimension)
             };
             image.Mutate(x => x.Resize(resizeOptions));
@@ -94,55 +95,85 @@ public class PhotoService : IPhotoService, IDisposable
         await image.SaveAsync(outputPath, encoder);
     }
 
+
     private async Task OptimizeAndSavePdfAsync(IFormFile file, string outputPath)
     {
-        using (var inputStream = file.OpenReadStream())
-        using (var outputStream = new FileStream(outputPath, FileMode.Create))
+        // Create temporary file for intermediate processing
+        string tempPath = Path.GetTempFileName();
+        
+        try
         {
-            // Read the original PDF
-            var reader = new PdfReader(inputStream);
+            // First, save the uploaded file to temp location
+            using (var stream = new FileStream(tempPath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            using var outputStream = new FileStream(outputPath, FileMode.Create);
+            using var reader = new PdfReader(tempPath);
             
-            // Set up the stamper with compression
-            var document = new Document();
-            var copy = new PdfCopy(document, outputStream);
+            // Remove unused objects and compress objects
+            reader.RemoveUnusedObjects();
+            
+            // Create new document with the same size as first page
+            using var document = new Document(reader.GetPageSizeWithRotation(1));
+            using var copy = new PdfSmartCopy(document, outputStream);
+            
+            // Enable compression
+            copy.SetFullCompression();
+            
             document.Open();
 
-            // Configure PDF settings for optimization
-            copy.SetFullCompression();
-            copy.CompressionLevel = PdfStream.BEST_COMPRESSION;
+            // Clear metadata to reduce size
+            reader.Info.Clear();
 
-            // Copy each page with compression
+            // Process each page
             for (int i = 1; i <= reader.NumberOfPages; i++)
             {
                 var page = copy.GetImportedPage(reader, i);
                 copy.AddPage(page);
             }
 
-            // Clean up
             document.Close();
             reader.Close();
             copy.Close();
+        }
+        finally
+        {
+            // Clean up temp file
+            if (File.Exists(tempPath))
+            {
+                File.Delete(tempPath);
+            }
         }
     }
 
     private async Task CompressAndSaveFileAsync(IFormFile file, string outputPath)
     {
         using var sourceStream = file.OpenReadStream();
-        using var destinationStream = new FileStream(outputPath, FileMode.Create);
-        
-        if (file.Length > MaxFileSize)
+        using var memoryStream = new MemoryStream();
+
+        // Compress the file into a MemoryStream
+        using (var compressionStream = new System.IO.Compression.GZipStream(
+                memoryStream,
+                System.IO.Compression.CompressionLevel.Optimal,
+                leaveOpen: true)) // Leave the MemoryStream open
         {
-            // Use basic compression for other file types
-            using var compressionStream = new System.IO.Compression.GZipStream(
-                destinationStream, 
-                System.IO.Compression.CompressionLevel.Optimal);
             await sourceStream.CopyToAsync(compressionStream);
         }
-        else
+
+        // Check the compressed size
+        if (memoryStream.Length > MaxFileSize)
         {
-            await sourceStream.CopyToAsync(destinationStream);
+            throw new Exception("Compressed file size exceeds the maximum allowed size.");
         }
+
+        // If the size is within the limit, write to the destination file
+        memoryStream.Position = 0; // Reset the stream position before writing
+        using var destinationStream = new FileStream(outputPath, FileMode.Create);
+        await memoryStream.CopyToAsync(destinationStream);
     }
+
 
     private bool IsImage(string contentType)
     {
@@ -176,7 +207,11 @@ public class PhotoService : IPhotoService, IDisposable
 
     public void Dispose()
     {
-        // Clean up any resources
         GC.SuppressFinalize(this);
     }
+
+    // public Task<PhotoUploadResult> AddPhotoAsync(IFormFile file, Guid entityId, EntityType entityType)
+    // {
+    //     throw new NotImplementedException();
+    // }
 }

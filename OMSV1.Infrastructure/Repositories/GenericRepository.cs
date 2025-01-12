@@ -97,55 +97,58 @@ namespace OMSV1.Infrastructure.Repositories
 
                 return await query.FirstOrDefaultAsync(e => e.Id == id);
             }
-                    // Implement AnyAsync method
-public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
-{
-    return await _context.Set<T>().AnyAsync(predicate, cancellationToken);
-}
+
+        // Implement AnyAsync method
+        public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
+        {
+            return await _context.Set<T>().AnyAsync(predicate, cancellationToken);
+        }
+
+                private IQueryable<T> ApplySpecification(ISpecification<T> spec)
+                    {
+                        var query = _context.Set<T>().AsQueryable();
+
+                        if (spec.Criteria != null)
+                        {
+                            query = query.Where(spec.Criteria);
+                        }
+
+                        if (spec.OrderBy != null)
+                        {
+                            query = query.OrderBy(spec.OrderBy);
+                        }
+
+                        if (spec.OrderByDescending != null)
+                        {
+                            query = query.OrderByDescending(spec.OrderByDescending);
+                        }
+
+                        query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
+
+                        return query;
+                    }
 
 
-        private IQueryable<T> ApplySpecification(ISpecification<T> spec)
-            {
-                var query = _context.Set<T>().AsQueryable();
+                // private IQueryable<T> ApplySpecification(ISpecification<T> spec)
+                //     {
+                //         var query = _context.Set<T>().AsQueryable();
 
-                if (spec.Criteria != null)
-                {
-                    query = query.Where(spec.Criteria);
-                }
+                //         if (spec.Criteria != null)
+                //             query = query.Where(spec.Criteria);
 
-                if (spec.OrderBy != null)
-                {
-                    query = query.OrderBy(spec.OrderBy);
-                }
+                //         if (spec.Includes != null)
+                //             query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
 
-                if (spec.OrderByDescending != null)
-                {
-                    query = query.OrderByDescending(spec.OrderByDescending);
-                }
+                //         return query;
+                //     }
 
-                query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
-
-                return query;
             }
-
-
-        // private IQueryable<T> ApplySpecification(ISpecification<T> spec)
-        //     {
-        //         var query = _context.Set<T>().AsQueryable();
-
-        //         if (spec.Criteria != null)
-        //             query = query.Where(spec.Criteria);
-
-        //         if (spec.Includes != null)
-        //             query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
-
-        //         return query;
-        //     }
-
-    }
 
 
     
 }
+
+
+
 
 
