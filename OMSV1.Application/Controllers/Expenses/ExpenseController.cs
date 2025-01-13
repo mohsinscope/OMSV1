@@ -56,14 +56,24 @@ namespace OMSV1.Application.Controllers.Expenses
             }
         }
         [HttpGet("dailyexpenses/{id:guid}")]
+       [RequirePermission("Rr")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var result = await _mediator.Send(new GetDailyExpenseByIdQuery(id));
+            try
+            {
+                var result = await _mediator.Send(new GetDailyExpenseByIdQuery(id));
 
-            if (result == null)
-                return NotFound($"Daily expense with ID {id} not found.");
+                if (result == null)
+                {
+                    return NotFound($"Daily expense with ID {id} not found.");
+                }
 
-            return Ok(result);
+                return Ok(result); // Or use a response helper for a consistent format
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpGet("{monthlyExpensesId}/daily-expenses")]
