@@ -7,6 +7,7 @@ using OMSV1.Application.Commands.Attachments;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.Lectures;
 using OMSV1.Domain.Entities.DamagedPassport;
+using OMSV1.Domain.Entities.Expenses;
 
 namespace OMSV1.Application.Handlers.Attachments
 {
@@ -53,6 +54,13 @@ namespace OMSV1.Application.Handlers.Attachments
                     if (damagedPassportExists == null)
                     {
                         throw new ArgumentException($"No damaged passport found with ID {request.EntityId}.");
+                    }
+                    break;
+                    case EntityType.Expense:
+                    var ExpenseExists = await _unitOfWork.Repository<DailyExpenses>().GetByIdAsync(request.EntityId);
+                    if (ExpenseExists == null)
+                    {
+                        throw new ArgumentException($"No Expense found with ID {request.EntityId}.");
                     }
                     break;
 
