@@ -153,6 +153,25 @@ namespace OMSV1.API.Controllers
                 return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while processing your request.", new[] { ex.Message });
             }
         }
+        [HttpPost("statistics/unavailable")]
+        public async Task<IActionResult> GetAttendanceStatistics([FromBody] GetUnavailableAttendancesQuery query)
+        {
+            try
+            {
+                var result = await _mediator.Send(query);
+
+                if (result == null || !result.Any())
+                {
+                    return NotFound("No offices found without attendance for the specified criteria.");
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
     
 }

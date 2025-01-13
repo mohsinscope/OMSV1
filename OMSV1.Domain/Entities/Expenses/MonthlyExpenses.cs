@@ -12,7 +12,7 @@ public class MonthlyExpenses(Status status, decimal totalAmount, string notes, G
 
     public decimal TotalAmount { get; private set; } = totalAmount;
     public Status Status { get; private set; } = status;
-    public string Notes { get; private set; } = notes;
+    public string? Notes { get; private set; } = notes;
 
     public Guid OfficeId { get; private set; } = officeId;
     public Guid GovernorateId { get; private set; } = governorateId;

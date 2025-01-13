@@ -16,7 +16,8 @@ public class MonthlyExpensesConfiguration : IEntityTypeConfiguration<MonthlyExpe
             .IsRequired();
 
         builder.Property(me => me.Notes)
-            .HasMaxLength(500);
+            .HasMaxLength(500)
+            .IsRequired(false);
 
         builder.Property(me => me.Status)
             .HasConversion<string>()

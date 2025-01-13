@@ -518,7 +518,6 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
