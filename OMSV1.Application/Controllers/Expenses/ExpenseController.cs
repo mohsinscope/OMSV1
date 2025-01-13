@@ -55,6 +55,16 @@ namespace OMSV1.Application.Controllers.Expenses
                 return StatusCode(500, new { message = "An error occurred while retrieving the monthly expenses.", details = ex.Message });
             }
         }
+        [HttpGet("dailyexpenses/{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var result = await _mediator.Send(new GetDailyExpenseByIdQuery(id));
+
+            if (result == null)
+                return NotFound($"Daily expense with ID {id} not found.");
+
+            return Ok(result);
+        }
 
         [HttpGet("{monthlyExpensesId}/daily-expenses")]
         [RequirePermission("EXr")]
