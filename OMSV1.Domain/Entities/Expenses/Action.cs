@@ -11,8 +11,8 @@ public class Action(string actionType, string notes, Guid profileId,Guid monthly
     public string Notes { get; private set; } = notes;
     public Guid ProfileId { get; private set; } = profileId;
     public Guid MonthlyExpensesId { get; private set; } = monthlyExpensesId;
-    public Profile Profile { get; private set; }
-    public MonthlyExpenses MonthlyExpenses { get; private set; }
+    public Profile? Profile { get; private set; }
+    public MonthlyExpenses? MonthlyExpenses { get; private set; }
 
 
 }

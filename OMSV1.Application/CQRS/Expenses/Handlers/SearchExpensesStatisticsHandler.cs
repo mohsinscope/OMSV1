@@ -54,6 +54,11 @@ public class SearchExpensesStatisticsHandler : IRequestHandler<SearchExpensesSta
             // Total amount calculation
             var totalAmount = expenses.Sum(x => x.TotalAmount);
 
+            // Calculate total percentage of the budget
+            var totalPercentage = Budget > 0 && totalCount > 0 
+                ? Math.Round(((totalAmount / totalCount) / Budget) * 100, 2) 
+                : 0;
+
             // Map to DTO with percentage calculation
             var expensesDto = expenses.Select(e => new MonthlyCleanDto
             {
@@ -69,6 +74,7 @@ public class SearchExpensesStatisticsHandler : IRequestHandler<SearchExpensesSta
             {
                 TotalCount = totalCount,
                 TotalAmount = totalAmount,
+                TotalPercentage = totalPercentage,
                 Expenses = expensesDto
             };
         }

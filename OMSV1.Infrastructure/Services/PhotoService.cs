@@ -1,13 +1,7 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Formats.Jpeg;
 using OMSV1.Infrastructure.Interfaces;
 using OMSV1.Application.Dtos.Attachments;
 using OMSV1.Domain.Enums;

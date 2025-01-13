@@ -47,6 +47,7 @@ public class AutoMapperProfiles : Profile
            //Expenses Mappings
            CreateMap<ExpenseType,ExpenseTypeDto>();
             CreateMap<MonthlyExpenses, MonthlyExpensesDto>();
+            CreateMap<MonthlyExpenses, MonthlyCleanDto>();
             CreateMap<DailyExpenses, DailyExpensesDto>();
         CreateMap<OMSV1.Domain.Entities.Expenses.Action,ActionDto>();
 
@@ -76,6 +77,8 @@ public class AutoMapperProfiles : Profile
             CreateMap<Lecture,LectureAllDto>();
             CreateMap <Company,CompanyDto>();
             CreateMap <LectureType,LectureTypeDto>();
+            CreateMap <LectureType,LectureTypeAllDto>();
+
 
             // Profile Mapping
             CreateMap<Profile, ProfileDto>();

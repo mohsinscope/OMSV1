@@ -55,6 +55,26 @@ namespace OMSV1.Application.Controllers.Expenses
                 return StatusCode(500, new { message = "An error occurred while retrieving the monthly expenses.", details = ex.Message });
             }
         }
+        [HttpGet("dailyexpenses/{id:guid}")]
+       [RequirePermission("Rr")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            try
+            {
+                var result = await _mediator.Send(new GetDailyExpenseByIdQuery(id));
+
+                if (result == null)
+                {
+                    return NotFound($"Daily expense with ID {id} not found.");
+                }
+
+                return Ok(result); // Or use a response helper for a consistent format
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
         [HttpGet("{monthlyExpensesId}/daily-expenses")]
         [RequirePermission("EXr")]
@@ -155,6 +175,45 @@ namespace OMSV1.Application.Controllers.Expenses
                 });
             }
         }
+    [HttpGet("statistics/last-two-months")] // Updated endpoint for all governorates
+    [RequirePermission("Rr")]
+
+    public async Task<IActionResult> GetStatisticsForLastTwoMonths()
+    {
+        try
+        {
+            var result = await _mediator.Send(new GetStatisticsForLastTwoMonthsQuery());
+
+            if (result == null)
+                return NotFound("No statistics available for the last two months.");
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An error occurred while retrieving statistics for the last two months.", details = ex.Message });
+        }
+    }
+
+           [HttpPost("search-last-month")]
+            [RequirePermission("EXr")]
+
+            public async Task<IActionResult> SearchLastMonthExpenses([FromBody] GetLastMonthQuery query)
+            {
+                try
+                {
+                    var result = await _mediator.Send(query);
+
+                    if (result == null)
+                        return NotFound("No expenses found for the specified criteria.");
+
+                    return Ok(result);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new { message = "An error occurred while retrieving last month's expenses.", details = ex.Message });
+                }
+            }
 
         [HttpPut("{id}")]
         [RequirePermission("EXu")]
