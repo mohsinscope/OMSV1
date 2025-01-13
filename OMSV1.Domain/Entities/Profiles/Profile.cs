@@ -19,7 +19,7 @@ namespace OMSV1.Domain.Entities.Profiles;
         OfficeId = officeId;
         GovernorateId = governorateId;
     }
-        public string FullName { get; private set; }
+        public string  FullName { get; private set; }
         public Position Position { get; private set; }
         public Guid UserId { get; private set; }
         public Guid OfficeId { get; private set; } 

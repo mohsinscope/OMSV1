@@ -155,26 +155,29 @@ namespace OMSV1.Application.Controllers.Expenses
                 });
             }
         }
-        [HttpPost("compare-statistics")]
-       // [RequirePermission("EXr")]
-        public async Task<IActionResult> CompareStatistics([FromBody] CompareMonthlyExpensesQuery query)
+    [HttpGet("statistics/last-two-months")] // Updated endpoint for all governorates
+    [RequirePermission("Rr")]
+
+    public async Task<IActionResult> GetStatisticsForLastTwoMonths()
+    {
+        try
         {
-            try
-            {
-                var result = await _mediator.Send(query);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                // Log the exception if needed
-                return StatusCode(500, new
-                {
-                    message = "An error occurred while comparing monthly expenses statistics.",
-                    details = ex.Message
-                });
-            }
+            var result = await _mediator.Send(new GetStatisticsForLastTwoMonthsQuery());
+
+            if (result == null)
+                return NotFound("No statistics available for the last two months.");
+
+            return Ok(result);
         }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An error occurred while retrieving statistics for the last two months.", details = ex.Message });
+        }
+    }
+
            [HttpPost("search-last-month")]
+            [RequirePermission("EXr")]
+
             public async Task<IActionResult> SearchLastMonthExpenses([FromBody] GetLastMonthQuery query)
             {
                 try
