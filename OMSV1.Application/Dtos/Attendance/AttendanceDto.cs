@@ -31,5 +31,7 @@ namespace OMSV1.Application.Dtos.Attendances
 
         public Guid ProfileId { get; set; }
         public string ProfileFullName { get; set; }
+        public DateTime DateCreated { get; set; }
+
     }
 }
