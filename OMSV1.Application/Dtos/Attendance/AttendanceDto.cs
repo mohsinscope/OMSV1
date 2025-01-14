@@ -15,7 +15,7 @@ namespace OMSV1.Application.Dtos.Attendances
         public DateTime Date { get; set; }
 
         // Note, should be string as it is in the entity
-        public string Note { get; set; }
+        public string? Note { get; set; }
 
         // WorkingHours should be kept as an integer (since it's an enum in the entity)
         public int WorkingHours { get; set; }

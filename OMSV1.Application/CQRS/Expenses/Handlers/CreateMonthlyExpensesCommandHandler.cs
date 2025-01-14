@@ -29,13 +29,13 @@ public class CreateMonthlyExpensesCommandHandler : IRequestHandler<CreateMonthly
 
             // Validate if another active MonthlyExpense exists for the same ProfileId
             var existingExpense = await _unitOfWork.Repository<MonthlyExpenses>().FirstOrDefaultAsync(
-                x => x.ProfileId == request.ProfileId && x.Status == Status.New
+                x => x.OfficeId == request.OfficeId && x.Status == Status.New
                 
             );
 
             if (existingExpense != null)
             {
-                throw new InvalidOperationException("An active MonthlyExpense already exists for the specified ProfileId.");
+                throw new InvalidOperationException("An active MonthlyExpense already exists for the specified OfficeId.");
             }
 
             // Fetch all thresholds

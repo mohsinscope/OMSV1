@@ -14,6 +14,8 @@ namespace OMSV1.Application.Dtos
         public string GovernorateName { get; set; }  // Assuming this is populated from the Governorate entity
         public Guid ProfileId { get; set; }
         public string ProfileFullName { get; set; }  // Assuming this is populated from the Profile entity
+        public DateTime Datecreated { get; set; }
+
 
         public DamagedPassportDto(string passportNumber, DateTime date, Guid damagedTypeId, string damagedTypeName,string note,
                                   Guid officeId, string officeName, Guid governorateId, string governorateName,
