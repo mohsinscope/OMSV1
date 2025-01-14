@@ -65,6 +65,11 @@ public class MonthlyExpenses(Status status, decimal totalAmount, string notes, G
 
         Status = newStatus;
     }
+    //Add notes
+        public void AddNotes(string notes)
+    {
+        Notes = notes;
+    }
         // Add a method to adjust the TotalAmount
     public void AdjustTotalAmount(decimal adjustmentAmount)
     {
