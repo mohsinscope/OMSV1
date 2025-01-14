@@ -214,6 +214,26 @@ namespace OMSV1.Application.Controllers.Expenses
                     return StatusCode(500, new { message = "An error occurred while retrieving last month's expenses.", details = ex.Message });
                 }
             }
+            
+        [HttpPost("expense-report")]
+        [RequirePermission("EXr")]
+        public async Task<IActionResult> GetExpenseReport([FromBody] GetExpenseReportQuery query)
+        {
+            try
+            {
+                var result = await _mediator.Send(query);
+                return Ok(result); // Return the report with total count, amount, and percentage
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while retrieving the expense report.",
+                    details = ex.Message
+                });
+            }
+        }
+
 
         [HttpPut("{id}")]
         [RequirePermission("EXu")]
