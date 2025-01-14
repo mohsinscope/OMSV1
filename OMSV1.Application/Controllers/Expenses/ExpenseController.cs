@@ -56,7 +56,7 @@ namespace OMSV1.Application.Controllers.Expenses
             }
         }
         [HttpGet("dailyexpenses/{id:guid}")]
-       [RequirePermission("Rr")]
+       [RequirePermission("EXr")]
         public async Task<IActionResult> GetById(Guid id)
         {
             try
@@ -121,7 +121,6 @@ namespace OMSV1.Application.Controllers.Expenses
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
         [HttpPost("{id}/status")]
         [RequirePermission("EXc")]
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateMonthlyExpensesStatusCommand command)
