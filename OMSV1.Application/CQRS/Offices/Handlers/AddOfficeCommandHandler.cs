@@ -21,36 +21,25 @@ namespace OMSV1.Application.Commands.Offices
         {
             try
             {
-                Console.WriteLine($"Request Budget: {request.Budget}"); // Log the value
+                // Map the command to the Office entity
+                var office = _mapper.Map<Office>(request);
 
-                var office = new Office(
-                    request.Name,
-                    request.Code,
-                    request.ReceivingStaff,
-                    request.AccountStaff,
-                    request.PrintingStaff,
-                    request.QualityStaff,
-                    request.DeliveryStaff,
-                    request.GovernorateId,
-                    request.Budget // Explicitly map Budget
-                );
-
-                Console.WriteLine($"Office Budget: {office.Budget}"); // Log the mapped value
-
+                // Use the generic repository to add the Office entity
                 await _unitOfWork.Repository<Office>().AddAsync(office);
 
+                // Save the changes using Unit of Work
                 if (!await _unitOfWork.SaveAsync(cancellationToken))
                 {
                     throw new Exception("Failed to save the office to the database.");
                 }
 
-                return office.Id;
+                return office.Id; // Return the new entity ID
             }
             catch (Exception ex)
             {
+                // Log and throw a custom exception if an error occurs
                 throw new HandlerException("An error occurred while adding the office.", ex);
             }
         }
-
     }
 }
