@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.Expenses;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Expenses;
@@ -19,6 +20,8 @@ public class ExpenseTypeController : BaseApiController
     // Get All ExpenseTypes with Pagination
 // POST method to add a new ExpenseType
         [HttpPost]
+        [RequirePermission("LOVe")]
+
         public async Task<IActionResult> AddExpenseType([FromBody] CreateExpenseTypeCommand command)
         {
             try
@@ -57,6 +60,7 @@ public class ExpenseTypeController : BaseApiController
         }
         
         [HttpPut("{id}")]
+        [RequirePermission("LOVe")]
         public async Task<IActionResult> UpdateExpenseType(Guid id, [FromBody] UpdateExpenseTypeCommand command)
         {
             try
@@ -82,6 +86,7 @@ public class ExpenseTypeController : BaseApiController
         }
           // DELETE method to delete an ExpenseType
         [HttpDelete("{id}")]
+        [RequirePermission("LOVe")]
         public async Task<IActionResult> DeleteExpenseType(Guid id)
         {
             try

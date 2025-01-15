@@ -12,5 +12,6 @@ namespace OMSV1.Application.Commands.Offices
         public int PrintingStaff { get; set; }
         public int QualityStaff { get; set; }
         public int DeliveryStaff { get; set; }
+        public decimal? Budget { get; set; } // Nullable Budget property
     }
 }

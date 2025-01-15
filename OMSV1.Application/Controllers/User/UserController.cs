@@ -207,7 +207,7 @@ public class AccountController : BaseApiController
 
     //Update User Permissions
     [HttpPut("{userId}/permissions")]
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = "RequireSuperAdminRole")]
     public async Task<IActionResult> UpdateUserPermissions(Guid userId, [FromBody] List<string> permissions)
     {
         try
@@ -270,7 +270,7 @@ public class AccountController : BaseApiController
 
     //add permissions to a user id
     [HttpPost("{userId}/add-permissions")]
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = "RequireSuperAdminRole")]
     public async Task<IActionResult> AddPermissionsToUser(Guid userId, [FromBody] List<string> permissions)
     {
         try
@@ -331,7 +331,7 @@ public class AccountController : BaseApiController
     
     //Add Permissions To Role
     [HttpPost("{roleName}/permissions")]
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = "RequireSuperAdminRole")]
     public async Task<IActionResult> AddPermissionsToRole(string roleName, [FromBody] List<string> permissions)
     {
         try
@@ -370,6 +370,49 @@ public class AccountController : BaseApiController
             return StatusCode(500, new { message = "Internal Server Error", details = ex.Message });
         }
     }
+    // Update Permissions for Role
+[HttpPut("role/{roleName}/permissions")]
+[Authorize(Policy = "RequireSuperAdminRole")]
+public async Task<IActionResult> UpdatePermissionsForRole(string roleName, [FromBody] List<string> permissions)
+{
+    try
+    {
+        // Fetch the role
+        var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
+        if (role == null)
+        {
+            return NotFound(new { message = $"Role '{roleName}' not found." });
+        }
+
+        // Fetch existing permissions for the role
+        var existingPermissions = await _context.RolePermissions
+            .Where(rp => rp.RoleId == role.Id)
+            .ToListAsync();
+
+        // Remove all existing permissions
+        _context.RolePermissions.RemoveRange(existingPermissions);
+
+        // Add new permissions if the array is not empty
+        if (permissions != null && permissions.Any())
+        {
+            foreach (var permission in permissions)
+            {
+                _context.RolePermissions.Add(new AppRolePermission
+                {
+                    RoleId = role.Id,
+                    Permission = permission
+                });
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok(new { message = "Permissions updated successfully." });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "Internal Server Error", details = ex.Message });
+    }
+}
 
 }
 

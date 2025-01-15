@@ -15,7 +15,6 @@ public class GetStatisticsForLastTwoMonthsHandler : IRequestHandler<GetStatistic
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-    private const decimal Budget = 500000m; // Static budget value
 
     public GetStatisticsForLastTwoMonthsHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
@@ -23,56 +22,60 @@ public class GetStatisticsForLastTwoMonthsHandler : IRequestHandler<GetStatistic
         _mapper = mapper;
     }
 
-public async Task<ExpensesStatisticsDto> Handle(GetStatisticsForLastTwoMonthsQuery request, CancellationToken cancellationToken)
-{
-    try
+    public async Task<ExpensesStatisticsDto> Handle(GetStatisticsForLastTwoMonthsQuery request, CancellationToken cancellationToken)
     {
-        var repository = _unitOfWork.Repository<MonthlyExpenses>();
-
-        // Fetch the last two completed expenses, ordered by DateCreated
-        var expenses = await repository.GetAllAsQueryable()
-            .Where(x => x.Status == Status.Completed)
-            .OrderByDescending(x => x.DateCreated)  // Ensure we get the most recent ones first
-            .Take(2)  // Only take the last two
-            .Include(x => x.Office)
-            .Include(x => x.Governorate)
-            .Include(x => x.Threshold)
-            .ToListAsync(cancellationToken);
-
-        // If there are less than 2 expenses, handle accordingly
-        if (expenses.Count < 2)
+        try
         {
-            throw new Exception("Not enough data to compare the last two months of expenses.");
+            var repository = _unitOfWork.Repository<MonthlyExpenses>();
+
+            // Fetch the last two completed expenses, ordered by DateCreated
+            var expenses = await repository.GetAllAsQueryable()
+                .Where(x => x.Status == Status.Completed)
+                .OrderByDescending(x => x.DateCreated)
+                .Take(2)
+                .Include(x => x.Office)
+                .Include(x => x.Governorate)
+                .Include(x => x.Threshold)
+                .ToListAsync(cancellationToken);
+
+            if (expenses.Count < 2)
+            {
+                throw new Exception("Not enough data to compare the last two months of expenses.");
+            }
+
+            // Prepare the list of expenses, calculating the percentage based on the office budget
+            var mappedExpenses = expenses.Select(e =>
+            {
+                var officeBudget = e.Office?.Budget ?? 0; // Default to 0 if no budget is set
+                return new MonthlyCleanDto
+                {
+                    DateCreated = e.DateCreated,
+                    TotalAmount = e.TotalAmount,
+                    OfficeName = e.Office?.Name ?? "Unknown Office",
+                    GovernorateName = e.Governorate?.Name ?? "Unknown Governorate",
+                    ThresholdName = e.Threshold?.Name ?? "No Threshold",
+                    PercentageOfBudget = officeBudget > 0 ? Math.Round((e.TotalAmount / officeBudget) * 100, 2) : 0,
+                };
+            }).ToList();
+
+            // Calculate aggregated statistics
+            var totalAmount = expenses.Sum(x => x.TotalAmount);
+            var totalBudget = expenses.Sum(x => x.Office?.Budget ?? 0); // Aggregate budget from all offices
+            var totalPercentage = totalBudget > 0 ? Math.Round((totalAmount / totalBudget) * 100, 2) : 0;
+
+            // Prepare response
+            return new ExpensesStatisticsDto
+            {
+                TotalCount = expenses.Count,
+                TotalAmount = totalAmount,
+                TotalPercentage = totalPercentage,
+                Expenses = mappedExpenses
+            };
         }
-
-        // Prepare the list of expenses, marking the current and last month
-        var mappedExpenses = expenses.Select(e => new MonthlyCleanDto
+        catch (Exception ex)
         {
-            DateCreated = e.DateCreated,  // Include DateCreated in the response
-            TotalAmount = e.TotalAmount,
-            OfficeName = e.Office?.Name ?? "Unknown Office",
-            GovernorateName = e.Governorate?.Name ?? "Unknown Governorate",
-            ThresholdName = e.Threshold?.Name ?? "No Threshold",
-            PercentageOfBudget = Budget > 0 ? Math.Round((e.TotalAmount / Budget) * 100, 2) : 0,
-        }).ToList();
-
-        // Prepare response
-        return new ExpensesStatisticsDto
-        {
-            TotalCount = expenses.Count,
-            TotalAmount = expenses.Sum(x => x.TotalAmount),
-            TotalPercentage = Budget > 0 ? Math.Round((expenses.Sum(x => x.TotalAmount) / Budget) * 100, 2) : 0,
-            Expenses = mappedExpenses
-        };
+            Console.WriteLine($"Error: {ex.Message}");
+            throw new HandlerException("An error occurred while calculating statistics for the last two months.", ex);
+        }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error: {ex.Message}");
-        throw new HandlerException("An error occurred while calculating statistics for the last two months.", ex);
-    }
-}
-
-
-
-
 }

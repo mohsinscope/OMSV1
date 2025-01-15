@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.LOV;
 using OMSV1.Application.CQRS.Lov.DamagedPassport;
 using OMSV1.Application.Helpers;
@@ -19,7 +20,7 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Add Damaged Type
         [HttpPost("add")]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVdp")]
         public async Task<IActionResult> AddDamagedType([FromBody] AddDamagedTypeCommand command)
         {
             try
@@ -75,7 +76,7 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Update Damaged Type
         [HttpPut("update/{id}")]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVdp")]
         public async Task<IActionResult> UpdateDamagedType(Guid id, [FromBody] UpdateDamagedTypeCommand command)
         {
             try
@@ -96,7 +97,7 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Delete Damaged Type
         [HttpDelete("delete/{id}")]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVdp")]
         public async Task<IActionResult> DeleteDamagedType(Guid id)
         {
             try

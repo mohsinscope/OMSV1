@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.Companies;
 using OMSV1.Application.Commands.LectureTypes;
 using OMSV1.Application.Controllers;
@@ -22,7 +23,7 @@ namespace OMSV1.WebApi.Controllers
 
         // POST api/company
         [HttpPost("add")]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVc")]
         public async Task<IActionResult> AddCompany([FromBody] AddCompanyCommand command)
         {
             try
@@ -70,7 +71,7 @@ namespace OMSV1.WebApi.Controllers
         }
        // DELETE: api/company/lectureType/{lectureTypeId}
         [HttpDelete("lectureType/{lectureTypeId}")]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVc")]
         public async Task<IActionResult> DeleteLectureType(Guid lectureTypeId)
         {
             var command = new DeleteLectureTypeCommand(lectureTypeId);
@@ -95,7 +96,7 @@ namespace OMSV1.WebApi.Controllers
         }
                 // DELETE: api/company/{id}
         [HttpDelete("{id}")]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVc")]
         public async Task<IActionResult> DeleteCompany(Guid id)
         {
             var command = new DeleteCompanyCommand(id);
@@ -122,7 +123,7 @@ namespace OMSV1.WebApi.Controllers
         }
         // PUT: api/company/lectureType/{lectureTypeId}
         [HttpPut("lectureType/{lectureTypeId}")]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVc")]
         public async Task<IActionResult> UpdateLectureType(Guid lectureTypeId, [FromBody] UpdateLectureTypeCommand command)
         {
             // Ensure the command has the correct LectureTypeId
@@ -151,7 +152,7 @@ namespace OMSV1.WebApi.Controllers
 
         // POST api/company/lecture-type
         [HttpPost("add-lecture-type")]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVc")]
 
         public async Task<IActionResult> AddLectureTypeToCompany([FromBody] AddLectureTypeToCompanyCommand command)
         {

@@ -5,6 +5,7 @@ using OMSV1.Application.Helpers;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using OMSV1.Application.Commands.Thresholds;
+using OMSV1.Application.Authorization.Attributes;
 
 namespace OMSV1.Application.Controllers
 {
@@ -61,7 +62,7 @@ namespace OMSV1.Application.Controllers
 
         // UPDATE Threshold
         [HttpPut("{id}")]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVt")]
         public async Task<IActionResult> UpdateThreshold(Guid id, [FromBody] UpdateThresholdCommand command)
         {
             try
@@ -84,7 +85,7 @@ namespace OMSV1.Application.Controllers
 
         // ADD Threshold
         [HttpPost]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVt")]
         public async Task<IActionResult> AddThreshold([FromBody] AddThresholdCommand command)
         {
             try
@@ -113,7 +114,7 @@ namespace OMSV1.Application.Controllers
 
         // DELETE Threshold
         [HttpDelete("{id}")]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVt")]
         public async Task<IActionResult> DeleteThreshold(Guid id)
         {
             try

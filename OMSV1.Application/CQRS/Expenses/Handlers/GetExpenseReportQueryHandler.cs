@@ -13,7 +13,6 @@ namespace OMSV1.Application.Handlers.Expenses
     {
         private readonly IGenericRepository<MonthlyExpenses> _repository;
         private readonly IMapper _mapper;
-        private const decimal Budget = 500000m; // Example static budget
 
         public GetExpenseReportQueryHandler(IGenericRepository<MonthlyExpenses> repository, IMapper mapper)
         {
@@ -45,17 +44,22 @@ namespace OMSV1.Application.Handlers.Expenses
                 // Total amount
                 var totalAmount = completedExpenses.Sum(x => x.TotalAmount);
 
-                // Total percentage of budget
-                var totalPercentage = Budget > 0 ? Math.Round((double)(totalAmount / Budget) * 100, 2) : 0;
+                // Total percentage of budget (sum all office budgets involved)
+                var totalBudget = completedExpenses.Sum(x => x.Office?.Budget ?? 0);
+                var totalPercentage = totalBudget > 0 ? Math.Round((double)(totalAmount / totalBudget) * 100, 2) : 0;
 
                 // Map to detailed expense DTOs
-                var expenseDetails = completedExpenses.Select(e => new MonthlyExpenseDetailDto
+                var expenseDetails = completedExpenses.Select(e =>
                 {
-                    TotalAmount = e.TotalAmount,
-                    OfficeName = e.Office?.Name ?? string.Empty,
-                    GovernorateName = e.Governorate?.Name ?? string.Empty,
-                    PercentageOfBudget = Budget > 0 ? Math.Round((double)(e.TotalAmount / Budget) * 100, 2) : 0,
-                    DateCreated = e.DateCreated
+                    var officeBudget = e.Office?.Budget ?? 0; // Office-specific budget
+                    return new MonthlyExpenseDetailDto
+                    {
+                        TotalAmount = e.TotalAmount,
+                        OfficeName = e.Office?.Name ?? string.Empty,
+                        GovernorateName = e.Governorate?.Name ?? string.Empty,
+                        PercentageOfBudget = officeBudget > 0 ? Math.Round((double)(e.TotalAmount / officeBudget) * 100, 2) : 0,
+                        DateCreated = e.DateCreated
+                    };
                 }).ToList();
 
                 return new ExpenseReportDto

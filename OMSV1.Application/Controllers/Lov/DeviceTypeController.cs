@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.LOV;
 using OMSV1.Application.CQRS.Lov.DamagedDevice;
 using OMSV1.Application.Helpers;
@@ -19,7 +20,7 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Add DeviceType
         [HttpPost]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVdd")]
         public async Task<IActionResult> AddDeviceType([FromBody] AddDeviceTypeCommand command)
         {
             try
@@ -77,7 +78,7 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Update DeviceType
         [HttpPut("{id}")]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVdd")]
         public async Task<IActionResult> UpdateDeviceType(Guid id, [FromBody] UpdateDeviceTypeCommand command)
         {
             try
@@ -104,7 +105,7 @@ namespace OMSV1.Application.Controllers.LOV
 
         // Delete DeviceType
         [HttpDelete("{id}")]
-        [Authorize(Policy = "RequireAdminRole")]
+        [RequirePermission("LOVdd")]
         public async Task<IActionResult> DeleteDeviceType(Guid id)
         {
             try

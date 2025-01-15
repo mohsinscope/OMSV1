@@ -13,7 +13,6 @@ public class SearchExpensesStatisticsHandler : IRequestHandler<SearchExpensesSta
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-    private const decimal Budget = 500000m; // Static budget value
 
     public SearchExpensesStatisticsHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
@@ -54,19 +53,26 @@ public class SearchExpensesStatisticsHandler : IRequestHandler<SearchExpensesSta
             // Total amount calculation
             var totalAmount = expenses.Sum(x => x.TotalAmount);
 
+            // Calculate total budget (sum of budgets from associated offices)
+            var totalBudget = expenses.Sum(x => x.Office?.Budget ?? 0);
+
             // Calculate total percentage of the budget
-            var totalPercentage = Budget > 0 && totalCount > 0 
-                ? Math.Round(((totalAmount / totalCount) / Budget) * 100, 2) 
+            var totalPercentage = totalBudget > 0 
+                ? Math.Round((totalAmount / totalBudget) * 100, 2) 
                 : 0;
 
             // Map to DTO with percentage calculation
-            var expensesDto = expenses.Select(e => new MonthlyCleanDto
+            var expensesDto = expenses.Select(e =>
             {
-                TotalAmount = e.TotalAmount,
-                OfficeName = e.Office?.Name ?? string.Empty,
-                GovernorateName = e.Governorate?.Name ?? string.Empty,
-                ThresholdName = e.Threshold?.Name ?? string.Empty,
-                PercentageOfBudget = Budget > 0 ? Math.Round((e.TotalAmount / Budget) * 100, 2) : 0
+                var officeBudget = e.Office?.Budget ?? 0; // Office-specific budget
+                return new MonthlyCleanDto
+                {
+                    TotalAmount = e.TotalAmount,
+                    OfficeName = e.Office?.Name ?? string.Empty,
+                    GovernorateName = e.Governorate?.Name ?? string.Empty,
+                    ThresholdName = e.Threshold?.Name ?? string.Empty,
+                    PercentageOfBudget = officeBudget > 0 ? Math.Round((e.TotalAmount / officeBudget) * 100, 2) : 0
+                };
             }).ToList();
 
             // Return the results

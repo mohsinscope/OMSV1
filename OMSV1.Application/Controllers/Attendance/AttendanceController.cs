@@ -124,7 +124,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpPost("statistics/office")]
-        [RequirePermission("Rr")]
+        [RequirePermission("Sa")]
         public async Task<IActionResult> GetAttendanceStatistics([FromBody] GetAttendanceStatisticsInOfficeQuery query)
         {
             try
@@ -139,7 +139,7 @@ namespace OMSV1.API.Controllers
         }
 
         [HttpPost("search/statistics")]
-        [RequirePermission("Rr")]
+        [RequirePermission("Sa")]
         public async Task<IActionResult> GetAttendanceStatistics([FromBody] SearchAttendanceStatisticsQuery query)
         {
             try
@@ -154,6 +154,8 @@ namespace OMSV1.API.Controllers
             }
         }
         [HttpPost("statistics/unavailable")]
+        [RequirePermission("Sa")]
+
         public async Task<IActionResult> GetAttendanceStatistics([FromBody] GetUnavailableAttendancesQuery query)
         {
             try
