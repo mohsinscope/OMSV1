@@ -7,7 +7,7 @@ namespace OMSV1.Domain.Entities.DamagedPassport;
 
 public class DamagedPassport : Entity
 {
-    public Guid Id { get; set; }
+    public new Guid Id { get; set; }
     public string PassportNumber { get; private set; }
     public DateTime Date { get; private set; }
     public Guid DamagedTypeId { get; private set; }

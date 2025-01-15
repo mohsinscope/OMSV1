@@ -5,7 +5,7 @@ namespace OMSV1.Domain.Entities.Attachments;
 
 public class AttachmentCU : Entity
 {
-    public Guid Id { get; set; }
+    public new Guid Id { get; set; }
     public string FileName { get; private set; }
     public string FilePath { get; private set; }
     public EntityType EntityType { get; private set; }

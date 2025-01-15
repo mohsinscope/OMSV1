@@ -19,5 +19,7 @@ public class DamagedDeviceDto
     public string? ProfileFullName{ get; set; }  
      public Guid? DamagedDeviceTypeId { get; set; } // New field for type ID
     public string? DamagedDeviceTypesName { get; set; } // New field for type name
+    public DateTime Datecreated { get; set; }
+
 
 }
