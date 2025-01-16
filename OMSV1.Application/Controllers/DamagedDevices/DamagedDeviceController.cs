@@ -247,7 +247,7 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
         // Get statistics for damaged devices
         [HttpPost("search/statistics")]
-        [RequirePermission("Rr")]
+        [RequirePermission("Sd")]
 
         public async Task<IActionResult> GetDamagedDeviceStatistics([FromBody] SearchDamagedDevicesStatisticsQuery query)
         {

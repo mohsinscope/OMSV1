@@ -55,37 +55,41 @@ namespace OMSV1.Application.Controllers.Offices
         }
 
         // POST: api/Office
-        [HttpPost]
-        [Authorize(Policy = "RequireAdminRole")]
-        public async Task<IActionResult> CreateOffice([FromBody] CreateOfficeDto officeDto)
+[HttpPost]
+[Authorize(Policy = "RequireAdminRole")]
+public async Task<IActionResult> CreateOffice([FromBody] CreateOfficeDto officeDto)
+{
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(ModelState);
+    }
+
+    try
+    {
+        // Manually map CreateOfficeDto to AddOfficeCommand
+        var command = new AddOfficeCommand
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
+            Name = officeDto.Name,
+            Code = officeDto.Code,
+            ReceivingStaff = officeDto.ReceivingStaff,
+            AccountStaff = officeDto.AccountStaff,
+            PrintingStaff = officeDto.PrintingStaff,
+            QualityStaff = officeDto.QualityStaff,
+            DeliveryStaff = officeDto.DeliveryStaff,
+            GovernorateId = officeDto.GovernorateId,
+            Budget = officeDto.Budget // Explicitly map Budget
+        };
 
-                var command = new AddOfficeCommand
-                {
-                    Name = officeDto.Name,
-                    Code = officeDto.Code,
-                    ReceivingStaff = officeDto.ReceivingStaff,
-                    AccountStaff = officeDto.AccountStaff,
-                    PrintingStaff = officeDto.PrintingStaff,
-                    QualityStaff = officeDto.QualityStaff,
-                    DeliveryStaff = officeDto.DeliveryStaff,
-                    GovernorateId = officeDto.GovernorateId
-                };
+        // Delegate the command to the mediator
+        var officeId = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetOfficeById), new { id = officeId }, officeId);
+    }
+    catch (Exception ex)
+    {
+        return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while creating the office.", new[] { ex.Message });
+    }
+}
 
-                var officeId = await _mediator.Send(command);
-                return CreatedAtAction(nameof(GetOfficeById), new { id = officeId }, officeId);
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while creating the office.", new[] { ex.Message });
-            }
-        }
 
         // GET: api/Office/dropdown
         [HttpGet("dropdown")]

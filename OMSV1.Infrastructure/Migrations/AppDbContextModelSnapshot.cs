@@ -702,6 +702,9 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Property<int>("AccountStaff")
                         .HasColumnType("integer");
 
+                    b.Property<decimal?>("Budget")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("Code")
                         .HasColumnType("integer");
 

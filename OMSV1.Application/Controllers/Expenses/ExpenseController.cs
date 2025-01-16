@@ -156,7 +156,7 @@ namespace OMSV1.Application.Controllers.Expenses
             }
         }
         [HttpPost("search-statistics")]
-        [RequirePermission("EXr")]
+        [RequirePermission("Se")]
         public async Task<IActionResult> SearchStatistics([FromBody] SearchExpensesStatisticsQuery query)
         {
             try
@@ -175,7 +175,7 @@ namespace OMSV1.Application.Controllers.Expenses
             }
         }
     [HttpGet("statistics/last-two-months")] // Updated endpoint for all governorates
-    [RequirePermission("Rr")]
+    [RequirePermission("Se")]
 
     public async Task<IActionResult> GetStatisticsForLastTwoMonths()
     {

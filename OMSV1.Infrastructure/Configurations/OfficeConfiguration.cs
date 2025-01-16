@@ -37,6 +37,11 @@ public class OfficeConfiguration : IEntityTypeConfiguration<Office>
         builder.Property(o => o.GovernorateId)
             .IsRequired();
 
+        builder.Property(o => o.Budget) // Budget configuration
+            .IsRequired(false) // Makes Budget nullable
+            .HasColumnType("decimal(18,2)"); // Specifies precision and scale
+
+
         // Relationship
         builder.HasOne(o => o.Governorate)
             .WithMany(g => g.Offices)
