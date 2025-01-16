@@ -122,7 +122,7 @@ namespace OMSV1.Application.Controllers.Expenses
             }
         }
         [HttpPost("{id}/status")]
-        [RequirePermission("EXc")]
+        [RequirePermission("EXr")]
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateMonthlyExpensesStatusCommand command)
         {
             try
