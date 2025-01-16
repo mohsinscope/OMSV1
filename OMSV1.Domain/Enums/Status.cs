@@ -8,10 +8,8 @@ public enum Status
     SentToManager = 3,
     ReturnedToManager = 4,
     SentToDirector = 5,
-    ReturnedToDirector = 6,
-
-    SentToAccountant = 7,
-    ReturnedToSupervisor = 8,
-    RecievedBySupervisor = 9,
-    Completed = 10
+    SentToAccountant = 6,
+    ReturnedToSupervisor = 7,
+    RecievedBySupervisor = 8,
+    Completed = 9
 }
