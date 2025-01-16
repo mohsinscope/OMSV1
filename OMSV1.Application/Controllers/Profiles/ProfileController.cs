@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.CQRS.Profiles.Queries;
 using OMSV1.Application.Helpers;
+using OMSV1.Application.Queries.Profiles;
 using OMSV1.Infrastructure.Extensions;
 using System.Net;
 
@@ -36,6 +37,7 @@ namespace OMSV1.Application.Controllers.Profiles
                 return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving roles.", new[] { ex.Message });
             }
         }
+        
          // Search Profiles with filters
         // [HttpPost("search")]
         // public async Task<IActionResult> GetProfilesWithUsersAndRoles([FromBody] SearchProfilesQuery query)
@@ -75,6 +77,27 @@ namespace OMSV1.Application.Controllers.Profiles
                 return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving the profile.", new[] { ex.Message });
             }
         }
+            [HttpGet("dropdown")]
+            public async Task<IActionResult> GetProfilesForDropdown()
+            {
+                try
+                {
+                    var profiles = await _mediator.Send(new GetProfilesForDropdownQuery());
+
+                    if (profiles == null || profiles.Count == 0)
+                    {
+                        return NotFound(new { message = "No profiles found." });
+                    }
+
+                    return Ok(profiles);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new { message = "An error occurred while retrieving profiles.", error = ex.Message });
+                }
+            }
+
+
             [HttpPost("search")]
             [Authorize(Policy = "RequireAdminRole")]
             public async Task<IActionResult> SearchProfiles([FromBody] SearchProfilesQuery query)
