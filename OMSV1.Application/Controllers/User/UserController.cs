@@ -39,31 +39,17 @@ public class AccountController : BaseApiController
 
     [Authorize(Policy = "RequireAdminRole")] 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterUserCommand command)
+    public async Task<IActionResult> RegisterUser([FromBody] RegisterUserCommand command)
     {
-        var result = await _mediator.Send(command);
-        return result;
-    }
+        // Get the current authenticated user
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return Unauthorized("User is not authenticated.");
+        }
 
-    [Authorize(Policy = "RequireAdminRole")]
-    [HttpGet("{userId:Guid}/permissions")]
-    public async Task<IActionResult> GetUserPermissions(Guid userId)
-    {
-        try
-        {
-            var query = new GetUserPermissionsQuery(userId);
-            var permissions = await _mediator.Send(query);
-
-            return Ok(permissions);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "Internal Server Error", details = ex.Message });
-        }
+        command.CurrentUser = currentUser;
+        return await _mediator.Send(command);
     }
 
     [HttpPost("login")]
@@ -203,35 +189,6 @@ public class AccountController : BaseApiController
         return Ok(profiles);
     }
 
-
-
-    //Update User Permissions
-    [HttpPut("{userId}/permissions")]
-    [Authorize(Policy = "RequireSuperAdminRole")]
-    public async Task<IActionResult> UpdateUserPermissions(Guid userId, [FromBody] List<string> permissions)
-    {
-        try
-        {
-            var command = new UpdateUserPermissionsCommand(userId, permissions);
-            var result = await _mediator.Send(command);
-
-            if (result)
-            {
-                return Ok(new { message = "Permissions updated successfully." });
-            }
-
-            return BadRequest(new { message = "Failed to update permissions." });
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "Internal Server Error", details = ex.Message });
-        }
-    }
-
     // Update Profile Only
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPut("{id}")]
@@ -264,50 +221,14 @@ public class AccountController : BaseApiController
         if (id != command.UserId)
             return BadRequest("User ID mismatch between route and body.");
 
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return Unauthorized("User is not authenticated.");
+        }
+
+        command.CurrentUser = currentUser;
         return await _mediator.Send(command);
-    }
-
-
-    //add permissions to a user id
-    [HttpPost("{userId}/add-permissions")]
-    [Authorize(Policy = "RequireSuperAdminRole")]
-    public async Task<IActionResult> AddPermissionsToUser(Guid userId, [FromBody] List<string> permissions)
-    {
-        try
-        {
-            // Validate user existence
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null)
-            {
-                return NotFound(new { message = $"User with ID '{userId}' not found." });
-            }
-
-            // Fetch existing user-specific permissions
-            var existingPermissions = await _context.UserPermissions
-                .Where(up => up.UserId == userId)
-                .Select(up => up.Permission)
-                .ToListAsync();
-
-            // Add only new permissions
-            foreach (var permission in permissions)
-            {
-                if (!existingPermissions.Contains(permission))
-                {
-                    _context.UserPermissions.Add(new UserPermission
-                    {
-                        UserId = userId,
-                        Permission = permission
-                    });
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return Ok(new { message = "Permissions added successfully." });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "Internal Server Error", details = ex.Message });
-        }
     }
 
 
@@ -328,91 +249,6 @@ public class AccountController : BaseApiController
         return await _mediator.Send(command);
     }
 
-    
-    //Add Permissions To Role
-    [HttpPost("{roleName}/permissions")]
-    [Authorize(Policy = "RequireSuperAdminRole")]
-    public async Task<IActionResult> AddPermissionsToRole(string roleName, [FromBody] List<string> permissions)
-    {
-        try
-        {
-            // Fetch the role
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
-            if (role == null)
-            {
-                return NotFound(new { message = $"Role '{roleName}' not found." });
-            }
-
-            // Fetch existing permissions for the role
-            var existingPermissions = await _context.RolePermissions
-                .Where(rp => rp.RoleId == role.Id)
-                .Select(rp => rp.Permission)
-                .ToListAsync();
-
-            // Add only new permissions
-            foreach (var permission in permissions)
-            {
-                if (!existingPermissions.Contains(permission))
-                {
-                    _context.RolePermissions.Add(new AppRolePermission
-                    {
-                        RoleId = role.Id,
-                        Permission = permission
-                    });
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return Ok(new { message = "Permissions added successfully." });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "Internal Server Error", details = ex.Message });
-        }
-    }
-    // Update Permissions for Role
-[HttpPut("role/{roleName}/permissions")]
-[Authorize(Policy = "RequireSuperAdminRole")]
-public async Task<IActionResult> UpdatePermissionsForRole(string roleName, [FromBody] List<string> permissions)
-{
-    try
-    {
-        // Fetch the role
-        var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
-        if (role == null)
-        {
-            return NotFound(new { message = $"Role '{roleName}' not found." });
-        }
-
-        // Fetch existing permissions for the role
-        var existingPermissions = await _context.RolePermissions
-            .Where(rp => rp.RoleId == role.Id)
-            .ToListAsync();
-
-        // Remove all existing permissions
-        _context.RolePermissions.RemoveRange(existingPermissions);
-
-        // Add new permissions if the array is not empty
-        if (permissions != null && permissions.Any())
-        {
-            foreach (var permission in permissions)
-            {
-                _context.RolePermissions.Add(new AppRolePermission
-                {
-                    RoleId = role.Id,
-                    Permission = permission
-                });
-            }
-        }
-
-        await _context.SaveChangesAsync();
-        return Ok(new { message = "Permissions updated successfully." });
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, new { message = "Internal Server Error", details = ex.Message });
-    }
-}
 
 }
 

@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Domain.Enums;
+using OMSV1.Infrastructure.Identity;
 
 namespace OMSV1.Application.Commands.Users;
 
@@ -13,4 +14,6 @@ public class RegisterUserCommand : IRequest<IActionResult>
     public Guid OfficeId { get; set; }
     public Guid GovernorateId { get; set; }
     public List<string> Roles { get; set; } = new();
+    public ApplicationUser? CurrentUser { get; set; } // Make it nullable
+
 }
