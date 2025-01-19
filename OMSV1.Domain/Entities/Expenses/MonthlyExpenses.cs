@@ -7,12 +7,11 @@ using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Domain.Entities.Expenses;
 
-public class MonthlyExpenses(Status status, decimal totalAmount, string notes, Guid officeId, Guid governorateId, Guid profileId) : Entity
+public class MonthlyExpenses(Status status, decimal totalAmount, Guid officeId, Guid governorateId, Guid profileId) : Entity
 {
 
     public decimal TotalAmount { get; private set; } = totalAmount;
     public Status Status { get; private set; } = status;
-    public string? Notes { get; private set; } = notes;
 
     public Guid OfficeId { get; private set; } = officeId;
     public Guid GovernorateId { get; private set; } = governorateId;
@@ -30,17 +29,6 @@ public class MonthlyExpenses(Status status, decimal totalAmount, string notes, G
     private List<DailyExpenses> _dailyExpenses = new List<DailyExpenses>();
     public IReadOnlyCollection<DailyExpenses> dailyExpenses => _dailyExpenses.AsReadOnly();
     
-    //  public MonthlyExpenses(Status status, decimal totalAmount, string notes, Guid officeId, Guid governorateId, Guid profileId)
-    // {
-    //     if (totalAmount < 0) throw new ArgumentException("TotalAmount cannot be negative.");
-    //     Status = status;
-    //     TotalAmount = totalAmount;
-    //     Notes = notes;
-    //     OfficeId = officeId;
-    //     GovernorateId = governorateId;
-    //     ProfileId = profileId;
-    // }
-
     // Method to add a daily expense
     public void AddDailyExpense(DailyExpenses dailyExpense, IEnumerable<Threshold> thresholds)
     {
@@ -65,12 +53,7 @@ public class MonthlyExpenses(Status status, decimal totalAmount, string notes, G
 
         Status = newStatus;
     }
-    //Add notes
-        public void AddNotes(string notes)
-    {
-        Notes = notes;
-    }
-        // Add a method to adjust the TotalAmount
+    // Add a method to adjust the TotalAmount
     public void AdjustTotalAmount(decimal adjustmentAmount)
     {
         if (Status == Status.Completed)

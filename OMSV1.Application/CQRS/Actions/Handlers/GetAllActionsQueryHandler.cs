@@ -28,7 +28,6 @@ namespace OMSV1.Application.Handlers.Expenses
                 // Query the actions repository
                 var actions = await _unitOfWork.Repository<OMSV1.Domain.Entities.Expenses.Action>()
                     .GetAllAsQueryable()
-                    .Include(a => a.Profile) // Include Profile for mapping ProfileName
                     .Include(a => a.MonthlyExpenses) // Include MonthlyExpenses for completeness
                     .ProjectTo<ActionDto>(_mapper.ConfigurationProvider) // Map to ActionDto
                     .ToListAsync(cancellationToken);

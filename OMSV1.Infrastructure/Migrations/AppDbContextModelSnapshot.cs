@@ -144,12 +144,8 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.Property<string>("EntityType")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text")
+                        .HasColumnName("EntityType");
 
                     b.Property<string>("FilePath")
                         .IsRequired()
@@ -157,6 +153,13 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EntityId")
+                        .HasDatabaseName("IX_AttachmentCU_EntityId_Expense")
+                        .HasFilter("\"EntityType\" = 'Expense'");
+
+                    b.HasIndex("EntityType", "EntityId")
+                        .HasDatabaseName("IX_AttachmentCU_EntityType_EntityId");
 
                     b.ToTable("AttachmentCUs", (string)null);
                 });
@@ -431,16 +434,11 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<Guid>("ProfileId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ActionType");
 
                     b.HasIndex("MonthlyExpensesId");
-
-                    b.HasIndex("ProfileId");
 
                     b.ToTable("Actions", (string)null);
                 });
@@ -516,10 +514,6 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.Property<Guid>("GovernorateId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
 
                     b.Property<Guid>("OfficeId")
                         .HasColumnType("uuid");
@@ -1077,15 +1071,7 @@ namespace OMSV1.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OMSV1.Domain.Entities.Profiles.Profile", "Profile")
-                        .WithMany()
-                        .HasForeignKey("ProfileId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("MonthlyExpenses");
-
-                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.DailyExpenses", b =>

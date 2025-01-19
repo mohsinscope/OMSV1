@@ -2,7 +2,9 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.Expenses;
+using OMSV1.Application.DTOs.Expenses;
 using OMSV1.Application.Helpers;
+using OMSV1.Application.Queries.Actions;
 using OMSV1.Application.Queries.Expenses;
 
 namespace OMSV1.Application.Controllers
@@ -32,8 +34,25 @@ namespace OMSV1.Application.Controllers
             }
         }
 
+        [HttpGet("{monthlyExpensesId}")]
+        [RequirePermission("EXr")]
+
+        public async Task<ActionResult<List<ActionDto>>> GetActionsByMonthlyExpensesId(Guid monthlyExpensesId)
+        {
+            try
+            {
+                var query = new GetActionsByMonthlyExpensesIdQuery(monthlyExpensesId);
+                var actions = await _mediator.Send(query);
+                return Ok(actions);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving actions.", details = ex.Message });
+            }
+        }
+
         [HttpPost]
-        [RequirePermission("EXc")]
+        [RequirePermission("EXr")]
         public async Task<IActionResult> AddAction([FromBody] AddActionCommand command)
         {
             try

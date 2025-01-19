@@ -30,9 +30,8 @@ namespace OMSV1.Application.Handlers.Expenses
                 throw new InvalidOperationException("Cannot change the status of a completed MonthlyExpenses.");
             }
 
-            // Update the status and add notes
+            // Update the status
             monthlyExpenses.UpdateStatus((Status)request.NewStatus);
-            monthlyExpenses.AddNotes(request.Notes); // Add notes to the entity (Assumes AddNotes method exists)
 
             // Save changes to the database
             if (!await _unitOfWork.SaveAsync(cancellationToken))

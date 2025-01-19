@@ -58,7 +58,6 @@ public class CreateMonthlyExpensesCommandHandler : IRequestHandler<CreateMonthly
             var monthlyExpenses = new MonthlyExpenses(
                 (Status)request.Status,
                 request.TotalAmount,
-                request.Notes,
                 request.OfficeId,
                 request.GovernorateId,
                 request.ProfileId

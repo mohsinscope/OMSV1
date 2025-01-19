@@ -23,10 +23,6 @@ public class ActionConfiguration : IEntityTypeConfiguration<DomainAction>
             .IsRequired();
 
          // Configure relationships
-         builder.HasOne(a => a.Profile)
-            .WithMany() // If Profile has a navigation property for actions, adjust this
-            .HasForeignKey(a => a.ProfileId)
-            .OnDelete(DeleteBehavior.Restrict);
 
          builder.HasOne(a => a.MonthlyExpenses)
             .WithMany(me => me.actions)

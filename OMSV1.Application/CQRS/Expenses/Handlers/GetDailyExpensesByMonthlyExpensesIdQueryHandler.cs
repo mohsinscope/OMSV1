@@ -28,6 +28,7 @@ namespace OMSV1.Application.Handlers.Expenses
                 // Retrieve DailyExpenses filtered by MonthlyExpensesId
                 var dailyExpensesQuery = _repository.GetAllAsQueryable()
                     .Where(de => de.MonthlyExpensesId == request.MonthlyExpensesId) // Filter by MonthlyExpensesId
+                    .OrderByDescending(de => de.DateCreated) // Order by DateCreated in descending order
                     .Include(de => de.ExpenseType); // Include ExpenseType for mapping
 
                 // Map to DailyExpensesDto using AutoMapper's ProjectTo

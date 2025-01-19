@@ -6,13 +6,11 @@ namespace OMSV1.Application.Commands.Expenses
     {
         public Guid MonthlyExpensesId { get; set; }
         public int NewStatus { get; set; }
-        public string Notes { get; set; } = string.Empty; // New property for Notes
 
-        public UpdateMonthlyExpensesStatusCommand(Guid monthlyExpensesId, int newStatus, string notes)
+        public UpdateMonthlyExpensesStatusCommand(Guid monthlyExpensesId, int newStatus)
         {
             MonthlyExpensesId = monthlyExpensesId;
             NewStatus = newStatus;
-            Notes = notes;
         }
     }
 }

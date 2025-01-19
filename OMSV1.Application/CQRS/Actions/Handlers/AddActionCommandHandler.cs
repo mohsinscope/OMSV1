@@ -27,11 +27,6 @@ namespace OMSV1.Application.Handlers.Expenses
                 if (string.IsNullOrWhiteSpace(request.Notes))
                     throw new ArgumentException("Notes cannot be empty.");
 
-                // Check if Profile exists
-                var profileExists = await _unitOfWork.Repository<OMSV1.Domain.Entities.Profiles.Profile>().ExistsAsync(p => p.Id == request.ProfileId);
-                if (!profileExists)
-                    throw new ArgumentException($"Profile with ID {request.ProfileId} does not exist.");
-
                 // Check if MonthlyExpenses exists
                 var monthlyExpensesExists = await _unitOfWork.Repository<MonthlyExpenses>().ExistsAsync(me => me.Id == request.MonthlyExpensesId);
                 if (!monthlyExpensesExists)
@@ -41,7 +36,6 @@ namespace OMSV1.Application.Handlers.Expenses
                 var action = new OMSV1.Domain.Entities.Expenses.Action(
                     request.ActionType,
                     request.Notes,
-                    request.ProfileId,
                     request.MonthlyExpensesId
                 );
 

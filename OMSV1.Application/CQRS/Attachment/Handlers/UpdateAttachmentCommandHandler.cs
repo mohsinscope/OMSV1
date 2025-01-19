@@ -39,7 +39,7 @@ namespace OMSV1.Application.Handlers.Attachments
                 var uploadResult = await _photoService.AddPhotoAsync(request.NewPhoto, request.EntityId, request.EntityType);
 
                 // Step 3: Update the attachment entity with the new photo details
-                attachment.Update(uploadResult.FileName, uploadResult.FilePath);
+                attachment.Update(uploadResult.FilePath);
 
                 // Step 4: Update the attachment in the database asynchronously
                 await _unitOfWork.Repository<AttachmentCU>().UpdateAsync(attachment);

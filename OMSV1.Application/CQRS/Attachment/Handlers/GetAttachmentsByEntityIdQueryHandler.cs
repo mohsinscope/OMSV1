@@ -30,7 +30,6 @@ namespace OMSV1.Application.Handlers.Attachments
                         Id = a.Id,
                         EntityId = a.EntityId,
                         EntityType = a.EntityType,
-                        FileName = a.FileName,
                         FilePath = a.FilePath // Return the file path (URL) to the client
                     });
 

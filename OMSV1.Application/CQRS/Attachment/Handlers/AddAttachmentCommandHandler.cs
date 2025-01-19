@@ -70,7 +70,6 @@ namespace OMSV1.Application.Handlers.Attachments
 
             // Create the attachment entity
             var attachment = new AttachmentCU(
-                fileName: result.FileName,
                 filePath: result.FilePath,
                 entityType: request.EntityType,
                 entityId: request.EntityId

@@ -15,10 +15,6 @@ public class MonthlyExpensesConfiguration : IEntityTypeConfiguration<MonthlyExpe
             .HasColumnType("decimal(18,2)")
             .IsRequired();
 
-        builder.Property(me => me.Notes)
-            .HasMaxLength(500)
-            .IsRequired(false);
-
         builder.Property(me => me.Status)
             .HasConversion<string>()
             .IsRequired();
