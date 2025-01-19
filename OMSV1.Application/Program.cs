@@ -96,9 +96,12 @@ app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = context =>
     {
-        context.Context.Response.Headers.Add("X-Content-Type-Options", "nosniff"); // Prevent MIME-type sniffing
+        var headers = context.Context.Response.Headers;
+        headers.Add("Access-Control-Allow-Origin", "*"); // Adjust to specific origins if needed
+        headers.Add("X-Content-Type-Options", "nosniff");
     }
 });
+
 
 // Add Content Security Policy (CSP) header
 app.Use(async (context, next) =>
