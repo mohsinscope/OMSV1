@@ -11,5 +11,6 @@ public enum Status
     SentToAccountant = 6,
     ReturnedToSupervisor = 7,
     RecievedBySupervisor = 8,
-    Completed = 9
+    Completed = 9,
+    SentFromDirector=10
 }

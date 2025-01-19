@@ -43,47 +43,75 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+// Add CORS configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigins", policy =>
+    {
+        policy.WithOrigins(
+                "https://oms.scopesky.org",
+                "http://oms.scopesky.org",
+                "http://localhost:5173"
+            )
+            .WithMethods("GET", "POST", "PUT", "DELETE") // Restrict allowed HTTP methods
+            .WithHeaders("Content-Type", "Authorization") // Restrict allowed headers
+            .AllowCredentials(); // Allow credentials for authenticated requests
+    });
+});
 
+// Add MediatR, Identity, AutoMapper, and application services
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, DynamicPermissionPolicyProvider>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
-
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddApplicationServices(builder.Configuration);
-
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
 
+// Enable HTTPS redirection
 app.UseHttpsRedirection();
 
-// Add rate limiting middleware - place it early in the pipeline
+// Apply HSTS to enforce HTTPS
+app.UseHsts();
+
+// Apply CORS policy before authentication
+app.UseCors("AllowSpecificOrigins");
+
+// Add rate limiting middleware
 app.UseRateLimiter();
 
+// Add custom exception middleware
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseCors(x => x
-    .AllowAnyHeader()
-    .AllowAnyMethod()
-    .AllowCredentials()
-    .WithOrigins(
-        "https://oms.scopesky.org",
-        "http://oms.scopesky.org",
-        "http://localhost:5173"
-    )
-);
 
+// Apply authentication and authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Apply rate limiting to all API endpoints
+// Serve static files without caching
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        context.Context.Response.Headers.Add("X-Content-Type-Options", "nosniff"); // Prevent MIME-type sniffing
+    }
+});
+
+// Add Content Security Policy (CSP) header
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Add("Content-Security-Policy", 
+        "default-src 'self'; img-src 'self' https://cdn-oms.scopesky.org; script-src 'self'; style-src 'self';");
+    await next();
+});
+
+// Map controllers with rate limiting
 app.MapControllers().RequireRateLimiting("api");
 
-app.UseStaticFiles();
-
+// Role and admin user initialization
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -91,7 +119,7 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
     // Create roles
-    var roles = new[] { "SuperAdmin","Admin", "Supervisor", "Manager"};
+    var roles = new[] { "SuperAdmin", "Admin", "Supervisor", "Manager" };
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))
@@ -107,10 +135,8 @@ using (var scope = app.Services.CreateScope())
     {
         var user = new ApplicationUser { UserName = adminEmail, Email = adminEmail };
         await userManager.CreateAsync(user, "Admin@123");
-        await userManager.AddToRoleAsync(user, "Admin");
+        await userManager.AddToRoleAsync(user, "SuperAdmin");
     }
 }
-
-
 
 app.Run();
