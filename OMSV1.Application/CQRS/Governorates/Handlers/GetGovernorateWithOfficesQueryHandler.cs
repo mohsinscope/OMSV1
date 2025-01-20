@@ -26,9 +26,9 @@ namespace OMSV1.Application.Handlers.Governorates
                 // Fetch governorate with offices included
                 var governorate = await _repository.GetByIdWithIncludesAsync(request.Id, g => g.Offices);
 
-                // Return null if not found
+                // Throw if not found
                 if (governorate == null)
-                    return null;
+                    throw new KeyNotFoundException($"Governorate with ID {request.Id} not found.");
 
                 // Map Governorate entity to GovernorateWithOfficesDto
                 return _mapper.Map<GovernorateWithOfficesDto>(governorate);
@@ -39,5 +39,6 @@ namespace OMSV1.Application.Handlers.Governorates
                 throw new HandlerException("An error occurred while fetching the governorate with offices.", ex);
             }
         }
+
     }
 }

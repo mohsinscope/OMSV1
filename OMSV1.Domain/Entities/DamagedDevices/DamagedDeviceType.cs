@@ -17,10 +17,11 @@ namespace OMSV1.Domain.Entities.DamagedDevices;
 
         // You can add more methods or validation logic here as needed.
         // Update method to modify the properties
-        public void Update(string name, string description)
-        {
-            Name = name;
-            Description = description;
-        }
+     public void Update(string? name, string? description)
+{
+    Name = name ?? Name; // Retain the current value if the new value is null
+    Description = description ?? Description; // Retain the current value if the new value is null
+}
+
     }
 

@@ -9,7 +9,10 @@ namespace OMSV1.Domain.Entities.Profiles;
 
  public class Profile : Entity,IAggregateRoot
     {
-    private Profile() { }
+private Profile() 
+{
+    FullName = string.Empty; // Default to an empty string
+}
 
     public Profile(Guid userId, string fullName,  Position position,Guid officeId,Guid governorateId)
     {
@@ -24,8 +27,8 @@ namespace OMSV1.Domain.Entities.Profiles;
         public Guid UserId { get; private set; }
         public Guid OfficeId { get; private set; } 
         public Guid GovernorateId { get; private set; } 
-        public Office? Office { get; private set; }      
-        public Governorate? Governorate { get; private set; }
+        public Office Office { get; private set; }= null!;      
+        public Governorate Governorate { get; private set; }= null!;
         
   
 

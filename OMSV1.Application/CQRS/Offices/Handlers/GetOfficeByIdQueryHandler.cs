@@ -23,13 +23,18 @@ namespace OMSV1.Application.Queries.Offices
             try
             {
                 var office = await _repository.GetByIdAsync(request.OfficeId);
-                return office == null ? null : _mapper.Map<OfficeDto>(office);
+                if (office == null)
+                {
+                    throw new KeyNotFoundException($"Office with ID {request.OfficeId} was not found.");
+                }
+
+                return _mapper.Map<OfficeDto>(office);
             }
             catch (Exception ex)
             {
-                // Log the error (you can use a logging library like Serilog or NLog)
                 throw new HandlerException("An error occurred while retrieving the office.", ex);
             }
         }
+
     }
 }

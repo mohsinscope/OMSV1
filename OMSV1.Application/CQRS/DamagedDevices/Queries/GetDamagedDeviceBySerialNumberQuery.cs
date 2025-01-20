@@ -5,5 +5,5 @@ namespace OMSV1.Application.CQRS.Queries.DamagedDevices;
 
 public class GetDamagedDeviceBySerialNumberQuery : IRequest<DamagedDeviceDto>
 {
-    public string SerialNumber { get; set; }
+    public required string SerialNumber { get; set; }
 }

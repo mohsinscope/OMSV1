@@ -17,11 +17,11 @@ public class MonthlyExpenses(Status status, decimal totalAmount, Guid officeId, 
     public Guid GovernorateId { get; private set; } = governorateId;
     public Guid ProfileId { get; private set; } = profileId;
 
-    public Governorate? Governorate { get; private set; }
-    public Office? Office { get; private set; }
-    public Profile? Profile { get; private set; }
+    public Governorate Governorate { get; private set; }= null!;
+    public Office Office { get; private set; } = null!;
+    public Profile Profile { get; private set; }= null!;
     public Guid? ThresholdId { get; private set; }
-    public Threshold? Threshold { get; private set; }
+    public Threshold Threshold { get; private set; }= null!;
 
     private List<Action> _actions = new List<Action>();
     public IReadOnlyCollection<Action> actions => _actions.AsReadOnly();

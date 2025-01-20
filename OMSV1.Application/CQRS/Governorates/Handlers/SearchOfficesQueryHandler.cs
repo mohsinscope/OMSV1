@@ -15,37 +15,28 @@ namespace OMSV1.Application.CQRS.Governorates
             _officeRepository = officeRepository;
         }
 
-        public async Task<List<OfficeCountDto>> Handle(SearchOfficesQuery request, CancellationToken cancellationToken)
+public async Task<List<OfficeCountDto>> Handle(SearchOfficesQuery request, CancellationToken cancellationToken)
+{
+    var query = _officeRepository.GetAllAsQueryable();
+
+    if (request.GovernorateId.HasValue)
+    {
+        // Filter by GovernorateId
+        query = query.Where(o => o.GovernorateId == request.GovernorateId.Value);
+    }
+
+    // Group by GovernorateId or use a constant
+    var result = await query
+        .GroupBy(o => request.GovernorateId.HasValue ? o.GovernorateId : (Guid?)null)
+        .Select(g => new OfficeCountDto
         {
-            if (request.GovernorateId.HasValue)
-            {
-                // If GovernorateId is provided, return offices for that governorate
-                var officeCount = await _officeRepository.GetAllAsQueryable()
-                    .Where(o => o.GovernorateId == request.GovernorateId.Value)
-                    .GroupBy(o => o.GovernorateId)
-                    .Select(g => new OfficeCountDto
-                    {
-                        GovernorateId = g.Key,
-                        NumberOfOffices = g.Count()
-                    })
-                    .ToListAsync(cancellationToken);
+            GovernorateId = g.Key ?? Guid.Empty, // Replace null with Guid.Empty
+            NumberOfOffices = g.Count()
+        })
+        .ToListAsync(cancellationToken);
 
-                return officeCount;
-            }
-            else
-            {
-                // If GovernorateId is null, return total office count across all governorates
-                var totalOffices = await _officeRepository.GetAllAsQueryable()
-                    .GroupBy(o => 1)  // Grouping by a constant value to get the total count
-                    .Select(g => new OfficeCountDto
-                    {
-                        GovernorateId = Guid.Empty, // Use Guid.Empty for no specific governorate
-                        NumberOfOffices = g.Count()
-                    })
-                    .ToListAsync(cancellationToken);
+    return result;
+}
 
-                return totalOffices;
-            }
-        }
     }
 }

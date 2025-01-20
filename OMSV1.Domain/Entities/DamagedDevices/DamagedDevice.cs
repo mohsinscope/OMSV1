@@ -17,11 +17,11 @@ namespace OMSV1.Domain.Entities.DamagedDevices
         public string? Note { get; private set; }
         
         // Navigation properties (optional nullability)
-        public DamagedDeviceType? DamagedDeviceTypes { get; private set; }
-        public DeviceType? DeviceType { get; private set; }
-        public Governorate? Governorate { get; private set; }
-        public Office? Office { get; private set; }
-        public Profile? Profile { get; private set; }
+        public DamagedDeviceType DamagedDeviceTypes { get; private set; }= null!;
+        public DeviceType DeviceType { get; private set; }= null!;
+        public Governorate Governorate { get; private set; }= null!;
+        public Office Office { get; private set; }= null!;
+        public Profile Profile { get; private set; }= null!;
 
         // Constructor for full initialization
         public DamagedDevice(string serialNumber, DateTime date, Guid damagedDeviceTypeId, string note,
@@ -39,7 +39,7 @@ namespace OMSV1.Domain.Entities.DamagedDevices
 
         // Constructor with default values (optional parameters)
         public DamagedDevice(string serialNumber, DateTime date)
-            : this(serialNumber, date, default, default, default, default,default,default)
+            : this(serialNumber, date, Guid.Empty, string.Empty, Guid.Empty, Guid.Empty, Guid.Empty, Guid.Empty)
         {
         }
         // Method to update the device details

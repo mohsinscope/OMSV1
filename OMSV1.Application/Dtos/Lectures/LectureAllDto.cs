@@ -6,11 +6,11 @@ namespace OMSV1.Application.Dtos.Lectures
     public class LectureAllDto
     {
         public Guid Id { get; set; }
-        public string Title { get; set; }
+        public required string Title { get; set; }
         public DateTime Date { get; set; }
-        public string OfficeName { get; set; } // Office Name
-        public string GovernorateName { get; set; } // Governorate Name
-        public string CompanyName { get; set; } // Company Name
+        public required string OfficeName { get; set; } // Office Name
+        public required string GovernorateName { get; set; } // Governorate Name
+        public required string CompanyName { get; set; } // Company Name
 
         // Added LectureTypeNames to hold multiple lecture type names
         public List<string> LectureTypeNames { get; set; } = new List<string>();

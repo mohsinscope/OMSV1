@@ -22,77 +22,81 @@ namespace OMSV1.Application.CQRS.Attendance.Handlers
             _officeRepository = officeRepository;
         }
 
-        public async Task<AttendanceStatisticsInOfficeDto> Handle(GetAttendanceStatisticsInOfficeQuery request, CancellationToken cancellationToken)
+public async Task<AttendanceStatisticsInOfficeDto> Handle(GetAttendanceStatisticsInOfficeQuery request, CancellationToken cancellationToken)
+{
+    try
     {
-        try
+        if (!request.OfficeId.HasValue)
         {
-            // Define the attendance filtering specification
-            var specification = new FilterAttendanceInOfficesStatisticsSpecification(
-                workingHours: request.WorkingHours,
-                date: request.Date,
-                officeId: request.OfficeId
-            );
+            throw new ArgumentException("OfficeId cannot be null.", nameof(request.OfficeId));
+        }
 
-            // Retrieve attendance data using ListAsQueryable
-            var attendancesQuery = _attendanceRepository.ListAsQueryable(specification);
+        // Define the attendance filtering specification
+        var specification = new FilterAttendanceInOfficesStatisticsSpecification(
+            workingHours: request.WorkingHours,
+            date: request.Date,
+            officeId: request.OfficeId.Value
+        );
 
-            // Retrieve office data
-            var office = await _officeRepository.GetByIdAsync(request.OfficeId.Value);
-            if (office == null)
-                throw new Exception($"Office with ID {request.OfficeId} not found");
+        // Retrieve attendance data using ListAsQueryable
+        var attendancesQuery = _attendanceRepository.ListAsQueryable(specification);
 
-            // Calculate total staff in the office
-            var totalStaff = office.ReceivingStaff + office.AccountStaff + office.PrintingStaff +
-                            office.QualityStaff + office.DeliveryStaff;
+        // Retrieve office data
+        var office = await _officeRepository.GetByIdAsync(request.OfficeId.Value);
+        if (office == null)
+            throw new Exception($"Office with ID {request.OfficeId} not found");
 
-            // Aggregate attendance data to calculate available staff
-            var attendanceData = await attendancesQuery
-                .GroupBy(a => 1) // Group by a constant to aggregate all records
-                .Select(g => new
-                {
-                    AvailableReceivingStaff = g.Sum(a => a.ReceivingStaff),
-                    AvailableAccountStaff = g.Sum(a => a.AccountStaff),
-                    AvailablePrintingStaff = g.Sum(a => a.PrintingStaff),
-                    AvailableQualityStaff = g.Sum(a => a.QualityStaff),
-                    AvailableDeliveryStaff = g.Sum(a => a.DeliveryStaff),
-                    // Total available staff is not needed anymore for AvailableStaffInOffice
-                })
-                .FirstOrDefaultAsync(cancellationToken);
+        // Calculate total staff in the office
+        var totalStaff = office.ReceivingStaff + office.AccountStaff + office.PrintingStaff +
+                        office.QualityStaff + office.DeliveryStaff;
 
-            // Assign attendance data
-            var availableReceivingStaff = attendanceData?.AvailableReceivingStaff ?? 0;
-            var availableAccountStaff = attendanceData?.AvailableAccountStaff ?? 0;
-            var availablePrintingStaff = attendanceData?.AvailablePrintingStaff ?? 0;
-            var availableQualityStaff = attendanceData?.AvailableQualityStaff ?? 0;
-            var availableDeliveryStaff = attendanceData?.AvailableDeliveryStaff ?? 0;
-
-            // Calculate the total available staff in the office (sum of available staff in all categories)
-            var availableStaffInOffice = availableReceivingStaff + availableAccountStaff + availablePrintingStaff +
-                                        availableQualityStaff + availableDeliveryStaff;
-
-            // Construct and return the DTO
-            return new AttendanceStatisticsInOfficeDto
+        // Aggregate attendance data to calculate available staff
+        var attendanceData = await attendancesQuery
+            .GroupBy(a => 1) // Group by a constant to aggregate all records
+            .Select(g => new
             {
-                TotalStaffInOffice = totalStaff,
-                AvailableStaffInOffice = availableStaffInOffice, // Updated calculation
-                ReceivingStaffTotal = office.ReceivingStaff,
-                ReceivingStaffAvailable = availableReceivingStaff,
-                AccountStaffTotal = office.AccountStaff,
-                AccountStaffAvailable = availableAccountStaff,
-                PrintingStaffTotal = office.PrintingStaff,
-                PrintingStaffAvailable = availablePrintingStaff,
-                QualityStaffTotal = office.QualityStaff,
-                QualityStaffAvailable = availableQualityStaff,
-                DeliveryStaffTotal = office.DeliveryStaff,
-                DeliveryStaffAvailable = availableDeliveryStaff
-            };
-        }
-        catch (Exception ex)
+                AvailableReceivingStaff = g.Sum(a => a.ReceivingStaff),
+                AvailableAccountStaff = g.Sum(a => a.AccountStaff),
+                AvailablePrintingStaff = g.Sum(a => a.PrintingStaff),
+                AvailableQualityStaff = g.Sum(a => a.QualityStaff),
+                AvailableDeliveryStaff = g.Sum(a => a.DeliveryStaff),
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        // Assign attendance data
+        var availableReceivingStaff = attendanceData?.AvailableReceivingStaff ?? 0;
+        var availableAccountStaff = attendanceData?.AvailableAccountStaff ?? 0;
+        var availablePrintingStaff = attendanceData?.AvailablePrintingStaff ?? 0;
+        var availableQualityStaff = attendanceData?.AvailableQualityStaff ?? 0;
+        var availableDeliveryStaff = attendanceData?.AvailableDeliveryStaff ?? 0;
+
+        // Calculate the total available staff in the office
+        var availableStaffInOffice = availableReceivingStaff + availableAccountStaff + availablePrintingStaff +
+                                    availableQualityStaff + availableDeliveryStaff;
+
+        // Construct and return the DTO
+        return new AttendanceStatisticsInOfficeDto
         {
-            // Log and rethrow the exception
-            throw new Exception("An error occurred while retrieving attendance statistics.", ex);
-        }
+            TotalStaffInOffice = totalStaff,
+            AvailableStaffInOffice = availableStaffInOffice,
+            ReceivingStaffTotal = office.ReceivingStaff,
+            ReceivingStaffAvailable = availableReceivingStaff,
+            AccountStaffTotal = office.AccountStaff,
+            AccountStaffAvailable = availableAccountStaff,
+            PrintingStaffTotal = office.PrintingStaff,
+            PrintingStaffAvailable = availablePrintingStaff,
+            QualityStaffTotal = office.QualityStaff,
+            QualityStaffAvailable = availableQualityStaff,
+            DeliveryStaffTotal = office.DeliveryStaff,
+            DeliveryStaffAvailable = availableDeliveryStaff
+        };
     }
+    catch (Exception ex)
+    {
+        throw new Exception("An error occurred while retrieving attendance statistics.", ex);
+    }
+}
+
 
     }
 }

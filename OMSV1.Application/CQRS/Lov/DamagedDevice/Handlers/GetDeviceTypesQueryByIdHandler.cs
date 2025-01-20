@@ -15,34 +15,31 @@ namespace OMSV1.Application.CQRS.Lov.DamagedDevice
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<DeviceTypeDto> Handle(GetDeviceTypesQueryById request, CancellationToken cancellationToken)
+public async Task<DeviceTypeDto> Handle(GetDeviceTypesQueryById request, CancellationToken cancellationToken)
+{
+    try
+    {
+        // Fetch the device type by ID
+        var deviceType = await _unitOfWork.Repository<DeviceType>().GetByIdAsync(request.Id);
+
+        if (deviceType == null)
         {
-            try
-            {
-                // Fetch the device type by Id using the unit of work and repository
-                var deviceType = await _unitOfWork.Repository<DeviceType>().GetByIdAsync(request.Id);
-
-                if (deviceType == null)
-                {
-                    // If not found, return null or handle the error as per your design (e.g., throw an exception)
-                    return null;
-                }
-
-                // Map the entity to DTO
-                var deviceTypeDto = new DeviceTypeDto
-                {
-                    Id = deviceType.Id,
-                    Name = deviceType.Name,
-                    Description = deviceType.Description
-                };
-
-                return deviceTypeDto;
-            }
-            catch (Exception ex)
-            {
-                // Throw a custom exception with the error message and inner exception
-                throw new HandlerException("An error occurred while retrieving the device type by ID.", ex);
-            }
+            throw new KeyNotFoundException($"DeviceType with ID {request.Id} not found.");
         }
+
+        // Map the entity to DTO
+        return new DeviceTypeDto
+        {
+            Id = deviceType.Id,
+            Name = deviceType.Name,
+            Description = deviceType.Description
+        };
+    }
+    catch (Exception ex)
+    {
+        throw new HandlerException("An error occurred while retrieving the device type by ID.", ex);
+    }
+}
+
     }
 }

@@ -19,7 +19,7 @@ namespace OMSV1.Application.Commands.LOV
         {
             try
             {
-                var damagedDeviceType = new DamagedDeviceType(request.Name, request.Description);
+                var damagedDeviceType = new DamagedDeviceType(request.Name,  request.Description ?? string.Empty);
 
                 // Use the generic repository to add the new damaged device type
                 await _unitOfWork.Repository<DamagedDeviceType>().AddAsync(damagedDeviceType);

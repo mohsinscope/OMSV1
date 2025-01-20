@@ -4,7 +4,7 @@ using OMSV1.Domain.Enums;
 
 namespace OMSV1.Application.Queries.Expenses;
 
-public class GetLastMonthQuery : IRequest<MonthlyExpensesDto>
+public class GetLastMonthQuery : IRequest<List<MonthlyExpensesDto>>  // Changed return type to List
 {
     public Guid? OfficeId { get; set; }
     public Status? Status { get; set; }

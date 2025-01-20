@@ -5,7 +5,7 @@ namespace OMSV1.Application.Commands.DamagedPassports
     public class UpdateDamagedPassportCommand : IRequest<bool>
     {
         public Guid Id { get; set; }  // Unique identifier for the damaged passport
-        public string PassportNumber { get; set; }
+        public required string PassportNumber { get; set; }
         public DateTime Date { get; set; }
         public string? Note { get; set; }
 

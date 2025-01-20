@@ -36,7 +36,7 @@ namespace OMSV1.Application.Handlers.Attendances
                 request.QualityStaff,
                 request.DeliveryStaff,
                 request.Date,
-                request.Note,
+                request.Note ?? string.Empty, // Default to an empty string if null
                 workingHoursEnum, // Now passing the enum
                 request.GovernorateId,
                 request.OfficeId,

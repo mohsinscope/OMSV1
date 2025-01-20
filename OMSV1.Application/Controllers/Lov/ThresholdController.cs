@@ -27,10 +27,10 @@ namespace OMSV1.Application.Controllers
                 var query = new GetThresholdsQuery();
                 var result = await _mediator.Send(query);
 
-                if (result == null || result.Count == 0)
-                {
-                    return ResponseHelper.CreateErrorResponse(HttpStatusCode.NotFound, "No thresholds found.", null);
-                }
+              if (result == null || result.Count == 0)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.NotFound, "No thresholds found.", Array.Empty<string>());
+            }
 
                 return Ok(result);
             }

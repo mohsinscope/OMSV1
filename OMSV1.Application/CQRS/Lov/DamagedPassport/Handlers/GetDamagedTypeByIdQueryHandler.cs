@@ -23,9 +23,9 @@ namespace OMSV1.Application.CQRS.Lov.DamagedPassport
                 var damagedType = await _unitOfWork.Repository<DamagedType>()
                     .GetByIdAsync(request.Id);
 
-                if (damagedType == null)
+                 if (damagedType == null)
                 {
-                    return null; // Return null if the damaged type does not exist
+                    throw new KeyNotFoundException($"DamagedType with ID {request.Id} not found.");
                 }
 
                 // Map to DTO (use AutoMapper if set up)

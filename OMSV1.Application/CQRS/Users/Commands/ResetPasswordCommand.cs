@@ -7,8 +7,8 @@ namespace OMSV1.Application.CQRS.Users.Commands;
 public class ResetPasswordCommand : IRequest<IActionResult>
 {
     [Required]
-    public string UserId { get; set; }
+    public required string UserId { get; set; }
 
     [Required]
-    public string NewPassword { get; set; }
+    public required string NewPassword { get; set; }
 }

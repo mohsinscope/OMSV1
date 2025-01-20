@@ -9,8 +9,8 @@ public abstract class BaseSpecification<T> : ISpecification<T> where T : Entity
     public Expression<Func<T, bool>> Criteria { get; }
     public List<Expression<Func<T, object>>> Includes { get; } = new();
     public List<string> IncludeStrings { get; } = new();
-    public Expression<Func<T, object>> OrderBy { get; private set; }
-    public Expression<Func<T, object>> OrderByDescending { get; private set; }
+    public Expression<Func<T, object>> OrderBy { get; private set; } = null!;
+    public Expression<Func<T, object>> OrderByDescending { get; private set; }= null!;
     public Expression<Func<T, object>>? SecondaryOrderBy { get; private set; }
     public Expression<Func<T, object>>? SecondaryOrderByDescending { get; private set; }
 

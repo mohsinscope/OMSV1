@@ -10,35 +10,27 @@ using OMSV1.Domain.Specifications.Expenses;
 
 namespace OMSV1.Application.Handlers.Expenses;
 
-public class GetLastMonthQueryHandler : IRequestHandler<GetLastMonthQuery, MonthlyExpensesDto>
+public class GetLastMonthQueryHandler : IRequestHandler<GetLastMonthQuery, List<MonthlyExpensesDto>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-
+    
     public GetLastMonthQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
 
-    public async Task<MonthlyExpensesDto> Handle(GetLastMonthQuery request, CancellationToken cancellationToken)
+    public async Task<List<MonthlyExpensesDto>> Handle(GetLastMonthQuery request, CancellationToken cancellationToken)
     {
         try
         {
-            // Define the specification for last month's expenses
             var lastMonthSpec = new FilterLastMonthExpensesSpecification(
                 request.OfficeId,
                 request.Status
             );
-
-            // Fetch the filtered expenses
             var lastMonthExpenses = await _unitOfWork.Repository<MonthlyExpenses>().ListAsync(lastMonthSpec);
-
-            // Map to DTO
-            var expensesDto = _mapper.Map<List<MonthlyExpensesDto>>(lastMonthExpenses);
-
-            // Return the results (assumes a single DTO output; modify as needed)
-            return expensesDto.FirstOrDefault();
+            return _mapper.Map<List<MonthlyExpensesDto>>(lastMonthExpenses);
         }
         catch (Exception ex)
         {

@@ -6,19 +6,19 @@ namespace OMSV1.Application.Dtos.Lectures
     public class LectureDto
     {
         public Guid Id { get; set; }
-        public string Title { get; set; }
+        public required string Title { get; set; }
         public DateTime Date { get; set; }
         public string? Note { get; set; }
 
         public Guid OfficeId { get; set; }
-        public string OfficeName { get; set; }
+        public required string OfficeName { get; set; }
         public Guid GovernorateId { get; set; }
-        public string GovernorateName { get; set; }
+        public required string GovernorateName { get; set; }
         public Guid ProfileId { get; set; }
-        public string ProfileFullName { get; set; }
+        public required string ProfileFullName { get; set; }
         public Guid CompanyId { get; set; }
-        public string CompanyName { get; set; }
-        public List<string> LectureTypeNames { get; set; }  // Assuming multiple Lecture Types
+        public required string CompanyName { get; set; }
+        public required List<string> LectureTypeNames { get; set; }  // Assuming multiple Lecture Types
 
         // Default constructor (parameterless)
         public LectureDto() { }

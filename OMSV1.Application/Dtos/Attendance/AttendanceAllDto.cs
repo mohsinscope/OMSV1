@@ -19,8 +19,8 @@ namespace OMSV1.Application.Dtos.Attendances
         public int WorkingHours { get; set; }
 
         // Name properties for DTO output
-        public string GovernorateName { get; set; }
-        public string OfficeName { get; set; }
-        public string ProfileFullName { get; set; }
+        public string? GovernorateName { get; set; }
+        public string? OfficeName { get; set; }
+        public string? ProfileFullName { get; set; }
     }
 }

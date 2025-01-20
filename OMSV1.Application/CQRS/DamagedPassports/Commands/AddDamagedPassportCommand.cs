@@ -4,7 +4,7 @@ namespace OMSV1.Application.Commands.DamagedPassports
 {
     public class AddDamagedPassportCommand : IRequest<Guid>
     {
-        public string PassportNumber { get; set; }
+        public required string PassportNumber { get; set; }
         public DateTime Date { get; set; }
         public string Note { get; set; } = ""; // Default value for Note if not provided
         public Guid OfficeId { get; set; }

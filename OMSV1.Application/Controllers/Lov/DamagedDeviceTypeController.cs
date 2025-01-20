@@ -29,10 +29,11 @@ namespace OMSV1.Application.Controllers
                 var query = new GetAllDamagedDeviceTypesQuery();
                 var result = await _mediator.Send(query);
                 
-                if (result == null || result.Count == 0)
+                    if (result == null || result.Count == 0)
                 {
-                    return ResponseHelper.CreateErrorResponse(HttpStatusCode.NotFound, "No damaged device types found.", null);
+                    return ResponseHelper.CreateErrorResponse(HttpStatusCode.NotFound, "No damaged device types found.", Array.Empty<string>());
                 }
+
 
                 return Ok(result);
             }
