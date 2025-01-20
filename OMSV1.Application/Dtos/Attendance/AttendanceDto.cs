@@ -24,13 +24,13 @@ namespace OMSV1.Application.Dtos.Attendances
         public Guid GovernorateId { get; set; }
 
         // Name properties for DTO output
-        public string GovernorateName { get; set; }
+        public string? GovernorateName { get; set; }
 
         public Guid OfficeId { get; set; }
-        public string OfficeName { get; set; }
+        public string? OfficeName { get; set; }
 
         public Guid ProfileId { get; set; }
-        public string ProfileFullName { get; set; }
+        public string? ProfileFullName { get; set; }
         public DateTime DateCreated { get; set; }
 
     }

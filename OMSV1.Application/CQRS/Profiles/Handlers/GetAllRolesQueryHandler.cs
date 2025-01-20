@@ -16,22 +16,22 @@ namespace OMSV1.Application.CQRS.Profiles
             _roleManager = roleManager;
         }
 
-        public async Task<List<string>> Handle(GetAllRolesQuery request, CancellationToken cancellationToken)
+     public async Task<List<string>> Handle(GetAllRolesQuery request, CancellationToken cancellationToken)
+    {
+        try
         {
-            try
-            {
-                // Fetch all roles using RoleManager
-                var roles = await _roleManager.Roles
-                    .Select(role => role.Name)
-                    .ToListAsync(cancellationToken);
+            var roles = await _roleManager.Roles
+                .Where(role => role.Name != null) // Exclude roles with null names
+                .Select(role => role.Name!)
+                .ToListAsync(cancellationToken);
 
-                return roles; // Return the list of role names
-            }
-            catch (Exception ex)
-            {
-                // Log the error (you can use a logging library like Serilog or NLog here)
-                throw new HandlerException("An error occurred while retrieving roles.", ex);
-            }
+            return roles;
         }
+        catch (Exception ex)
+        {
+            throw new HandlerException("An error occurred while retrieving roles.", ex);
+        }
+    }
+
     }
 }

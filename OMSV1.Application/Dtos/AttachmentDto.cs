@@ -6,7 +6,7 @@ namespace OMSV1.Application.Dtos;
 public class AttachmentDto
 {
     public Guid Id { get; set; }
-    public string FilePath { get; set; }
+    public required string FilePath { get; set; }
     public EntityType EntityType { get; set; }
     public Guid EntityId { get; set; }
 }

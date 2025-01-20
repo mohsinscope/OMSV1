@@ -7,15 +7,15 @@ namespace OMSV1.Application.Dtos;
     {
         [Required]
         [MinLength(3)]
-        public string UserName { get; set; }
+        public required string UserName { get; set; }
 
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public required string Email { get; set; }
 
         [Required]
         [MinLength(6)]
-        public string Password { get; set; }
+        public required string Password { get; set; }
 
         public List<string> Roles { get; set; } = new();
     }

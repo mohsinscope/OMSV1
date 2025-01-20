@@ -248,6 +248,34 @@ public class AccountController : BaseApiController
     {
         return await _mediator.Send(command);
     }
+    [HttpDelete("{userId}")]
+    [Authorize(Policy = "RequireSuperAdminRole")]
+
+    public async Task<IActionResult> DeleteUser(string userId)
+    {
+        // Get the current logged-in user
+        var currentUserName = User.Identity?.Name;
+        if (string.IsNullOrEmpty(currentUserName))
+        {
+            return Unauthorized(new { message = "Current user is not authenticated." });
+        }
+
+        var currentUser = await _userManager.FindByNameAsync(currentUserName);
+        if (currentUser == null)
+        {
+            return Unauthorized(new { message = "Current user not found in the system." });
+        }
+
+        // Create the command
+        var command = new DeleteUserCommand
+        {
+            UserId = userId,
+            CurrentUser = currentUser // Pass the current user to the command
+        };
+
+        return await _mediator.Send(command);
+    }
+
 
 
 }

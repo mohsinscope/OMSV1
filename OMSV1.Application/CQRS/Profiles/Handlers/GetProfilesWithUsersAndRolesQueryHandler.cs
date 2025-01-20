@@ -20,47 +20,44 @@ namespace OMSV1.Application.CQRS.Queries.Profiles
             _userManager = userManager;
         }
 
-public async Task<List<ProfileWithUserAndRolesDto>> Handle(GetProfilesWithUsersAndRolesQuery request, CancellationToken cancellationToken)
-{
-    // Fetch profiles with related Governorate and Office entities
-  var profiles = await _unitOfWork.Repository<Profile>()
-    .GetAllAsQueryable() // Use GetAllAsQueryable for no specification
-    .Include(p => p.Governorate)
-    .Include(p => p.Office)
-    .ToListAsync(cancellationToken);
-
-
-    var profileWithUserRoles = new List<ProfileWithUserAndRolesDto>();
-
-    foreach (var profile in profiles)
-    {
-        // Fetch the user associated with the profile
-        var user = await _userManager.FindByIdAsync(profile.UserId.ToString());
-
-        if (user != null)
+        public async Task<List<ProfileWithUserAndRolesDto>> Handle(GetProfilesWithUsersAndRolesQuery request, CancellationToken cancellationToken)
         {
-            // Map the profile and related user data into the DTO
-            var profileWithRoles = new ProfileWithUserAndRolesDto
+            // Fetch profiles with related Governorate and Office entities
+            var profiles = await _unitOfWork.Repository<Profile>()
+                .GetAllAsQueryable() // Use GetAllAsQueryable for no specification
+                .Include(p => p.Governorate)
+                .Include(p => p.Office)
+                .ToListAsync(cancellationToken);
+
+            var profileWithUserRoles = new List<ProfileWithUserAndRolesDto>();
+
+            foreach (var profile in profiles)
             {
-                Id = profile.Id,
-                FullName = profile.FullName,
-                Position = profile.Position.ToString(),
-                GovernorateId = profile.GovernorateId,
-                GovernorateName = profile.Governorate?.Name, // Fetch Governorate name
-                OfficeId = profile.OfficeId,
-                OfficeName = profile.Office?.Name, // Fetch Office name
-                UserId = user.Id,
-                Username = user.UserName,
-                Roles = (await _userManager.GetRolesAsync(user)).ToList() // Fetch roles
-            };
+                // Fetch the user associated with the profile
+                var user = await _userManager.FindByIdAsync(profile.UserId.ToString());
 
-            profileWithUserRoles.Add(profileWithRoles);
+                if (user != null)
+                {
+                    // Map the profile and related user data into the DTO
+                    var profileWithRoles = new ProfileWithUserAndRolesDto
+                    {
+                        Id = profile.Id,
+                        FullName = profile.FullName ?? "Unknown", // Handle null FullName
+                        Position = profile.Position.ToString(),
+                        GovernorateId = profile.GovernorateId,
+                        GovernorateName = profile.Governorate?.Name ?? "Unknown Governorate", // Handle null Governorate name
+                        OfficeId = profile.OfficeId,
+                        OfficeName = profile.Office?.Name ?? "Unknown Office", // Handle null Office name
+                        UserId = user.Id,
+                        Username = user.UserName ?? "Unknown User", // Handle null UserName
+                        Roles = (await _userManager.GetRolesAsync(user))?.ToList() ?? new List<string>() // Handle null roles
+                    };
+
+                    profileWithUserRoles.Add(profileWithRoles);
+                }
+            }
+
+            return profileWithUserRoles;
         }
-    }
-
-    return profileWithUserRoles;
-}
-
-
     }
 }

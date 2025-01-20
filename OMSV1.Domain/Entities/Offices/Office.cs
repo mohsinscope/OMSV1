@@ -22,7 +22,10 @@ namespace OMSV1.Domain.Entities.Offices
         }
 
         // Parameterless constructor for EF Core
-        private Office() { }
+private Office() 
+{
+    Name = string.Empty; // Default to an empty string
+}
 
         public string Name { get; private set; }
         public int Code { get; private set; }
@@ -33,7 +36,7 @@ namespace OMSV1.Domain.Entities.Offices
         public int DeliveryStaff { get; private set; }
         public Guid GovernorateId { get; private set; }
         public decimal? Budget { get; private set; }
-        public Governorate? Governorate { get; private set; }
+        public Governorate Governorate { get; private set; }= null!;
 
         // Methods for updating properties
         public void UpdateCode(int code) => Code = code;

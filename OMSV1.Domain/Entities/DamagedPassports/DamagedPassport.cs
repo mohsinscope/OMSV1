@@ -17,10 +17,10 @@ public class DamagedPassport : Entity
     public Guid GovernorateId { get; private set; }
     public Guid ProfileId { get; private set; }
 
-    public Governorate? Governorate { get; private set; }
-    public Profile? Profile { get; private set; }
-    public Office? Office { get; private set; }
-    public DamagedType? DamagedType { get; private set; }
+    public Governorate Governorate { get; private set; }= null!;
+    public Profile Profile { get; private set; }= null!;
+    public Office Office { get; private set; }= null!;
+    public DamagedType DamagedType { get; private set; }= null!;
 
     // Main constructor that handles all properties
     public DamagedPassport(string passportNumber, DateTime date, string note,
@@ -38,7 +38,7 @@ public class DamagedPassport : Entity
 
         // Constructor with default values (optional parameters)
         public DamagedPassport(string passportNumber, DateTime date)
-            : this(passportNumber, date, default, default, default, default,default)
+            : this(passportNumber, date, string.Empty, Guid.Empty, Guid.Empty, Guid.Empty, Guid.Empty)
         {
         }
         public void UpdateDeviceDetails(

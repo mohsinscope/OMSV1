@@ -19,7 +19,7 @@ namespace OMSV1.Application.Commands.LOV
             try
             {
                 // Create the new DamagedType entity from the command
-                var damagedType = new DamagedType(request.Name, request.Description);
+                var damagedType = new DamagedType(request.Name, request.Description?? string.Empty);
 
                 // Use the generic repository to add the new damaged type
                 await _unitOfWork.Repository<DamagedType>().AddAsync(damagedType);

@@ -29,15 +29,14 @@ namespace OMSV1.Application.Handlers.DamagedDevices
 
                 // Update the device details
                 damagedDevice.UpdateDeviceDetails(
-                    request.SerialNumber,
-                    request.Date,
-                    request.DamagedDeviceTypeId,
-                    request.DeviceTypeId,
-                    request.OfficeId,
-                    request.Note,
-                    
-                    request.GovernorateId,
-                    request.ProfileId
+                request.SerialNumber ?? string.Empty, // Default to an empty string
+                request.Date,
+                request.DamagedDeviceTypeId,
+                request.DeviceTypeId,
+                request.OfficeId,
+                request.Note ?? string.Empty, // Default to an empty string
+                request.GovernorateId,
+                request.ProfileId
                 );
 
                 // Update the entity using the repository inside unit of work

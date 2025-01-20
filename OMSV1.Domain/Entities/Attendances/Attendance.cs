@@ -63,11 +63,11 @@ public class Attendance(
   
   
 
-     public Governorate? Governorate { get; private set; }
+     public Governorate Governorate { get; private set; }= null!;
 
-     public Office? Office { get; private set; }
+    public Office Office { get; private set; } = null!;
 
-     public Profile? Profile { get; private set; }
+     public Profile Profile { get; private set; }= null!;
 
        // Method to update attendance details
 

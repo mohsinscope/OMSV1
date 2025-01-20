@@ -14,10 +14,10 @@ namespace OMSV1.Domain.Entities.DamagedPassport
             Description = description;
         }
             // Update method to modify the properties
-        public void Update(string name, string description)
+        public void Update(string? name, string? description)
         {
-            Name = name;
-            Description = description;
+            Name = name?? Name;
+            Description = description?? Description;
         }
     }
 }

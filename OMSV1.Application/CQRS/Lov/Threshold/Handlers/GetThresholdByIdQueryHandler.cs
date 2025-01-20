@@ -16,7 +16,10 @@ namespace OMSV1.Application.Queries.Thresholds
         public async Task<ThresholdDto> Handle(GetThresholdByIdQuery request, CancellationToken cancellationToken)
         {
             var threshold = await _unitOfWork.Repository<Threshold>().GetByIdAsync(request.Id);
-            if (threshold == null) return null;
+            if (threshold == null)
+            {
+                throw new KeyNotFoundException($"Threshold with ID {request.Id} was not found.");
+            }
 
             return new ThresholdDto
             {
@@ -27,4 +30,5 @@ namespace OMSV1.Application.Queries.Thresholds
             };
         }
     }
+
 }

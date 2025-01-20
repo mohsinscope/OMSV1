@@ -15,7 +15,7 @@ namespace OMSV1.Domain.Entities.DamagedDevices;
             Description = description;
         }
      // Update method to allow modification of properties
-        public void Update(string name, string description)
+        public void Update(string? name, string? description)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Description = description ?? throw new ArgumentNullException(nameof(description));

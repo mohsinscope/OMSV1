@@ -29,23 +29,24 @@ namespace OMSV1.Application.CQRS.Queries.Profiles
                 .Include(p => p.Office)
                 .FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);// Assuming GetByIdAsync is adjusted to fetch by UserId
 
-                if (profile == null)
+              if (profile == null)
                 {
-                    return null; // Return null or throw an exception as needed
+                    throw new KeyNotFoundException($"Profile for user ID {request.UserId} was not found.");
                 }
 
                 // Map the entity to DTO
-                var profileDto = new ProfileDto
-                {
-                    ProfileId = profile.Id,
-                    FullName = profile.FullName,
-                    Position = profile.Position.ToString(),
-                    GovernorateName = profile.Governorate?.Name, // Null check to prevent NRE
-                    OfficeName = profile.Office?.Name, // Null check to prevent NRE
-                    UserId = request.UserId,
-                    GovernorateId = profile.Governorate?.Id ?? Guid.Empty, // Fallback if Governorate is null
-                    OfficeId = profile.Office?.Id ?? Guid.Empty// Fallback if Office is null
-                };
+             var profileDto = new ProfileDto
+            {
+                ProfileId = profile.Id,
+                FullName = profile.FullName,
+                Position = profile.Position.ToString(),
+                GovernorateName = profile.Governorate?.Name ?? "Unknown Governorate", // Handle null with a default value
+                OfficeName = profile.Office?.Name ?? "Unknown Office", // Handle null with a default value
+                UserId = request.UserId,
+                GovernorateId = profile.Governorate?.Id ?? Guid.Empty, // Fallback to Guid.Empty if null
+                OfficeId = profile.Office?.Id ?? Guid.Empty // Fallback to Guid.Empty if null
+            };
+
 
                 return profileDto;
             }

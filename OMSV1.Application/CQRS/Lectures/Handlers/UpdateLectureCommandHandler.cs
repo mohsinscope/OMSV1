@@ -28,12 +28,12 @@ namespace OMSV1.Application.Handlers.Lectures
                 lecture.UpdateLectureDetails(
                     request.Title,
                     request.Date,
-                    request.Note,
+                    request.Note ?? string.Empty, // Default to empty if null
                     request.OfficeId,
                     request.GovernorateId,
                     request.ProfileId,
                     request.CompanyId,
-                    null // Clear existing LectureTypes
+                    new List<Guid>() // Replace null with an empty list
                 );
 
                 // Remove existing LectureLectureTypes

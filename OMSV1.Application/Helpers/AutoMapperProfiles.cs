@@ -1,4 +1,3 @@
-using System;
 using AutoMapper;
 using OMSV1.Application.Commands.Attendances;
 using OMSV1.Application.Commands.DamagedDevices;
@@ -17,7 +16,6 @@ using OMSV1.Application.Dtos.LectureTypes;
 using OMSV1.Application.Dtos.Offices;
 using OMSV1.Application.Dtos.Profiles;
 using OMSV1.Application.DTOs.Expenses;
-using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.Entities.Companies;
 using OMSV1.Domain.Entities.DamagedDevices;

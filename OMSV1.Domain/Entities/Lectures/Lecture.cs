@@ -23,11 +23,12 @@ namespace OMSV1.Domain.Entities.Lectures
         public Guid ProfileId { get; private set; }
         public Guid? CompanyId { get; private set; }
         
-        public Governorate Governorate { get; private set; }
-        public Office Office { get; private set; }
-        public Profile Profile { get; private set; }
-        public Company? Company { get; private set; }
-        public ICollection<LectureLectureType> LectureLectureTypes { get; private set; }
+        public Governorate Governorate { get; private set; }= null!;
+        public Office Office { get; private set; }= null!;
+        public Profile Profile { get; private set; }= null!;
+        public Company Company { get; private set; }= null!;
+        public ICollection<LectureLectureType> LectureLectureTypes { get; private set; } = new List<LectureLectureType>();
+
 
         public Lecture(string title,
                     DateTime date,

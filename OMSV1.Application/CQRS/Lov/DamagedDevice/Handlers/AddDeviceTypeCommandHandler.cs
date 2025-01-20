@@ -18,7 +18,7 @@ namespace OMSV1.Application.CQRS.Lov.DamagedDevice
         {
             try
             {
-                var deviceType = new DeviceType(request.Name, request.Description);
+                var deviceType = new DeviceType(request.Name,  request.Description ?? string.Empty);
 
                 // Use the generic repository to add the new device type
                 await _unitOfWork.Repository<DeviceType>().AddAsync(deviceType);
