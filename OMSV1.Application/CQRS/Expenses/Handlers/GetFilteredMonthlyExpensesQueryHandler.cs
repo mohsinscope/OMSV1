@@ -10,51 +10,93 @@ using OMSV1.Domain.Specifications.Expenses;
 
 namespace OMSV1.Application.Handlers.Expenses
 {
-    public class GetFilteredMonthlyExpensesQueryHandler : IRequestHandler<GetFilteredMonthlyExpensesQuery, PagedList<MonthlyExpensesDto>>
+    public class GetFilteredMonthlyExpensesQueryHandler : 
+        IRequestHandler<GetFilteredMonthlyExpensesQuery, PagedList<MonthlyExpensesDto>>
     {
         private readonly IGenericRepository<MonthlyExpenses> _repository;
         private readonly IMapper _mapper;
 
-        public GetFilteredMonthlyExpensesQueryHandler(IGenericRepository<MonthlyExpenses> repository, IMapper mapper)
+        public GetFilteredMonthlyExpensesQueryHandler(
+            IGenericRepository<MonthlyExpenses> repository, 
+            IMapper mapper)
         {
-            _repository = repository;
-            _mapper = mapper;
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<PagedList<MonthlyExpensesDto>> Handle(GetFilteredMonthlyExpensesQuery request, CancellationToken cancellationToken)
+        public async Task<PagedList<MonthlyExpensesDto>> Handle(
+            GetFilteredMonthlyExpensesQuery request, 
+            CancellationToken cancellationToken)
         {
             try
             {
-                // Create the specification based on the query parameters
+                // Validate request
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.PaginationParams == null)
+                    throw new ArgumentNullException(nameof(request.PaginationParams));
+
+                // Validate date range if both dates are provided
+                if (request.StartDate.HasValue && request.EndDate.HasValue)
+                {
+                    if (request.StartDate > request.EndDate)
+                        throw new ArgumentException("Start date cannot be later than end date");
+                }
+
+                // Create specification with filters
                 var spec = new FilterExpensesSpecification(
                     officeId: request.OfficeId,
                     governorateId: request.GovernorateId,
                     profileId: request.ProfileId,
-                    status: request.Status,
+                    statuses: request.Statuses,
                     startDate: request.StartDate,
-                    endDate: request.EndDate,
-                    pageNumber: request.PaginationParams.PageNumber,
-                    pageSize: request.PaginationParams.PageSize
+                    endDate: request.EndDate
                 );
 
-                // Get the queryable list of MonthlyExpenses entities
+                // Get queryable result
                 var queryableResult = _repository.ListAsQueryable(spec);
+                if (queryableResult == null)
+                    throw new InvalidOperationException("Failed to retrieve expenses from repository");
 
-                // Map to MonthlyExpensesDto
-                var mappedQuery = queryableResult.ProjectTo<MonthlyExpensesDto>(_mapper.ConfigurationProvider);
+                // Project to DTO
+                var mappedQuery = queryableResult.ProjectTo<MonthlyExpensesDto>(
+                    _mapper.ConfigurationProvider
+                );
 
-                // Create a paginated list of MonthlyExpensesDto
-                return await PagedList<MonthlyExpensesDto>.CreateAsync(
+                // Create paginated result
+                var pagedResult = await PagedList<MonthlyExpensesDto>.CreateAsync(
                     mappedQuery,
                     request.PaginationParams.PageNumber,
                     request.PaginationParams.PageSize
                 );
+
+                // Validate the created paged list
+                if (pagedResult == null)
+                    throw new InvalidOperationException("Failed to create paged list of expenses");
+
+                return pagedResult;
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new HandlerException($"Invalid argument provided: {ex.ParamName}", ex);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new HandlerException("Invalid argument values provided", ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new HandlerException("Operation failed while processing expenses", ex);
             }
             catch (Exception ex)
             {
-                // Handle any unexpected errors and throw a custom exception
-                throw new HandlerException("An error occurred while retrieving monthly expenses.", ex);
+                throw new HandlerException(
+                    "An unexpected error occurred while retrieving monthly expenses", 
+                    ex
+                );
             }
         }
     }
+
 }

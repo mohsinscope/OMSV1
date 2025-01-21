@@ -11,7 +11,7 @@ namespace OMSV1.Application.Queries.Expenses
         public Guid? OfficeId { get; set; }
         public Guid? GovernorateId { get; set; }
         public Guid? ProfileId { get; set; }
-        public Status? Status { get; set; }
+        public ICollection<Status>? Statuses { get; set; } // Changed from Status? to ICollection<Status>?
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public PaginationParams PaginationParams { get; set; }
@@ -20,7 +20,7 @@ namespace OMSV1.Application.Queries.Expenses
             Guid? officeId,
             Guid? governorateId,
             Guid? profileId,
-            Status? status,
+            ICollection<Status>? statuses, // Updated parameter
             DateTime? startDate,
             DateTime? endDate,
             PaginationParams paginationParams)
@@ -28,7 +28,7 @@ namespace OMSV1.Application.Queries.Expenses
             OfficeId = officeId;
             GovernorateId = governorateId;
             ProfileId = profileId;
-            Status = status;
+            Statuses = statuses;
             StartDate = startDate;
             EndDate = endDate;
             PaginationParams = paginationParams;
