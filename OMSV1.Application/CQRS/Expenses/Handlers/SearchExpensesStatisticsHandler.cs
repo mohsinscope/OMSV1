@@ -62,18 +62,21 @@ public class SearchExpensesStatisticsHandler : IRequestHandler<SearchExpensesSta
                 : 0;
 
             // Map to DTO with percentage calculation
-            var expensesDto = expenses.Select(e =>
-            {
-                var officeBudget = e.Office?.Budget ?? 0; // Office-specific budget
-                return new MonthlyCleanDto
-                {
-                    TotalAmount = e.TotalAmount,
-                    OfficeName = e.Office?.Name ?? string.Empty,
-                    GovernorateName = e.Governorate?.Name ?? string.Empty,
-                    ThresholdName = e.Threshold?.Name ?? string.Empty,
-                    PercentageOfBudget = officeBudget > 0 ? Math.Round((e.TotalAmount / officeBudget) * 100, 2) : 0
-                };
-            }).ToList();
+        // Map to DTO with percentage calculation
+var expensesDto = expenses.Select(e =>
+{
+    var officeBudget = e.Office?.Budget ?? 0; // Office-specific budget
+    return new MonthlyCleanDto
+    {
+        TotalAmount = e.TotalAmount,
+        OfficeName = e.Office?.Name ?? string.Empty,
+        GovernorateName = e.Governorate?.Name ?? string.Empty,
+        ThresholdName = e.Threshold?.Name ?? string.Empty,
+        PercentageOfBudget = officeBudget > 0 ? Math.Round((e.TotalAmount / officeBudget) * 100, 2) : 0,
+        DateCreated = e.DateCreated // Ensure valid DateCreated is passed
+    };
+}).ToList();
+
 
             // Return the results
             return new ExpensesStatisticsDto
