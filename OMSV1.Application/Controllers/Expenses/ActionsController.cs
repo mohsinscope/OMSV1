@@ -4,8 +4,10 @@ using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.Expenses;
 using OMSV1.Application.DTOs.Expenses;
 using OMSV1.Application.Helpers;
+using OMSV1.Application.Pdf.Commands;
 using OMSV1.Application.Queries.Actions;
 using OMSV1.Application.Queries.Expenses;
+using OMSV1.Infrastructure.Services;
 
 namespace OMSV1.Application.Controllers
 {
@@ -76,7 +78,29 @@ namespace OMSV1.Application.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
              }
         }
+        //Generate Pdf
+        // [HttpPost("generate-pdf")]
+        // public async Task<IActionResult> GeneratePdf([FromBody] GeneratePdfCommand command)
+        // {
+        //     try 
+        //     {
+        //         var result = await _mediator.Send(command);
+        //         return Ok(result);
+        //     }
+        //     catch (PdfGenerationException ex)
+        //     {
+        //         return BadRequest(ex.Message);
+        //     }
+        // }
 
+         [HttpGet("generate-monthly-expenses-pdf")]
+        public async Task<IActionResult> GenerateMonthlyExpensesPdf()
+        {
+            var query = new GetMonthlyExpensesQuery();
+            var pdfPath = await _mediator.Send(query);
+
+            return Ok(new { PdfPath = pdfPath });
+        }
         
     }
 }

@@ -12,6 +12,13 @@ using OMSV1.Infrastructure.Extensions;
 using OMSV1.Infrastructure.Identity;
 using OMSV1.Infrastructure.Persistence;
 using OMSV1.Infrastructure.Repositories;
+using OMSV1.Application.Queries.Expenses;
+using MediatR;
+using OMSV1.Application.DTOs.Expenses;
+using OMSV1.Application.Handlers.Expenses;
+using OMSV1.Infrastructure.Interfaces;
+using OMSV1.Domain.Interfaces;
+using OMSV1.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,6 +76,13 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddControllers();
+builder.Services.AddDocumentServices(builder.Configuration);
+// Monthly expenses
+builder.Services.AddScoped<MonthlyExpensesRepository, MonthlyExpensesRepository>();
+builder.Services.AddScoped<IRequestHandler<GetMonthlyExpensesQuery, string>, GetMonthlyExpensesQueryHandler>();
+builder.Services.AddScoped<IMonthlyExpensesRepository, MonthlyExpensesRepository>();
+builder.Services.AddScoped<IPdfService, ITextSharpPdfService>();
+
 
 var app = builder.Build();
 
@@ -90,6 +104,7 @@ app.UseMiddleware<ExceptionMiddleware>();
 // Apply authentication and authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
+System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
 // Serve static files without caching
 app.UseStaticFiles(new StaticFileOptions
@@ -97,8 +112,8 @@ app.UseStaticFiles(new StaticFileOptions
     OnPrepareResponse = context =>
     {
         var headers = context.Context.Response.Headers;
-        headers.Add("Access-Control-Allow-Origin", "*"); // Adjust to specific origins if needed
-        headers.Add("X-Content-Type-Options", "nosniff");
+        headers.Append("Access-Control-Allow-Origin", "*"); // Adjust to specific origins if needed
+        headers.Append("X-Content-Type-Options", "nosniff");
     }
 });
 
@@ -106,7 +121,7 @@ app.UseStaticFiles(new StaticFileOptions
 // Add Content Security Policy (CSP) header
 app.Use(async (context, next) =>
 {
-    context.Response.Headers.Add("Content-Security-Policy", 
+    context.Response.Headers.Append("Content-Security-Policy", 
         "default-src 'self'; img-src 'self' https://cdn-oms.scopesky.org; script-src 'self'; style-src 'self';");
     await next();
 });
