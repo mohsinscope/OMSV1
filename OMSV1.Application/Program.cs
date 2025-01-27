@@ -23,6 +23,7 @@ using Hangfire;
 using Hangfire.PostgreSql;
 using OMSV1.Infrastructure.Helpers;
 using OMSV1.Application.Configuration;
+using Hangfire.Dashboard;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -134,12 +135,28 @@ app.UseAuthorization();
 
 // Configure Hangfire dashboard
 // Then in your app configuration:
+app.UseHangfireDashboard("/job", new DashboardOptions
+{
+    IsReadOnlyFunc = dashboardContext =>
+    {
+        var httpContext = dashboardContext.GetHttpContext();
+
+        // Check if the request is from the local machine
+        if (httpContext.Connection.RemoteIpAddress != null &&
+            httpContext.Connection.RemoteIpAddress.Equals(httpContext.Connection.LocalIpAddress))
+        {
+            // If local, allow full access
+            return false;
+        }
+
+        // For non-local (web), make it read-only
+        return true;
+    }
+});
+
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {
-    Authorization = new[] 
-    { 
-        app.Services.GetRequiredService<HangfireAuthorizationFilter>() 
-    }
+    IsReadOnlyFunc = _ => true // Allow full access to everyone
 });
 
 HangfireJobsConfigurator.ConfigureRecurringJobs();
