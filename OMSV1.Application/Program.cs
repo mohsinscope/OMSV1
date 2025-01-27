@@ -19,6 +19,10 @@ using OMSV1.Application.Handlers.Expenses;
 using OMSV1.Infrastructure.Interfaces;
 using OMSV1.Domain.Interfaces;
 using OMSV1.Infrastructure.Services;
+using Hangfire;
+using Hangfire.PostgreSql;
+using OMSV1.Infrastructure.Helpers;
+using OMSV1.Application.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,8 +41,7 @@ builder.Services.AddRateLimiter(options =>
     {
         context.HttpContext.Response.StatusCode = 429;
         context.HttpContext.Response.Headers.RetryAfter = "10";
-        
-        await context.HttpContext.Response.WriteAsJsonAsync(new 
+        await context.HttpContext.Response.WriteAsJsonAsync(new
         {
             error = "Too many requests. Please try again later.",
             retryAfter = 10
@@ -60,11 +63,27 @@ builder.Services.AddCors(options =>
                 "http://oms.scopesky.org",
                 "http://localhost:5173"
             )
-            .WithMethods("GET", "POST", "PUT", "DELETE") // Restrict allowed HTTP methods
-            .WithHeaders("Content-Type", "Authorization") // Restrict allowed headers
-            .AllowCredentials(); // Allow credentials for authenticated requests
+            .WithMethods("GET", "POST", "PUT", "DELETE")
+            .WithHeaders("Content-Type", "Authorization")
+            .AllowCredentials();
     });
 });
+
+// Configure Hangfire with PostgreSQL
+// Update the Hangfire configuration to use the new method
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UsePostgreSqlStorage(options =>
+    {
+        options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection"));
+    }));
+builder.Services.AddHangfireServer();
+
+// Register Hangfire-related services
+builder.Services.AddScoped<HangfireJobs>();
+//builder.Services.AddScoped<ScheduledPdfService>();
 
 // Add MediatR, Identity, AutoMapper, and application services
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
@@ -77,19 +96,27 @@ builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddControllers();
 builder.Services.AddDocumentServices(builder.Configuration);
-// Monthly expenses
 builder.Services.AddScoped<MonthlyExpensesRepository, MonthlyExpensesRepository>();
-builder.Services.AddScoped<IRequestHandler<GetMonthlyExpensesQuery, string>, GetMonthlyExpensesQueryHandler>();
+//builder.Services.AddScoped<IRequestHandler<GetMonthlyExpensesQuery, string>, GetMonthlyExpensesQueryHandler>();
 builder.Services.AddScoped<IMonthlyExpensesRepository, MonthlyExpensesRepository>();
 builder.Services.AddScoped<IPdfService, ITextSharpPdfService>();
+builder.Services.AddScoped<ITextSharpPdfService, ITextSharpPdfService>();
+
+// Add services BEFORE Build()
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton<EmailService>();
+builder.Services.AddScoped<ReportService>();
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings")
+);
+//Hangfire
+builder.Services.AddSingleton<HangfireAuthorizationFilter>();
 
 
 var app = builder.Build();
 
-// Enable HTTPS redirection
+// Enable HTTPS redirection and HSTS
 app.UseHttpsRedirection();
-
-// Apply HSTS to enforce HTTPS
 app.UseHsts();
 
 // Apply CORS policy before authentication
@@ -104,7 +131,29 @@ app.UseMiddleware<ExceptionMiddleware>();
 // Apply authentication and authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
-System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+// Configure Hangfire dashboard
+// Then in your app configuration:
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] 
+    { 
+        app.Services.GetRequiredService<HangfireAuthorizationFilter>() 
+    }
+});
+
+HangfireJobsConfigurator.ConfigureRecurringJobs();
+// Schedule recurring jobs
+// RecurringJob.AddOrUpdate<HangfireJobs>(
+//     "GenerateAndSendMonthlyReport", // Job ID
+//     job => job.GenerateAndSendMonthlyExpensesReport(), // Method to execute
+//     Cron.Monthly(1), // Runs on the 1st day of every month
+//     new RecurringJobOptions
+//     {
+//         TimeZone = TimeZoneInfo.Utc // Adjust timezone if needed
+//     }
+// );
+
 
 // Serve static files without caching
 app.UseStaticFiles(new StaticFileOptions
@@ -112,16 +161,15 @@ app.UseStaticFiles(new StaticFileOptions
     OnPrepareResponse = context =>
     {
         var headers = context.Context.Response.Headers;
-        headers.Append("Access-Control-Allow-Origin", "*"); // Adjust to specific origins if needed
+        headers.Append("Access-Control-Allow-Origin", "*");
         headers.Append("X-Content-Type-Options", "nosniff");
     }
 });
 
-
 // Add Content Security Policy (CSP) header
 app.Use(async (context, next) =>
 {
-    context.Response.Headers.Append("Content-Security-Policy", 
+    context.Response.Headers.Append("Content-Security-Policy",
         "default-src 'self'; img-src 'self' https://cdn-oms.scopesky.org; script-src 'self'; style-src 'self';");
     await next();
 });
@@ -136,8 +184,7 @@ using (var scope = app.Services.CreateScope())
     var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-    // Create roles
-    var roles = new[] { "SuperAdmin", "Admin", "Supervisor", "Manager" };
+    var roles = new[] { "SuperAdmin", "Admin", "Supervisor", "Manager","I.T" };
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))
@@ -146,7 +193,6 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    // Create an admin user
     var adminEmail = "admin";
     var adminUser = await userManager.FindByEmailAsync(adminEmail);
     if (adminUser == null)

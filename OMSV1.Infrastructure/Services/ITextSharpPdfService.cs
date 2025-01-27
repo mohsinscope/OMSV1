@@ -1,6 +1,7 @@
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using OMSV1.Domain.Entities.Expenses;
+using OMSV1.Domain.Enums;
 using OMSV1.Infrastructure.Interfaces;
 using iTextRectangle = iTextSharp.text.Rectangle;
 
@@ -31,21 +32,24 @@ namespace OMSV1.Infrastructure.Services
                 throw new InvalidOperationException("Error during static initialization of ITextSharpPdfService.", ex);
             }
         }
-public async Task<string> GenerateMonthlyExpensesPdfAsync(List<MonthlyExpenses> expenses)
+public async Task<byte[]> GenerateMonthlyExpensesPdfAsync(List<MonthlyExpenses> expenses)
 {
-    var fileName = $"MonthlyExpenses_{DateTime.Now:yyyyMMddHHmmss}.pdf";
-    var outputPath = Path.Combine("C:\\GeneratedPDFs", fileName);
+    if (expenses == null)
+        throw new ArgumentNullException(nameof(expenses));
 
-    if (!Directory.Exists("C:\\GeneratedPDFs"))
-        Directory.CreateDirectory("C:\\GeneratedPDFs");
+    // Filter for completed expenses
+    var completedExpenses = expenses.Where(e => e.Status == Status.Completed).ToList();
 
-    using var fs = new FileStream(outputPath, FileMode.Create);
+    if (!completedExpenses.Any())
+        throw new InvalidOperationException("No completed expenses found for the specified period.");
+
+    using var memoryStream = new MemoryStream();
     using var document = new Document(PageSize.A4, 50, 50, 50, 50);
-    var writer = PdfWriter.GetInstance(document, fs);
+    var writer = PdfWriter.GetInstance(document, memoryStream);
 
     document.Open();
 
-    // Add Title
+    // Title Table
     var titleFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 24);
     var titleCell = new PdfPCell(new Phrase(ShapeArabicText("تقرير المصروفات الشهرية"), titleFont))
     {
@@ -65,7 +69,7 @@ public async Task<string> GenerateMonthlyExpensesPdfAsync(List<MonthlyExpenses> 
     titleTable.AddCell(titleCell);
     document.Add(titleTable);
 
-    // Add Report Generation Date
+    // Report Date Table
     var dateFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12);
     var dateCell = new PdfPCell(new Phrase(ShapeArabicText($"تاريخ التقرير: {DateTime.Now:yyyy-MM-dd}"), dateFont))
     {
@@ -85,44 +89,41 @@ public async Task<string> GenerateMonthlyExpensesPdfAsync(List<MonthlyExpenses> 
     dateTable.AddCell(dateCell);
     document.Add(dateTable);
 
-    // Create and style the table for the report data
-    var table = new PdfPTable(5) // Updated to 5 columns
+    // Main Data Table
+    var table = new PdfPTable(5)
     {
         WidthPercentage = 100,
         SpacingBefore = 10f,
         SpacingAfter = 20f
     };
 
-    // Set column widths
-    float[] columnWidths = new float[] { 20f, 20f, 20f, 20f, 20f }; // Adjust widths to fit 5 columns
+    float[] columnWidths = new float[] { 20f, 20f, 20f, 20f, 20f };
     table.SetWidths(columnWidths);
 
-    // Add table headers
     AddTableHeader(table, new[]
     {
         ShapeArabicText("المبلغ الإجمالي"),
         ShapeArabicText("اسم المشرف"),
         ShapeArabicText("اسم المكتب"),
         ShapeArabicText("اسم المحافظة"),
-        ShapeArabicText("تاريخ الإنشاء") // New column for DateCreated
+        ShapeArabicText("تاريخ الإنشاء")
     });
 
-    // Add table rows
-    foreach (var expense in expenses)
+    foreach (var expense in completedExpenses)
     {
         AddTableRow(table, new[]
         {
-            expense.TotalAmount.ToString("C"),
-            ShapeArabicText(expense.Profile.FullName),
-            ShapeArabicText(expense.Office.Name),
-            ShapeArabicText(expense.Governorate.Name),
-            ShapeArabicText(expense.DateCreated.ToString("yyyy-MM-dd")) // Format DateCreated
+            expense?.TotalAmount.ToString("C") ?? "-",
+            ShapeArabicText(expense?.Profile?.FullName ?? "-"),
+            ShapeArabicText(expense?.Office?.Name ?? "-"),
+            ShapeArabicText(expense?.Governorate?.Name ?? "-"),
+            ShapeArabicText(expense?.DateCreated.ToString("yyyy-MM-dd") ?? "-")
         });
     }
 
     document.Add(table);
 
-    // Add Footer
+    // Footer Table
     var footerFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 8);
     var footerCell = new PdfPCell(new Phrase(ShapeArabicText("تم إنشاؤه بواسطة OMS"), footerFont))
     {
@@ -142,7 +143,34 @@ public async Task<string> GenerateMonthlyExpensesPdfAsync(List<MonthlyExpenses> 
     document.Add(footerTable);
 
     document.Close();
-    return outputPath;
+
+    // Write the memory stream asynchronously
+    return await Task.FromResult(memoryStream.ToArray());
+}
+
+
+
+// You might also want to add null checks in the helper methods
+private void AddTableRow(PdfPTable table, string[] cells)
+{
+    if (table == null) throw new ArgumentNullException(nameof(table));
+    if (cells == null) throw new ArgumentNullException(nameof(cells));
+
+    var cellFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 10);
+
+    foreach (string cellContent in cells)
+    {
+        var cell = new PdfPCell(new Phrase(ShapeArabicText(cellContent ?? "-"), cellFont))
+        {
+            HorizontalAlignment = Element.ALIGN_RIGHT,
+            VerticalAlignment = Element.ALIGN_MIDDLE,
+            Padding = 6f,
+            BorderColor = BORDER_COLOR,
+            MinimumHeight = 20f,
+            RunDirection = PdfWriter.RUN_DIRECTION_RTL
+        };
+        table.AddCell(cell);
+    }
 }
 
 
@@ -174,24 +202,24 @@ private void AddTableHeader(PdfPTable table, string[] headers)
 }
 
 
-private void AddTableRow(PdfPTable table, string[] cells)
-{
-    var cellFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 10);
+// private void AddTableRow(PdfPTable table, string[] cells)
+// {
+//     var cellFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 10);
 
-    foreach (string cellContent in cells)
-    {
-        var cell = new PdfPCell(new Phrase(ShapeArabicText(cellContent), cellFont))
-        {
-            HorizontalAlignment = Element.ALIGN_RIGHT, // Ensure RTL alignment
-            VerticalAlignment = Element.ALIGN_MIDDLE,
-            Padding = 6f,
-            BorderColor = BORDER_COLOR,
-            MinimumHeight = 20f,
-            RunDirection = PdfWriter.RUN_DIRECTION_RTL // Set to RTL
-        };
-        table.AddCell(cell);
-    }
-}
+//     foreach (string cellContent in cells)
+//     {
+//         var cell = new PdfPCell(new Phrase(ShapeArabicText(cellContent), cellFont))
+//         {
+//             HorizontalAlignment = Element.ALIGN_RIGHT, // Ensure RTL alignment
+//             VerticalAlignment = Element.ALIGN_MIDDLE,
+//             Padding = 6f,
+//             BorderColor = BORDER_COLOR,
+//             MinimumHeight = 20f,
+//             RunDirection = PdfWriter.RUN_DIRECTION_RTL // Set to RTL
+//         };
+//         table.AddCell(cell);
+//     }
+// }
 
     }
 }
