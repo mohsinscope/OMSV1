@@ -1,5 +1,6 @@
 using System;
 using OMSV1.Domain.Entities.Expenses;
+using OMSV1.Domain.Enums;
 
 namespace OMSV1.Domain.Specifications.Expenses
 {
@@ -8,10 +9,12 @@ namespace OMSV1.Domain.Specifications.Expenses
         public FilterExpensesByThresholdSpecification(
             Guid? officeId = null,
             Guid? governorateId = null,
-            Guid? thresholdId = null, // Filter by ThresholdId
+            Guid? thresholdId = null,
+             // Filter by ThresholdId
             DateTime? startDate = null,
             DateTime? endDate = null)
             : base(x =>
+                x.Status == Status.Completed && // Only include records with Status.Completed
                 (!officeId.HasValue || x.OfficeId == officeId) &&
                 (!governorateId.HasValue || x.GovernorateId == governorateId) &&
                 (!thresholdId.HasValue || x.ThresholdId == thresholdId) && // Threshold filter
