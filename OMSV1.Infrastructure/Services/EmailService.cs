@@ -20,7 +20,7 @@ public class EmailService : IEmailService
   public async Task SendEmailAsync(string from, string to, string subject, string body, byte[] pdfData = null)
 {
     var message = new MimeMessage();
-    message.From.Add(new MailboxAddress("Sender", from));
+    message.From.Add(new MailboxAddress("OMS", from));
     message.To.Add(new MailboxAddress("Recipient", to));
     message.Subject = subject;
 
@@ -69,7 +69,7 @@ public class EmailService : IEmailService
     private MimeMessage CreateEmailMessage(string from, string[] recipients, string subject, string body, string pdfPath)
     {
         var message = new MimeMessage();
-        message.From.Add(new MailboxAddress("Sender", from));
+        message.From.Add(new MailboxAddress("OMS", from));
 
         foreach (var recipient in recipients)
         {
