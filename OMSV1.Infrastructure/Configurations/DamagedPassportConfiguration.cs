@@ -18,7 +18,7 @@ public class DamagedPassportConfiguration : IEntityTypeConfiguration<DamagedPass
             .HasMaxLength(50); // Adjust length as per your requirement.
                  // Add index on PassportNumber
             builder.HasIndex(dd => dd.PassportNumber)
-                .IsUnique(false); // Set to true if you want a unique index
+                .IsUnique(true); // Set to true if you want a unique index
 
         builder.Property(dp => dp.Date)
             .IsRequired();

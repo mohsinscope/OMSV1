@@ -286,7 +286,8 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasIndex("ProfileId");
 
-                    b.HasIndex("SerialNumber");
+                    b.HasIndex("SerialNumber")
+                        .IsUnique();
 
                     b.ToTable("DamagedDevices", (string)null);
                 });
@@ -381,7 +382,8 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasIndex("OfficeId");
 
-                    b.HasIndex("PassportNumber");
+                    b.HasIndex("PassportNumber")
+                        .IsUnique();
 
                     b.HasIndex("ProfileId");
 
