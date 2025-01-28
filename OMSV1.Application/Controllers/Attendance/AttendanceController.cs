@@ -59,7 +59,13 @@ namespace OMSV1.API.Controllers
                 return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving the attendance.", new[] { ex.Message });
             }
         }
-
+        [HttpPost("governorate-statistics")]
+        [RequirePermission("Sa")]
+        public async Task<IActionResult> GetAttendanceGovernorateStatistics([FromBody] GetAttendanceGovernorateStatisticsQuery query)
+        {
+            var response = await _mediator.Send(query);
+            return Ok(response);
+        }
         [HttpPost]
         [RequirePermission("Ac")]
 

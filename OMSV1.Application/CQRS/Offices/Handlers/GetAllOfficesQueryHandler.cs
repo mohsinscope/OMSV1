@@ -25,8 +25,11 @@ public class GetAllOfficesQueryHandler : IRequestHandler<GetAllOfficesQuery, Pag
             // Retrieve the offices as IQueryable
             var officesQuery = _repository.GetAllAsQueryable();
 
+            // Sort by governorate
+            var sortedQuery = officesQuery.OrderBy(o => o.Governorate);
+
             // Map to OfficeDto using AutoMapper's ProjectTo
-            var mappedQuery = officesQuery.ProjectTo<OfficeDto>(_mapper.ConfigurationProvider);
+            var mappedQuery = sortedQuery.ProjectTo<OfficeDto>(_mapper.ConfigurationProvider);
 
             // Apply pagination
             var pagedOffices = await PagedList<OfficeDto>.CreateAsync(
