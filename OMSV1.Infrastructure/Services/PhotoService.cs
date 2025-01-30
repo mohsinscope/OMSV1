@@ -11,15 +11,40 @@ namespace OMSV1.Infrastructure.Services;
 public class PhotoService : IPhotoService, IDisposable
 {
     private readonly IWebHostEnvironment _webHostEnvironment;
-    private readonly string _networkStoragePath = @"\\172.16.108.26\samba";
-    // private readonly string _networkStoragePath = @"C:\Uploads";
+    //private readonly string _networkStoragePath = @"\\172.16.108.26\samba";
+    private readonly string _networkStoragePath = @"C:\Uploads";
     private const int MaxImageDimension = 1920; // Max dimension for images
     private const long MaxFileSize = 2048; // 2MB max file size
     private const int ImageQuality = 75; // JPEG quality (0-100)
+    private const long MaxFolderSize = 50L * 1024L * 1024L * 1024L; // 50GB in bytes
 
     public PhotoService(IWebHostEnvironment webHostEnvironment)
     {
         _webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));
+    }
+
+    private string GetNextAvailableFolder(string baseFolder)
+    {
+        int counter = 1;
+        string currentFolder = baseFolder;
+
+        // Keep checking folders until we find one under the size limit
+        while (Directory.Exists(currentFolder) && GetDirectorySize(currentFolder) >= MaxFolderSize)
+        {
+            counter++;
+            currentFolder = $"{baseFolder}{counter}";
+        }
+
+        Directory.CreateDirectory(currentFolder);
+        return currentFolder;
+    }
+
+    private long GetDirectorySize(string folderPath)
+    {
+        DirectoryInfo dirInfo = new DirectoryInfo(folderPath);
+        return dirInfo.Exists ? 
+            dirInfo.EnumerateFiles("*", SearchOption.AllDirectories).Sum(file => file.Length) : 
+            0;
     }
 
     public async Task<PhotoUploadResult> AddPhotoAsync(IFormFile file, Guid entityId, EntityType entityType)
@@ -29,14 +54,20 @@ public class PhotoService : IPhotoService, IDisposable
 
         try
         {
-            // Ensure the uploads folder exists in network storage
-            string uploadsFolder = Path.Combine(_networkStoragePath, "uploads");
-            Directory.CreateDirectory(uploadsFolder);
-
+            // Create base folder path for the entity type
+            string entityTypeFolder = entityType.ToString().ToLower();
+            string baseFolder = Path.Combine(_networkStoragePath, entityTypeFolder);
+            
+            // Get the appropriate folder to save the file
+            string targetFolder = GetNextAvailableFolder(baseFolder);
+            
             // Generate a unique filename
             string uniqueFileName = $"{entityType}_{entityId}_{Guid.NewGuid()}_{file.FileName}";
-            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-            string fileUrl = $"/uploads/{uniqueFileName}";
+            string filePath = Path.Combine(targetFolder, uniqueFileName);
+            
+            // Calculate the relative path from network storage root
+            string relativePath = Path.GetRelativePath(_networkStoragePath, filePath);
+            string fileUrl = $"/{relativePath.Replace('\\', '/')}";
 
             // Process file based on its type
             if (IsImage(file.ContentType))
@@ -49,7 +80,6 @@ public class PhotoService : IPhotoService, IDisposable
             }
             else
             {
-                // For other file types, just save with basic compression
                 await CompressAndSaveFileAsync(file, filePath);
             }
 
@@ -87,7 +117,6 @@ public class PhotoService : IPhotoService, IDisposable
 
         await image.SaveAsync(outputPath, encoder);
     }
-
 
     private async Task OptimizeAndSavePdfAsync(IFormFile file, string outputPath)
     {
@@ -166,7 +195,6 @@ public class PhotoService : IPhotoService, IDisposable
         using var destinationStream = new FileStream(outputPath, FileMode.Create);
         await memoryStream.CopyToAsync(destinationStream);
     }
-
 
     private bool IsImage(string contentType)
     {
