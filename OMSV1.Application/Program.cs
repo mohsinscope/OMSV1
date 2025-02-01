@@ -102,6 +102,11 @@ builder.Services.AddScoped<MonthlyExpensesRepository, MonthlyExpensesRepository>
 builder.Services.AddScoped<IMonthlyExpensesRepository, MonthlyExpensesRepository>();
 builder.Services.AddScoped<IPdfService, ITextSharpPdfService>();
 builder.Services.AddScoped<ITextSharpPdfService, ITextSharpPdfService>();
+builder.Services.AddScoped<IDamagedPassportRepository, DamagedPassportRepository>();
+builder.Services.AddScoped<IDamagedPassportService, DamagedPassportPdfService>();
+builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
+builder.Services.AddScoped<IAttendanceService, AttendancePdfService>();
+
 
 // Add services BEFORE Build()
 builder.Services.AddScoped<IEmailService, EmailService>();

@@ -1,5 +1,6 @@
 using iTextSharp.text;
 using iTextSharp.text.pdf;
+using OMSV1.Domain.Entities.DamagedPassport;
 using OMSV1.Domain.Entities.Expenses;
 using OMSV1.Domain.Enums;
 using OMSV1.Infrastructure.Interfaces;
@@ -200,6 +201,131 @@ private void AddTableHeader(PdfPTable table, string[] headers)
         table.AddCell(cell);
     }
 }
+// public async Task<byte[]> GenerateDailyDamagedPassportsPdfAsync(List<DamagedPassport> damagedPassports)
+// {
+//     if (damagedPassports == null)
+//         throw new ArgumentNullException(nameof(damagedPassports));
+
+//     // Filter for damaged passports registered today
+//     var today = DateTime.Today;
+//     var dailyDamagedPassports = damagedPassports
+//     .Where(dp => dp.Date.Date == today)
+//     .GroupBy(dp => new 
+//     { 
+//         GovernorateName = dp.Governorate?.Name, 
+//         OfficeName = dp.Office?.Name 
+//     })
+//     .Select(g => new
+//     {
+//         GovernorateName = g.Key.GovernorateName ?? "-",
+//         OfficeName = g.Key.OfficeName ?? "-",
+//         DamagedPassportCount = g.Count()
+//     })
+//     .ToList();
+
+//     if (!dailyDamagedPassports.Any())
+//         throw new InvalidOperationException("No damaged passports found for today.");
+
+//     using var memoryStream = new MemoryStream();
+//     using var document = new Document(PageSize.A4, 50, 50, 50, 50);
+//     var writer = PdfWriter.GetInstance(document, memoryStream);
+
+//     document.Open();
+
+//     // Title Table
+//     var titleFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 24);
+//     var titleCell = new PdfPCell(new Phrase(ShapeArabicText("تقرير الجوازات التالفة اليومية"), titleFont))
+//     {
+//         BackgroundColor = BaseColor.WHITE,
+//         HorizontalAlignment = Element.ALIGN_CENTER,
+//         VerticalAlignment = Element.ALIGN_MIDDLE,
+//         Padding = 10f,
+//         Border = iTextRectangle.NO_BORDER,
+//         RunDirection = PdfWriter.RUN_DIRECTION_RTL
+//     };
+
+//     var titleTable = new PdfPTable(1)
+//     {
+//         WidthPercentage = 100,
+//         SpacingAfter = 20f
+//     };
+//     titleTable.AddCell(titleCell);
+//     document.Add(titleTable);
+
+//     // Report Date Table
+//     var dateFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12);
+//     var dateCell = new PdfPCell(new Phrase(ShapeArabicText($"تاريخ التقرير: {DateTime.Now:yyyy-MM-dd}"), dateFont))
+//     {
+//         BackgroundColor = BaseColor.WHITE,
+//         HorizontalAlignment = Element.ALIGN_RIGHT,
+//         VerticalAlignment = Element.ALIGN_MIDDLE,
+//         Padding = 10f,
+//         Border = iTextRectangle.NO_BORDER,
+//         RunDirection = PdfWriter.RUN_DIRECTION_RTL
+//     };
+
+//     var dateTable = new PdfPTable(1)
+//     {
+//         WidthPercentage = 100,
+//         SpacingAfter = 10f
+//     };
+//     dateTable.AddCell(dateCell);
+//     document.Add(dateTable);
+
+//     // Main Data Table
+//     var table = new PdfPTable(3)
+//     {
+//         WidthPercentage = 100,
+//         SpacingBefore = 10f,
+//         SpacingAfter = 20f
+//     };
+
+//     float[] columnWidths = new float[] { 30f, 30f, 40f };
+//     table.SetWidths(columnWidths);
+
+//     AddTableHeader(table, new[]
+//     {
+//         ShapeArabicText("عدد الجوازات التالفة"),
+//         ShapeArabicText("اسم المكتب"),
+//         ShapeArabicText("اسم المحافظة")
+//     });
+
+//     foreach (var entry in dailyDamagedPassports)
+//     {
+//         AddTableRow(table, new[]
+//         {
+//             entry.DamagedPassportCount.ToString(),
+//             ShapeArabicText(entry.OfficeName),
+//             ShapeArabicText(entry.GovernorateName)
+//         });
+//     }
+
+//     document.Add(table);
+
+//     // Footer Table
+//     var footerFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 8);
+//     var footerCell = new PdfPCell(new Phrase(ShapeArabicText("تم إنشاؤه بواسطة OMS"), footerFont))
+//     {
+//         BackgroundColor = BaseColor.WHITE,
+//         HorizontalAlignment = Element.ALIGN_CENTER,
+//         VerticalAlignment = Element.ALIGN_MIDDLE,
+//         Padding = 10f,
+//         Border = iTextRectangle.NO_BORDER,
+//         RunDirection = PdfWriter.RUN_DIRECTION_RTL
+//     };
+
+//     var footerTable = new PdfPTable(1)
+//     {
+//         WidthPercentage = 100
+//     };
+//     footerTable.AddCell(footerCell);
+//     document.Add(footerTable);
+
+//     document.Close();
+
+//     // Write the memory stream asynchronously
+//     return await Task.FromResult(memoryStream.ToArray());
+// }
 
 
 // private void AddTableRow(PdfPTable table, string[] cells)

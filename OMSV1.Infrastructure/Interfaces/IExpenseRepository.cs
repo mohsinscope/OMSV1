@@ -1,3 +1,4 @@
+using OMSV1.Domain.Entities.DamagedPassport;
 using OMSV1.Domain.Entities.Expenses;
 
 namespace OMSV1.Domain.Interfaces

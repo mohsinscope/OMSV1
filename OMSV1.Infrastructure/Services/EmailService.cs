@@ -3,9 +3,11 @@ using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using OMSV1.Infrastructure.Interfaces;
 using System;
 using System.Threading.Tasks;
 
+// EmailService.cs
 public class EmailService : IEmailService
 {
     private readonly EmailSettings _settings;
@@ -17,40 +19,41 @@ public class EmailService : IEmailService
         _logger = logger;
     }
 
-  public async Task SendEmailAsync(string from, string to, string subject, string body, byte[] pdfData = null)
-{
-    var message = new MimeMessage();
-    message.From.Add(new MailboxAddress("OMS", from));
-    message.To.Add(new MailboxAddress("Recipient", to));
-    message.Subject = subject;
-
-    var bodyBuilder = new BodyBuilder { TextBody = body };
-
-    if (pdfData != null)
+    public async Task SendEmailAsync(string from, string to, string subject, string body, byte[] pdfData = null)
     {
-        bodyBuilder.Attachments.Add("MonthlyExpensesReport.pdf", pdfData, new ContentType("application", "pdf"));
-    }
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress("OMS", from));
+        message.To.Add(new MailboxAddress("Recipient", to));
+        message.Subject = subject;
 
-    message.Body = bodyBuilder.ToMessageBody();
+        var bodyBuilder = new BodyBuilder { TextBody = body };
+        
+        if (pdfData != null)
+        {
+            // Generate a dynamic name based on current timestamp
+            string pdfFileName = $"Report_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            bodyBuilder.Attachments.Add(pdfFileName, pdfData, new ContentType("application", "pdf"));
+        }
 
-    using var smtpClient = new SmtpClient();
-    try
-    {
-        await smtpClient.ConnectAsync(_settings.SmtpServer, _settings.Port, SecureSocketOptions.StartTls);
-        await smtpClient.AuthenticateAsync(_settings.Username, _settings.Password);
-        await smtpClient.SendAsync(message);
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error sending email");
-        throw;
-    }
-    finally
-    {
-        await smtpClient.DisconnectAsync(true);
-    }
-}
+        message.Body = bodyBuilder.ToMessageBody();
 
+        using var smtpClient = new SmtpClient();
+        try
+        {
+            await smtpClient.ConnectAsync(_settings.SmtpServer, _settings.Port, SecureSocketOptions.StartTls);
+            await smtpClient.AuthenticateAsync(_settings.Username, _settings.Password);
+            await smtpClient.SendAsync(message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending email");
+            throw;
+        }
+        finally
+        {
+            await smtpClient.DisconnectAsync(true);
+        }
+    }
 
     public async Task SendEmailToMultipleRecipientsAsync(string from, string[] recipients, string subject, string body, string pdfPath = null)
     {
@@ -70,12 +73,10 @@ public class EmailService : IEmailService
     {
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("OMS", from));
-
         foreach (var recipient in recipients)
         {
             message.To.Add(new MailboxAddress("Recipient", recipient));
         }
-
         message.Subject = subject;
 
         var bodyBuilder = new BodyBuilder { TextBody = body };
