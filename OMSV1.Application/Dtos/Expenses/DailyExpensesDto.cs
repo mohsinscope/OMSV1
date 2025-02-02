@@ -11,5 +11,6 @@ public class DailyExpensesDto
     public decimal Amount { get; set; }
     public string? Notes { get; set; }
     public DateTime ExpenseDate { get; set; }
+    public Guid ExpenseTypeId {get;set;}
     public string? ExpenseTypeName { get; set; } // Include only ExpenseType name
 }
