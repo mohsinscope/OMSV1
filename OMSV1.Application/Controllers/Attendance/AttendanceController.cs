@@ -180,6 +180,30 @@ namespace OMSV1.API.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+[HttpPost("search/type-statistics")]
+[RequirePermission("Sa")]
+public async Task<IActionResult> SearchAttendanceTypeStatistics([FromBody] SearchAttendanceTypeStatisticsQuery query)
+{
+    try
+    {
+        // Validate required fields
+        if (string.IsNullOrEmpty(query.StaffType) || !query.Date.HasValue)
+        {
+            return BadRequest("StaffType and Date are required.");
+        }
+
+        // Send the query to the handler
+        var result = await _mediator.Send(query);
+
+        // Return the result
+        return Ok(result);
+    }
+    catch (Exception ex)
+    {
+        // Return 500 Internal Server Error with a detailed message
+        return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while processing your request.", new[] { ex.Message });
+    }
+}
     }
     
 }
