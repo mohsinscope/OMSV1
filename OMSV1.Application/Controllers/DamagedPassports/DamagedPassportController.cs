@@ -7,6 +7,7 @@ using OMSV1.Application.Helpers;
 using OMSV1.Application.CQRS.DamagedPassports.Queries;
 using System.Net;
 using OMSV1.Application.Authorization.Attributes;
+using OMSV1.Application.Handlers.DamagedPassports;
 namespace OMSV1.Application.Controllers.DamagedPassports
 {
 
@@ -68,23 +69,27 @@ namespace OMSV1.Application.Controllers.DamagedPassports
         }
 
         // POST method to add a new damaged passport
-        [HttpPost]
-        [RequirePermission("DPc")]
-
-        public async Task<IActionResult> AddDamagedPassport([FromBody] AddDamagedPassportCommand command)
-        {
-            try
-            {
-                var id = await _mediator.Send(command);
-                return CreatedAtAction(nameof(GetDamagedPassportById), new { id }, id);  // 201 Created response
-            }
-            catch (Exception ex)
-            {
-                // Handle errors and return a 500 Internal Server Error
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
+// Controller action
+[HttpPost]
+[RequirePermission("DPc")]
+public async Task<IActionResult> AddDamagedPassport([FromBody] AddDamagedPassportCommand command)
+{
+    try
+    {
+        var id = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetDamagedPassportById), new { id }, id);  // 201 Created response
+    }
+    catch (DuplicatePassportException ex)
+    {
+        // Return 409 Conflict for duplicate passport numbers
+        return Conflict(new { message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        // Handle other errors and return a 500 Internal Server Error
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+    }
+}
         // PUT method to update the damaged passport
         [HttpPut("{id}")]
         [RequirePermission("DPu")]

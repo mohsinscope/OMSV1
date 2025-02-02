@@ -5,6 +5,7 @@ using OMSV1.Application.Commands.DamagedDevices;
 using OMSV1.Application.CQRS.Commands.DamagedDevices;
 using OMSV1.Application.CQRS.DamagedDevices.Queries;
 using OMSV1.Application.CQRS.Queries.DamagedDevices;
+using OMSV1.Application.Handlers.DamagedDevices;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.DamagedDevices;
 using OMSV1.Infrastructure.Extensions;
@@ -162,22 +163,33 @@ namespace OMSV1.Application.Controllers.DamagedDevices
 
 
         // Add a new damaged device
+        // Controller action
         [HttpPost]
         [RequirePermission("DDc")]
-
         public async Task<IActionResult> AddDamagedDevice([FromBody] AddDamagedDeviceCommand command)
         {
             try
             {
-                var userId = User.GetUserId(); 
+                var userId = User.GetUserId();
                 command.UserId = userId;
 
                 var id = await _mediator.Send(command);
-                return CreatedAtAction(nameof(GetDamagedDeviceById), new { id }, id);  // Return 201 Created response
+                return CreatedAtAction(nameof(GetDamagedDeviceById), new { id }, id);
+            }
+            catch (DuplicateDeviceException ex)
+            {
+                // Return 409 Conflict for duplicate serial numbers
+                return Conflict(new { message = ex.Message });
+            }
+            catch (HandlerException ex)
+            {
+                // Return 400 Bad Request for validation errors
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");  // Catch any unhandled exceptions
+                // Handle other errors with 500 Internal Server Error
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 

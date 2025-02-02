@@ -8,57 +8,73 @@ using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Application.Handlers.DamagedDevices
 {
-    public class AddDamagedDeviceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper) : IRequestHandler<AddDamagedDeviceCommand, Guid>
+// Handler class
+public class AddDamagedDeviceCommandHandler : IRequestHandler<AddDamagedDeviceCommand, Guid>
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+
+    public AddDamagedDeviceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        private readonly IUnitOfWork _unitOfWork = unitOfWork;
-        private readonly IMapper _mapper = mapper;
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+    }
 
-public async Task<Guid> Handle(AddDamagedDeviceCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(AddDamagedDeviceCommand request, CancellationToken cancellationToken)
     {
-        try{
-        // Validate if the OfficeId belongs to the GovernorateId using AnyAsync
-        var officeBelongsToGovernorate = await _unitOfWork.Repository<Office>()
-        .AnyAsync(o => o.Id == request.OfficeId && o.GovernorateId == request.GovernorateId, cancellationToken);
-
-
-        if (!officeBelongsToGovernorate)
+        try
         {
-            // If the validation fails, throw an exception
-            throw new Exception($"Office ID {request.OfficeId} does not belong to Governorate ID {request.GovernorateId}.");
+            // Check for duplicate serial number
+            var existingDevice = await _unitOfWork.Repository<DamagedDevice>()
+                .FirstOrDefaultAsync(dd => dd.SerialNumber == request.SerialNumber);
+
+            if (existingDevice != null)
+            {
+                throw new DuplicateDeviceException($"A damaged device with serial number {request.SerialNumber} already exists.");
+            }
+
+            // Validate if the OfficeId belongs to the GovernorateId
+            var officeBelongsToGovernorate = await _unitOfWork.Repository<Office>()
+                .AnyAsync(o => o.Id == request.OfficeId && o.GovernorateId == request.GovernorateId, cancellationToken);
+
+            if (!officeBelongsToGovernorate)
+            {
+                throw new HandlerException($"Office ID {request.OfficeId} does not belong to Governorate ID {request.GovernorateId}.");
+            }
+
+            var damagedDevice = _mapper.Map<DamagedDevice>(request);
+            damagedDevice.UpdateDate(DateTime.SpecifyKind(request.Date, DateTimeKind.Utc));
+
+            await _unitOfWork.Repository<DamagedDevice>().AddAsync(damagedDevice);
+
+            if (!await _unitOfWork.SaveAsync(cancellationToken))
+            {
+                throw new HandlerException("Failed to save the damaged device to the database.");
+            }
+
+            return damagedDevice.Id;
         }
-
-        // Map the request to the DamagedDevice entity
-        var damagedDevice = _mapper.Map<DamagedDevice>(request);
-
-        // Convert Date to UTC before saving
-        damagedDevice.UpdateDate(DateTime.SpecifyKind(request.Date, DateTimeKind.Utc));
-
-        // Add the damaged device to the repository using AddAsync
-        await _unitOfWork.Repository<DamagedDevice>().AddAsync(damagedDevice);
-
-        // Save changes to the database
-        if (!await _unitOfWork.SaveAsync(cancellationToken))
+        catch (DuplicateDeviceException)
         {
-            // Handle failure to save
-            throw new Exception("Failed to save the damaged device to the database.");
+            // Re-throw duplicate device exceptions to be handled by the controller
+            throw;
         }
-
-        // Return the ID of the newly created damaged device
-        return damagedDevice.Id;
+        catch (HandlerException ex)
+        {
+            throw new HandlerException("An error occurred while processing the Damaged Device creation request.", ex);
+        }
+        catch (Exception ex)
+        {
+            throw new HandlerException("An unexpected error occurred.", ex);
+        }
     }
-          catch (HandlerException ex)
-            {
-                // Handle specific business exceptions (HandlerException)
-                throw new HandlerException("An error occurred while processing the DamagedD Device creation request.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Handle any unexpected exceptions (generic)
-                throw new HandlerException("An unexpected error occurred.", ex);
-            }
-    }
+}
 
+// Custom Exception class (add this to your project)
+public class DuplicateDeviceException : Exception
+{
+    public DuplicateDeviceException(string message) : base(message) { }
+    public DuplicateDeviceException(string message, Exception innerException) : base(message, innerException) { }
+}
 
-
-    }
 }

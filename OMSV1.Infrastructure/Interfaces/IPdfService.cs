@@ -1,3 +1,4 @@
+using OMSV1.Domain.Entities.DamagedPassport;
 using OMSV1.Domain.Entities.Expenses;
 
 namespace OMSV1.Infrastructure.Interfaces
@@ -6,6 +7,7 @@ namespace OMSV1.Infrastructure.Interfaces
 {
     // Task<string> GenerateAsync(string title, string content, Dictionary<string, string>? metadata = null);
     Task<byte[]> GenerateMonthlyExpensesPdfAsync(List<MonthlyExpenses> expenses);
+
 }
 
 }
