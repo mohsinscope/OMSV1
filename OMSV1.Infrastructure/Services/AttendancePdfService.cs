@@ -1,17 +1,32 @@
 using iTextSharp.text;
 using iTextSharp.text.pdf;
+using Microsoft.EntityFrameworkCore;
 using OMSV1.Domain.Entities.Attendances;
+using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.Enums;
 using OMSV1.Domain.Interfaces;
+using OMSV1.Domain.SeedWork;
 using OMSV1.Infrastructure.Interfaces;
+using OMSV1.Infrastructure.Persistence;
 using iTextRectangle = iTextSharp.text.Rectangle;
 
 namespace OMSV1.Infrastructure.Services
 {
     public class AttendancePdfService : IAttendanceService
     {
+        private readonly IGenericRepository<Office> _officeRepository;
+        private readonly AppDbContext _context; // Inject the DbContext
+
         private static readonly BaseColor TABLE_HEADER_COLOR = new BaseColor(240, 240, 240);
         private static readonly BaseColor BORDER_COLOR = new BaseColor(120, 120, 120);
+     public AttendancePdfService(
+        IGenericRepository<Office> officeRepository,
+        AppDbContext context) // Add DbContext parameter here
+    {
+        _officeRepository = officeRepository ?? throw new ArgumentNullException(nameof(officeRepository));
+        _context = context ?? throw new ArgumentNullException(nameof(context));
+    }
+    
 
         static AttendancePdfService()
         {
@@ -32,86 +47,59 @@ namespace OMSV1.Infrastructure.Services
                 throw new InvalidOperationException("Error during static initialization of AttendancePdfService.", ex);
             }
         }
-// private void AddTableHeader(PdfPTable table, string[] headers)
-// {
-//     var headerFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12);
-
-//     // Add headers in reverse order to ensure RTL display
-//     foreach (string header in headers.Reverse())
-//     {
-//         var cell = new PdfPCell(new Phrase(ShapeArabicText(header), headerFont))
-//         {
-//             BackgroundColor = TABLE_HEADER_COLOR,
-//             HorizontalAlignment = Element.ALIGN_RIGHT,
-//             VerticalAlignment = Element.ALIGN_MIDDLE,
-//             Padding = 8f,
-//             BorderColor = BORDER_COLOR,
-//             MinimumHeight = 25f,
-//             RunDirection = PdfWriter.RUN_DIRECTION_RTL
-//         };
-//         table.AddCell(cell);
-//     }
-// }
-
-// private void AddTableRow(PdfPTable table, string[] cells)
-// {
-//     var cellFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 10);
-
-//     // Add cells in reverse order to ensure RTL display
-//     foreach (string cellContent in cells.Reverse())
-//     {
-//         var cell = new PdfPCell(new Phrase(ShapeArabicText(cellContent ?? "-"), cellFont))
-//         {
-//             HorizontalAlignment = Element.ALIGN_RIGHT,
-//             VerticalAlignment = Element.ALIGN_MIDDLE,
-//             Padding = 6f,
-//             BorderColor = BORDER_COLOR,
-//             MinimumHeight = 20f,
-//             RunDirection = PdfWriter.RUN_DIRECTION_RTL
-//         };
-//         table.AddCell(cell);
-//     }
-// }
-
 public async Task<byte[]> GenerateDailyAttendancePdfAsync(List<Attendance> attendances)
 {
-    if (attendances == null)
-        throw new ArgumentNullException(nameof(attendances));
+if (attendances == null)
+            throw new ArgumentNullException(nameof(attendances));
 
-    var todayUtc = DateTime.UtcNow.Date;
+        var todayUtc = DateTime.UtcNow.Date;
 
-    // Aggregate attendance by Governorate and Office, summing up the staff count
-    var dailyAttendance = attendances
-        .Where(a => a.Date.Date == todayUtc)
-        .GroupBy(a => new
-        {
-            GovernorateName = a.Governorate?.Name,
-            OfficeName = a.Office?.Name,
-            OfficeCode = a.Office?.Code // Include Office Code in grouping
-        })
-        .Select(g => new
-        {
-            GovernorateName = g.Key.GovernorateName ?? "-",
-            OfficeName = g.Key.OfficeName ?? "-",
-            OfficeCode = g.Key.OfficeCode ?? 0, // Default to 0 if OfficeCode is null
-            MorningAttendance = g.Where(a => a.WorkingHours.HasFlag(WorkingHours.Morning))
-                .Sum(a => a.ReceivingStaff + a.AccountStaff + a.PrintingStaff + a.QualityStaff + a.DeliveryStaff),
-            EveningAttendance = g.Where(a => a.WorkingHours.HasFlag(WorkingHours.Evening))
-                .Sum(a => a.ReceivingStaff + a.AccountStaff + a.PrintingStaff + a.QualityStaff + a.DeliveryStaff),
-            TotalAttendance = g.Sum(a => a.ReceivingStaff + a.AccountStaff + a.PrintingStaff + a.QualityStaff + a.DeliveryStaff)
-        })
-        .OrderBy(a => a.OfficeCode) // Sort by Office Code ascendingly
-        .ToList();
+        // Fetch all offices along with their Governorate in a single query
+        var allOffices = await _context.Offices
+            .Include(o => o.Governorate)
+            .ToListAsync();
 
-    if (!dailyAttendance.Any())
-        throw new InvalidOperationException("No attendance records found for today.");
+        if (!allOffices.Any())
+            throw new InvalidOperationException("No offices found in the system.");
 
-    using var memoryStream = new MemoryStream();
-    using var document = new Document(PageSize.A4, 50, 50, 50, 50);
-    var writer = PdfWriter.GetInstance(document, memoryStream);
+        var dailyAttendance = allOffices
+    .Select(office => new
+    {
+        GovernorateName = office.Governorate?.Name ?? "_",
+        OfficeName = office.Name ?? "-",
+        OfficeCode = office.Code,
+        TodayAttendance = attendances
+            .Where(a => a.Date.Date == todayUtc &&
+                        a.Office?.Code == office.Code)
+            .ToList()
+    })
+    .Select(office => new
+    {
+        GovernorateName = office.GovernorateName,
+        OfficeName = office.OfficeName,
+        OfficeCode = office.OfficeCode,
+        MorningAttendance = office.TodayAttendance
+            .Where(a => a.WorkingHours.HasFlag(WorkingHours.Morning))
+            .Sum(a => a.ReceivingStaff + a.AccountStaff + a.PrintingStaff + a.QualityStaff + a.DeliveryStaff),
+        EveningAttendance = office.TodayAttendance
+            .Where(a => a.WorkingHours.HasFlag(WorkingHours.Evening))
+            .Sum(a => a.ReceivingStaff + a.AccountStaff + a.PrintingStaff + a.QualityStaff + a.DeliveryStaff),
+        TotalAttendance = office.TodayAttendance
+            .Sum(a => a.ReceivingStaff + a.AccountStaff + a.PrintingStaff + a.QualityStaff + a.DeliveryStaff)
+    })
+    .OrderBy(a => a.OfficeCode)
+    .ToList();
 
-    document.Open();
 
+    if (!allOffices.Any())
+        throw new InvalidOperationException("No offices found in the system.");
+        // PDF Generation Logic
+        using var memoryStream = new MemoryStream();
+        using var document = new Document(PageSize.A4, 50, 50, 50, 50);
+        var writer = PdfWriter.GetInstance(document, memoryStream);
+
+        document.Open();
+        // (Add PDF Tables here)
     // Title Table
     var titleFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 24);
     var titleCell = new PdfPCell(new Phrase(ShapeArabicText("تقرير الحضور اليومي"), titleFont))
@@ -153,38 +141,35 @@ public async Task<byte[]> GenerateDailyAttendancePdfAsync(List<Attendance> atten
     document.Add(dateTable);
 
     // Main Data Table
-    var table = new PdfPTable(5) // 5 Columns: Governorate, Office, Morning, Evening, Total
+    var table = new PdfPTable(5)
     {
         WidthPercentage = 100,
         SpacingBefore = 10f,
         SpacingAfter = 20f,
-        RunDirection = PdfWriter.RUN_DIRECTION_RTL // Ensures full RTL table
+        RunDirection = PdfWriter.RUN_DIRECTION_RTL
     };
 
-    // Column widths adjusted for RTL
-    float[] columnWidths = new float[] { 20f, 25f, 15f, 15f, 25f }; // Order: Total, Evening, Morning, Office, Governorate
+    float[] columnWidths = new float[] { 20f, 25f, 15f, 15f, 25f };
     table.SetWidths(columnWidths);
 
-    // Add headers in the correct order (from right to left)
     AddTableHeader(table, new[]
     {
-        ShapeArabicText("اسم المحافظة"), // Rightmost column
+        ShapeArabicText("اسم المحافظة"),
         ShapeArabicText("اسم المكتب"),
         ShapeArabicText("الحضور الصباحي"),
         ShapeArabicText("الحضور المسائي"),
-        ShapeArabicText("إجمالي الحضور") // Leftmost column
+        ShapeArabicText("إجمالي الحضور")
     });
 
-    // Add rows in the correct order (from right to left)
     foreach (var entry in dailyAttendance)
     {
         AddTableRow(table, new[]
         {
-            ShapeArabicText(entry.GovernorateName), // Rightmost column
+            ShapeArabicText(entry.GovernorateName),
             ShapeArabicText(entry.OfficeName),
             entry.MorningAttendance.ToString(),
             entry.EveningAttendance.ToString(),
-            entry.TotalAttendance.ToString() // Leftmost column
+            entry.TotalAttendance.ToString()
         });
     }
 
@@ -213,6 +198,7 @@ public async Task<byte[]> GenerateDailyAttendancePdfAsync(List<Attendance> atten
 
     return await Task.FromResult(memoryStream.ToArray());
 }
+    
 private void AddTableRow(PdfPTable table, string[] cells)
 {
     var cellFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 10);

@@ -18,25 +18,27 @@ public static class HangfireJobsConfigurator
             }
         );
 
-        // Configure the daily damaged passports report job
+        // Configure the daily damaged passports report job to run at 8:00 PM Baghdad time
         RecurringJob.AddOrUpdate<HangfireJobs>(
             "GenerateAndSendDailyDamagedPassportsReport",
             job => job.GenerateAndSendDailyDamagedPassportsReport(),
-            Cron.Daily(0, 0), // Run daily at midnight (00:00 UTC)
+            Cron.Daily(20, 0), // 20:00 in 24-hour format = 8:00 PM
             new RecurringJobOptions
             {
-                TimeZone = TimeZoneInfo.Utc
+                TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Arabic Standard Time")
             }
         );
-              // ✅ Configure the daily attendance report job
+
+        // Configure the daily attendance report job to run at 8:05 PM Baghdad time
         RecurringJob.AddOrUpdate<HangfireJobs>(
             "GenerateAndSendDailyAttendanceReport",
             job => job.GenerateAndSendDailyAttendanceReport(),
-            Cron.Daily(0, 5), // Runs daily at 00:05 UTC to avoid overlap
+            Cron.Daily(20, 5), // 20:05 in 24-hour format = 8:05 PM
             new RecurringJobOptions
             {
-                TimeZone = TimeZoneInfo.Utc
+                TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Arabic Standard Time")
             }
         );
+
     }
 }
