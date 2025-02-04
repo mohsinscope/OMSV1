@@ -4,7 +4,9 @@ using OMSV1.Application.Commands.Attendances;
 using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.Entities.Offices;
+using OMSV1.Domain.Enums;
 using OMSV1.Domain.SeedWork;
+using OMSV1.Domain.Specifications.Attendances; // Ensure the correct namespace
 
 namespace OMSV1.Application.Handlers.Attendances
 {
@@ -13,7 +15,6 @@ namespace OMSV1.Application.Handlers.Attendances
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        // Constructor to inject dependencies
         public CreateAttendanceCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
@@ -24,48 +25,76 @@ namespace OMSV1.Application.Handlers.Attendances
         {
             try
             {
-                // Step 1: Validate if the OfficeId belongs to the GovernorateId using FirstOrDefaultAsync
+                // Validate that the Office belongs to the provided Governorate.
                 var office = await _unitOfWork.Repository<Office>()
                     .FirstOrDefaultAsync(o => o.Id == request.OfficeId && o.GovernorateId == request.GovernorateId);
-
                 if (office == null)
                 {
-                    // If the office doesn't belong to the governorate, throw a custom exception
                     throw new HandlerException($"Office ID {request.OfficeId} does not belong to Governorate ID {request.GovernorateId}.");
                 }
 
-                // Step 2: Ensure the Date is set to current date if not provided
+                // Ensure the Date is set to the current date if not provided.
                 if (request.Date == default)
                 {
-                    request.Date = DateTime.UtcNow;  // Use current date if not specified
+                    request.Date = DateTime.UtcNow;
                 }
 
-                // Step 4: Map the command to the entity
+                // Normalize the date by defining a range for the day.
+                var attendanceDate = request.Date.Date;
+                var nextDate = attendanceDate.AddDays(1);
+
+                // Create a specification to retrieve all attendances for the office on the given day.
+                var attendanceSpec = new AttendanceByOfficeAndDateSpecification(request.OfficeId, attendanceDate, nextDate);
+                
+                // Remove the cancellationToken parameter since ListAsync only takes a single specification argument.
+                var attendancesForDay = await _unitOfWork.Repository<Attendance>().ListAsync(attendanceSpec);
+
+                // Check for Morning conflict.
+                if (((int)request.WorkingHours & (int)WorkingHours.Morning) == (int)WorkingHours.Morning)
+                {
+                    bool hasMorningConflict = attendancesForDay.Any(a =>
+                        (((int)a.WorkingHours & (int)WorkingHours.Morning) == (int)WorkingHours.Morning));
+                    if (hasMorningConflict)
+                    {
+                        throw new HandlerException($"An attendance for the Morning shift on {attendanceDate:d} already exists for office ID {request.OfficeId}.");
+                    }
+                }
+
+                // Check for Evening conflict.
+                if (((int)request.WorkingHours & (int)WorkingHours.Evening) == (int)WorkingHours.Evening)
+                {
+                    bool hasEveningConflict = attendancesForDay.Any(a =>
+                        (((int)a.WorkingHours & (int)WorkingHours.Evening) == (int)WorkingHours.Evening));
+                    if (hasEveningConflict)
+                    {
+                        throw new HandlerException($"An attendance for the Evening shift on {attendanceDate:d} already exists for office ID {request.OfficeId}.");
+                    }
+                }
+
+                // Map the command to the Attendance entity.
                 var attendance = _mapper.Map<Attendance>(request);
 
-                // Step 5: Convert Date to UTC if needed
+                // Update the attendance date to ensure it is in UTC.
                 attendance.UpdateDate(DateTime.SpecifyKind(request.Date, DateTimeKind.Utc));
 
-                // Step 6: Add the attendance entity to the repository
+                // Add the attendance entity to the repository.
                 await _unitOfWork.Repository<Attendance>().AddAsync(attendance);
 
-                // Step 7: Save changes to the database
+                // Save changes to the database.
                 if (!await _unitOfWork.SaveAsync(cancellationToken))
                 {
                     throw new HandlerException("Failed to save the Attendance to the database.");
                 }
 
-                // Step 8: Return the ID of the newly created attendance
+                // Return the ID of the newly created attendance.
                 return attendance.Id;
             }
             catch (HandlerException ex)
             {
-                // Handle specific business exceptions (HandlerException)
                 throw new HandlerException("An error occurred while processing the attendance creation request.", ex);
             }
             catch (Exception ex)
             {
-                // Handle any unexpected exceptions (generic)
                 throw new HandlerException("An unexpected error occurred.", ex);
             }
         }

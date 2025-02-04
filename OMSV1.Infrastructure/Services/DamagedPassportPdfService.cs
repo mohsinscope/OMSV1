@@ -1,16 +1,25 @@
 using iTextSharp.text;
 using iTextSharp.text.pdf;
+using Microsoft.EntityFrameworkCore;
 using OMSV1.Domain.Entities.DamagedPassport;
+using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.Interfaces;
 using OMSV1.Infrastructure.Interfaces;
+using OMSV1.Infrastructure.Persistence;
 using iTextRectangle = iTextSharp.text.Rectangle;
 
 namespace OMSV1.Infrastructure.Services
 {
     public class DamagedPassportPdfService : IDamagedPassportService
     {
+        private readonly AppDbContext _context;
         private static readonly BaseColor TABLE_HEADER_COLOR = new BaseColor(240, 240, 240);
         private static readonly BaseColor BORDER_COLOR = new BaseColor(120, 120, 120);
+
+        public DamagedPassportPdfService(AppDbContext context)
+        {
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+        }
 
         static DamagedPassportPdfService()
         {
@@ -33,37 +42,47 @@ namespace OMSV1.Infrastructure.Services
             }
         }
 
-public async Task<byte[]> GenerateDailyDamagedPassportsPdfAsync(List<DamagedPassport> damagedPassports)
-{
-    if (damagedPassports == null)
-        throw new ArgumentNullException(nameof(damagedPassports));
-
-    // Convert local DateTime.Today to UTC for comparison
-    var startOfTodayUtc = DateTime.UtcNow.Date;
-    var endOfTodayUtc = startOfTodayUtc.AddDays(1).AddTicks(-1);
-
-    // Filter for passports created today in UTC
-    var dailyDamagedPassports = damagedPassports
-        .Where(dp => dp.DateCreated >= startOfTodayUtc && dp.DateCreated <= endOfTodayUtc)
-        .GroupBy(dp => new
+        public async Task<byte[]> GenerateDailyDamagedPassportsPdfAsync(List<DamagedPassport> damagedPassports)
         {
-            GovernorateName = dp.Governorate?.Name,
-            OfficeName = dp.Office?.Name
-        })
-        .Select(g => new
-        {
-            GovernorateName = g.Key.GovernorateName ?? "-",
-            OfficeName = g.Key.OfficeName ?? "-",
-            DamagedPassportCount = g.Count()
-        })
-        .ToList();
+            if (damagedPassports == null)
+                throw new ArgumentNullException(nameof(damagedPassports));
 
-    if (!dailyDamagedPassports.Any())
-        throw new InvalidOperationException("No damaged passports found for today.");
+            // Define the UTC boundaries for today
+            var startOfTodayUtc = DateTime.UtcNow.Date;
+            var endOfTodayUtc = startOfTodayUtc.AddDays(1).AddTicks(-1);
 
+            // Filter the provided list to get only the passports created today (in UTC)
+            var dailyDamagedPassports = damagedPassports
+                .Where(dp => dp.DateCreated >= startOfTodayUtc && dp.DateCreated <= endOfTodayUtc)
+                .ToList();
+
+            // Fetch all offices along with their Governorate in a single query
+            var allOffices = await _context.Offices
+                .Include(o => o.Governorate)
+                .ToListAsync();
+
+            if (!allOffices.Any())
+                throw new InvalidOperationException("No offices found in the system.");
+
+            // For each office, count the number of damaged passports registered today.
+            // This is a left join: if no damaged passports are found for an office, the count is zero.
+            var officesWithDamagedPassports = allOffices
+                .Select(office => new
+                {
+                    GovernorateName = office.Governorate?.Name ?? "-",
+                    OfficeName = office.Name ?? "-",
+                    OfficeCode = office.Code,  // Include OfficeCode here
+                    DamagedPassportCount = dailyDamagedPassports
+                        .Where(dp => dp.Office?.Code == office.Code)
+                        .Count()
+                })
+                .OrderBy(x => x.OfficeCode) // Order by OfficeCode
+                .ToList();
+
+            // Begin PDF generation
             using var memoryStream = new MemoryStream();
             using var document = new Document(PageSize.A4, 50, 50, 50, 50);
-            var writer = PdfWriter.GetInstance(document, memoryStream);
+            PdfWriter.GetInstance(document, memoryStream);
 
             document.Open();
 
@@ -89,7 +108,7 @@ public async Task<byte[]> GenerateDailyDamagedPassportsPdfAsync(List<DamagedPass
 
             // Report Date Table
             var dateFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12);
-            var dateCell = new PdfPCell(new Phrase(ShapeArabicText($"تاريخ التقرير: {DateTime.Now:yyyy-MM-dd}"), dateFont))
+            var dateCell = new PdfPCell(new Phrase(ShapeArabicText($"تاريخ التقرير: {DateTime.UtcNow:yyyy-MM-dd}"), dateFont))
             {
                 BackgroundColor = BaseColor.WHITE,
                 HorizontalAlignment = Element.ALIGN_RIGHT,
@@ -108,30 +127,35 @@ public async Task<byte[]> GenerateDailyDamagedPassportsPdfAsync(List<DamagedPass
             document.Add(dateTable);
 
             // Main Data Table
+            // The column order is:
+            // 1. اسم المحافظة (Governorate Name)
+            // 2. اسم المكتب (Office Name)
+            // 3. عدد الجوازات التالفة (Damaged Passport Count)
             var table = new PdfPTable(3)
             {
                 WidthPercentage = 100,
                 SpacingBefore = 10f,
-                SpacingAfter = 20f
+                SpacingAfter = 20f,
+                RunDirection = PdfWriter.RUN_DIRECTION_RTL
             };
 
-            float[] columnWidths = new float[] { 30f, 30f, 40f };
+            float[] columnWidths = new float[] { 40f, 30f, 30f }; // Adjust widths if needed
             table.SetWidths(columnWidths);
 
             AddTableHeader(table, new[]
             {
-                ShapeArabicText("عدد الجوازات التالفة"),
+                ShapeArabicText("اسم المحافظة"),
                 ShapeArabicText("اسم المكتب"),
-                ShapeArabicText("اسم المحافظة")
+                ShapeArabicText("عدد الجوازات التالفة")
             });
 
-            foreach (var entry in dailyDamagedPassports)
+            foreach (var entry in officesWithDamagedPassports)
             {
                 AddTableRow(table, new[]
                 {
-                    entry.DamagedPassportCount.ToString(),
+                    ShapeArabicText(entry.GovernorateName),
                     ShapeArabicText(entry.OfficeName),
-                    ShapeArabicText(entry.GovernorateName)
+                    entry.DamagedPassportCount.ToString()
                 });
             }
 
@@ -183,12 +207,6 @@ public async Task<byte[]> GenerateDailyDamagedPassportsPdfAsync(List<DamagedPass
             }
         }
 
-        private string ShapeArabicText(string text)
-        {
-            // Arabic text shaping logic (placeholder; can use libraries like `RTLText`)
-            return text; // Replace this with proper shaping logic if needed.
-        }
-
         private void AddTableHeader(PdfPTable table, string[] headers)
         {
             var headerFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12);
@@ -207,6 +225,12 @@ public async Task<byte[]> GenerateDailyDamagedPassportsPdfAsync(List<DamagedPass
                 };
                 table.AddCell(cell);
             }
+        }
+
+        private string ShapeArabicText(string text)
+        {
+            // Placeholder for Arabic text shaping logic.
+            return text; // Replace with a proper shaping implementation if needed.
         }
     }
 }
