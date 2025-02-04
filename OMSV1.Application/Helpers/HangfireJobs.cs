@@ -60,7 +60,7 @@ namespace OMSV1.Application.Helpers
                     foreach (var recipient in recipients)
                     {
                         await _emailService.SendEmailAsync(
-                            from: "report@epp-scopesky.com",
+                            from: "omc@scopesky.iq",
                             to: recipient,
                             subject: "تقرير الصرفيات الشهري",
                             body: "المصاريف الشهرية",
@@ -107,7 +107,7 @@ public async Task GenerateAndSendDailyAttendanceReport()
             foreach (var recipient in recipients)
             {
                 await _emailService.SendEmailAsync(
-                    from: "report@epp-scopesky.com",
+                    from: "omc@scopesky.iq",
                     to: recipient,
                     subject: "تقرير الحضور اليومي",
                     body: "تقرير الحضور اليومي مرفق",
@@ -149,7 +149,7 @@ public async Task GenerateAndSendDailyAttendanceReport()
                     foreach (var recipient in recipients)
                     {
                         await _emailService.SendEmailAsync(
-                            from: "report@epp-scopesky.com",
+                            from: "omc@scopesky.iq",
                             to: recipient,
                             subject: "تقرير الجوازات التالفة اليومية",
                             body: "تقرير الجوازات التالفة المسجلة اليوم",
