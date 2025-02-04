@@ -159,27 +159,27 @@ namespace OMSV1.API.Controllers
                 return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while processing your request.", new[] { ex.Message });
             }
         }
-        [HttpPost("statistics/unavailable")]
-        [RequirePermission("Sa")]
+[HttpPost("statistics/unavailable")]
+[RequirePermission("Sa")]
+public async Task<IActionResult> GetAttendanceStatistics([FromBody] GetUnavailableAttendancesQuery query)
+{
+    try
+    {
+        var result = await _mediator.Send(query);
 
-        public async Task<IActionResult> GetAttendanceStatistics([FromBody] GetUnavailableAttendancesQuery query)
+        // Always return 200 OK with an empty list if all offices have attendance
+        return Ok(new 
         {
-            try
-            {
-                var result = await _mediator.Send(query);
+            Message = result.Any() ? "Unavailable offices retrieved successfully." : "All offices have attendance.",
+            UnavailableOffices = result
+        });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+    }
+}
 
-                if (result == null || !result.Any())
-                {
-                    return NotFound("No offices found without attendance for the specified criteria.");
-                }
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
 [HttpPost("search/type-statistics")]
 [RequirePermission("Sa")]
 public async Task<IActionResult> SearchAttendanceTypeStatistics([FromBody] SearchAttendanceTypeStatisticsQuery query)
