@@ -23,6 +23,8 @@ namespace OMSV1.Domain.Specifications.Attendances
             // Include only necessary relationships
             AddInclude(x => x.Office);
             AddInclude(x => x.Governorate);
+            ApplyOrderBy(x => x.Office.Code);
+
         }
     }
 }
