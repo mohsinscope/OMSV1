@@ -15,6 +15,10 @@ namespace OMSV1.Infrastructure.Services
         private readonly AppDbContext _context;
         private static readonly BaseColor TABLE_HEADER_COLOR = new BaseColor(240, 240, 240);
         private static readonly BaseColor BORDER_COLOR = new BaseColor(120, 120, 120);
+        // Red highlight for offices with no damaged passports.
+        private static readonly BaseColor NO_DAMAGED_PASSPORT_ROW_COLOR = new BaseColor(255, 200, 200);
+        // Green highlight for the total summary box.
+        private static readonly BaseColor TOTAL_BOX_COLOR = new BaseColor(200, 255, 200);
 
         public DamagedPassportPdfService(AppDbContext context)
         {
@@ -47,13 +51,14 @@ namespace OMSV1.Infrastructure.Services
             if (damagedPassports == null)
                 throw new ArgumentNullException(nameof(damagedPassports));
 
-            // Define the UTC boundaries for today
-            var startOfTodayUtc = DateTime.UtcNow.Date;
-            var endOfTodayUtc = startOfTodayUtc.AddDays(1).AddTicks(-1);
+            // Configure Baghdad time (UTC+3)
+            var baghdadNow = DateTime.UtcNow.AddHours(3);
+            var startOfTodayBaghdad = baghdadNow.Date;
+            var endOfTodayBaghdad = startOfTodayBaghdad.AddDays(1).AddTicks(-1);
 
-            // Filter the provided list to get only the passports created today (in UTC)
+            // Filter the provided list to get only the passports created today (in Baghdad time)
             var dailyDamagedPassports = damagedPassports
-                .Where(dp => dp.DateCreated >= startOfTodayUtc && dp.DateCreated <= endOfTodayUtc)
+                .Where(dp => dp.DateCreated >= startOfTodayBaghdad && dp.DateCreated <= endOfTodayBaghdad)
                 .ToList();
 
             // Fetch all offices along with their Governorate in a single query
@@ -71,12 +76,12 @@ namespace OMSV1.Infrastructure.Services
                 {
                     GovernorateName = office.Governorate?.Name ?? "-",
                     OfficeName = office.Name ?? "-",
-                    OfficeCode = office.Code,  // Include OfficeCode here
+                    OfficeCode = office.Code,
                     DamagedPassportCount = dailyDamagedPassports
                         .Where(dp => dp.Office?.Code == office.Code)
                         .Count()
                 })
-                .OrderBy(x => x.OfficeCode) // Order by OfficeCode
+                .OrderBy(x => x.OfficeCode)
                 .ToList();
 
             // Begin PDF generation
@@ -106,9 +111,9 @@ namespace OMSV1.Infrastructure.Services
             titleTable.AddCell(titleCell);
             document.Add(titleTable);
 
-            // Report Date Table
+            // Report Date Table using Baghdad time
             var dateFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12);
-            var dateCell = new PdfPCell(new Phrase(ShapeArabicText($"تاريخ التقرير: {DateTime.UtcNow:yyyy-MM-dd}"), dateFont))
+            var dateCell = new PdfPCell(new Phrase(ShapeArabicText($"تاريخ التقرير: {baghdadNow:yyyy-MM-dd}"), dateFont))
             {
                 BackgroundColor = BaseColor.WHITE,
                 HorizontalAlignment = Element.ALIGN_RIGHT,
@@ -126,23 +131,23 @@ namespace OMSV1.Infrastructure.Services
             dateTable.AddCell(dateCell);
             document.Add(dateTable);
 
-            // Main Data Table
-            // The column order is:
+            // Build the Main Data Table
+            // Column order:
             // 1. اسم المحافظة (Governorate Name)
             // 2. اسم المكتب (Office Name)
             // 3. عدد الجوازات التالفة (Damaged Passport Count)
-            var table = new PdfPTable(3)
+            var mainTable = new PdfPTable(3)
             {
                 WidthPercentage = 100,
                 SpacingBefore = 10f,
-                SpacingAfter = 20f,
+                SpacingAfter = 10f,
                 RunDirection = PdfWriter.RUN_DIRECTION_RTL
             };
 
             float[] columnWidths = new float[] { 40f, 30f, 30f }; // Adjust widths if needed
-            table.SetWidths(columnWidths);
+            mainTable.SetWidths(columnWidths);
 
-            AddTableHeader(table, new[]
+            AddTableHeader(mainTable, new[]
             {
                 ShapeArabicText("اسم المحافظة"),
                 ShapeArabicText("اسم المكتب"),
@@ -151,15 +156,45 @@ namespace OMSV1.Infrastructure.Services
 
             foreach (var entry in officesWithDamagedPassports)
             {
-                AddTableRow(table, new[]
+                // Set red highlight if no damaged passports exist for the office
+                var backgroundColor = entry.DamagedPassportCount == 0 ? NO_DAMAGED_PASSPORT_ROW_COLOR : BaseColor.WHITE;
+                AddTableRow(mainTable, new[]
                 {
                     ShapeArabicText(entry.GovernorateName),
                     ShapeArabicText(entry.OfficeName),
                     entry.DamagedPassportCount.ToString()
-                });
+                }, backgroundColor);
             }
 
-            document.Add(table);
+            // Add the main table to the document.
+            document.Add(mainTable);
+
+            // Calculate the total damaged passports across all offices.
+            var totalDamagedPassportCount = officesWithDamagedPassports.Sum(x => x.DamagedPassportCount);
+            var totalFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD);
+
+            // Create the summary cell (green box) for "اجمالي الجوازات"
+            var summaryCell = new PdfPCell(new Phrase(ShapeArabicText($"اجمالي الجوازات: {totalDamagedPassportCount}"), totalFont))
+            {
+                BackgroundColor = TOTAL_BOX_COLOR,
+                HorizontalAlignment = Element.ALIGN_CENTER,
+                VerticalAlignment = Element.ALIGN_MIDDLE,
+                Padding = 10f,
+                BorderColor = BORDER_COLOR,
+                RunDirection = PdfWriter.RUN_DIRECTION_RTL
+            };
+
+            // Create a one-column table for the summary box that spans the full width of the main table.
+            var summaryTable = new PdfPTable(1)
+            {
+                WidthPercentage = 100,
+                SpacingBefore = 10f,
+                SpacingAfter = 10f
+            };
+            summaryTable.AddCell(summaryCell);
+
+            // Add the summary table to the document (it will appear at the bottom).
+            document.Add(summaryTable);
 
             // Footer Table
             var footerFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 8);
@@ -185,18 +220,24 @@ namespace OMSV1.Infrastructure.Services
             return await Task.FromResult(memoryStream.ToArray());
         }
 
-        private void AddTableRow(PdfPTable table, string[] cells)
+        /// <summary>
+        /// Adds a table row with an optional background color.
+        /// </summary>
+        private void AddTableRow(PdfPTable table, string[] cells, BaseColor backgroundColor = null)
         {
             if (table == null) throw new ArgumentNullException(nameof(table));
             if (cells == null) throw new ArgumentNullException(nameof(cells));
 
+            backgroundColor ??= BaseColor.WHITE;
             var cellFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 10);
 
             foreach (string cellContent in cells)
             {
                 var cell = new PdfPCell(new Phrase(ShapeArabicText(cellContent ?? "-"), cellFont))
                 {
-                    HorizontalAlignment = Element.ALIGN_RIGHT,
+                    BackgroundColor = backgroundColor,
+                    // Changed from ALIGN_RIGHT to ALIGN_CENTER
+                    HorizontalAlignment = Element.ALIGN_CENTER,
                     VerticalAlignment = Element.ALIGN_MIDDLE,
                     Padding = 6f,
                     BorderColor = BORDER_COLOR,
@@ -207,6 +248,9 @@ namespace OMSV1.Infrastructure.Services
             }
         }
 
+        /// <summary>
+        /// Adds the table header cells.
+        /// </summary>
         private void AddTableHeader(PdfPTable table, string[] headers)
         {
             var headerFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12);
@@ -216,7 +260,8 @@ namespace OMSV1.Infrastructure.Services
                 var cell = new PdfPCell(new Phrase(ShapeArabicText(header), headerFont))
                 {
                     BackgroundColor = TABLE_HEADER_COLOR,
-                    HorizontalAlignment = Element.ALIGN_RIGHT,
+                    // Changed from ALIGN_RIGHT to ALIGN_CENTER
+                    HorizontalAlignment = Element.ALIGN_CENTER,
                     VerticalAlignment = Element.ALIGN_MIDDLE,
                     Padding = 8f,
                     BorderColor = BORDER_COLOR,
@@ -227,10 +272,13 @@ namespace OMSV1.Infrastructure.Services
             }
         }
 
+        /// <summary>
+        /// A placeholder for Arabic text shaping.
+        /// Replace with proper shaping logic if needed.
+        /// </summary>
         private string ShapeArabicText(string text)
         {
-            // Placeholder for Arabic text shaping logic.
-            return text; // Replace with a proper shaping implementation if needed.
+            return text;
         }
     }
 }

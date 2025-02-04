@@ -18,6 +18,8 @@ public class FilterAttendanceunavailableStatisticsSpecification : BaseSpecificat
             (!governorateId.HasValue || x.GovernorateId == governorateId.Value))
     {
         AddInclude(x => x.Office);
+        ApplyOrderBy(x => x.Office.Code);
+
     }
 }
 

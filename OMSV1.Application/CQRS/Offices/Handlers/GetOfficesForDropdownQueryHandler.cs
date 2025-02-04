@@ -22,8 +22,11 @@ namespace OMSV1.Application.Queries.Offices
                 // Fetch the offices using the repository inside unit of work
                 var offices = await _unitOfWork.Repository<Office>().GetAllAsync();
 
-                // Map the entities to DTOs
-                var officeDropdownDtos = offices.Select(o => new OfficeDropdownDto
+                // Order the offices by their Code property
+                var orderedOffices = offices.OrderBy(o => o.Code).ToList();
+
+                // Map the ordered entities to DTOs
+                var officeDropdownDtos = orderedOffices.Select(o => new OfficeDropdownDto
                 {
                     Id = o.Id,
                     Name = o.Name
