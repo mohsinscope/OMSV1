@@ -14,7 +14,7 @@ public static class HangfireJobsConfigurator
             Cron.Monthly(1), // Run on the 1st day of every month
             new RecurringJobOptions
             {
-                TimeZone = TimeZoneInfo.Utc
+                TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Arabic Standard Time")
             }
         );
 
