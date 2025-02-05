@@ -62,6 +62,8 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
                 "https://oms.scopesky.org",
                 "http://oms.scopesky.org",
+                "http://172.16.108.27",
+                "http://172.16.108.28",
                 "http://localhost:5173"
             )
             .WithMethods("GET", "POST", "PUT", "DELETE")
