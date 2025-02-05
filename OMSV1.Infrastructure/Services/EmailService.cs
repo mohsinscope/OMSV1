@@ -54,6 +54,48 @@ public class EmailService : IEmailService
             await smtpClient.DisconnectAsync(true);
         }
     }
+public async Task SendEmailWithAttachmentAsync(
+    string from,
+    string to,
+    string subject,
+    string body,
+    byte[] attachmentBytes,
+    string attachmentName)
+{
+    var message = new MimeMessage();
+    message.From.Add(new MailboxAddress("OMS", from));
+    message.To.Add(new MailboxAddress("Recipient", to));
+    message.Subject = subject;
+
+    var bodyBuilder = new BodyBuilder { TextBody = body };
+
+    // Add the attachment with the specified name.
+    if (attachmentBytes != null && attachmentBytes.Length > 0)
+    {
+        // Determine the content type if necessary. For example, for ZIP files:
+        var contentType = new ContentType("application", "zip");
+        bodyBuilder.Attachments.Add(attachmentName, attachmentBytes, contentType);
+    }
+
+    message.Body = bodyBuilder.ToMessageBody();
+
+    using var smtpClient = new SmtpClient();
+    try
+    {
+        await smtpClient.ConnectAsync(_settings.SmtpServer, _settings.Port, SecureSocketOptions.StartTls);
+        await smtpClient.AuthenticateAsync(_settings.Username, _settings.Password);
+        await smtpClient.SendAsync(message);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error sending email with attachment");
+        throw;
+    }
+    finally
+    {
+        await smtpClient.DisconnectAsync(true);
+    }
+}
 
     public async Task SendEmailToMultipleRecipientsAsync(string from, string[] recipients, string subject, string body, string pdfPath = null)
     {

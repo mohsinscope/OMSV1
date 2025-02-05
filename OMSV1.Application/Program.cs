@@ -108,6 +108,7 @@ builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<IAttendanceService, AttendancePdfService>();
 //Email Reports
 builder.Services.AddScoped<IEmailReportRepository, EmailReportRepository>();
+builder.Services.AddScoped<IDamagedPassportArchiveService, DamagedPassportArchiveService>();
 
 
 // Add services BEFORE Build()

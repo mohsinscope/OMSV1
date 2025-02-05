@@ -28,6 +28,17 @@ public static class HangfireJobsConfigurator
                 TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Arabic Standard Time")
             }
         );
+        // Configure the daily damaged passports ZIP archive job to run at 8:00 PM Baghdad time
+        RecurringJob.AddOrUpdate<HangfireJobs>(
+            "GenerateAndSendDailyDamagedPassportsZipArchiveReport",
+            job => job.GenerateAndSendDailyDamagedPassportsZipArchiveReport(),
+            Cron.Daily(20, 0),
+            new RecurringJobOptions
+            {
+                TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Arabic Standard Time")
+            }
+        );
+
 
         // Configure the daily attendance report job to run at 8:05 PM Baghdad time
         RecurringJob.AddOrUpdate<HangfireJobs>(
