@@ -11,6 +11,7 @@ using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Lectures;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.Entities.Profiles;
+using OMSV1.Domain.Entities.Reports;
 using OMSV1.Infrastructure.Identity;
 
 namespace OMSV1.Infrastructure.Persistence;
@@ -50,6 +51,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         public DbSet<Company> Company { get; set; }
         public DbSet<LectureType> LectureType { get; set; }
         public DbSet<Threshold> Thresholds {get;set;}
+        public DbSet<EmailReport> EmailReports {get;set;}
+        public DbSet<ReportType> ReportTypes {get;set;}
+
+
 
 
 

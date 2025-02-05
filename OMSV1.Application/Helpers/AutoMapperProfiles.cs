@@ -16,6 +16,7 @@ using OMSV1.Application.Dtos.LectureTypes;
 using OMSV1.Application.Dtos.Offices;
 using OMSV1.Application.Dtos.Profiles;
 using OMSV1.Application.DTOs.Expenses;
+using OMSV1.Application.DTOs.Reports;
 using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.Entities.Companies;
 using OMSV1.Domain.Entities.DamagedDevices;
@@ -24,6 +25,7 @@ using OMSV1.Domain.Entities.Expenses;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Lectures;
 using OMSV1.Domain.Entities.Offices;
+using OMSV1.Domain.Entities.Reports;
 using OMSV1.Infrastructure.Identity;
 namespace OMSV1.Application.Helpers{
 
@@ -66,6 +68,12 @@ public class AutoMapperProfiles : Profile
             CreateMap<AddDamagedDeviceCommand, DamagedDevice>();
             CreateMap<DamagedDevice, DamagedDeviceDto>();
             CreateMap<DamagedDevice, DamagedDeviceAllDto>();
+            //Email
+            CreateMap<ReportType, ReportTypeDto>();
+            CreateMap<EmailReport, EmailReportDto>()
+            .ForMember(dest => dest.ReportTypes, opt => opt.MapFrom(src => src.ReportTypes));
+
+
 
             //Lecture
             CreateMap<AddLectureCommand,Lecture>();
