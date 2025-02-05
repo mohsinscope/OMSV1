@@ -16,8 +16,9 @@ namespace OMSV1.Application.Helpers
         private readonly ILogger<HangfireJobs> _logger;
         private readonly IDamagedPassportRepository _damagedPassportRepository;
         private readonly IDamagedPassportService _damagedPassportService;
-        private readonly IAttendanceRepository _attendanceRepository; // Add this field
-        private readonly IAttendanceService _attendanceService; // Add this field
+        private readonly IAttendanceRepository _attendanceRepository;
+        private readonly IAttendanceService _attendanceService;
+        private readonly IEmailReportRepository _emailReportRepository; // New dependency
 
         public HangfireJobs(
             IMonthlyExpensesRepository repository,
@@ -26,8 +27,9 @@ namespace OMSV1.Application.Helpers
             ILogger<HangfireJobs> logger,
             IDamagedPassportRepository damagedPassportRepository,
             IDamagedPassportService damagedPassportService,
-            IAttendanceRepository attendanceRepository, // Add this parameter
-            IAttendanceService attendanceService) // Add this parameter
+            IAttendanceRepository attendanceRepository,
+            IAttendanceService attendanceService,
+            IEmailReportRepository emailReportRepository) // New parameter
         {
             _repository = repository;
             _pdfService = pdfService;
@@ -35,8 +37,9 @@ namespace OMSV1.Application.Helpers
             _logger = logger;
             _damagedPassportRepository = damagedPassportRepository;
             _damagedPassportService = damagedPassportService;
-            _attendanceRepository = attendanceRepository; // Assign the field
-            _attendanceService = attendanceService; // Assign the field
+            _attendanceRepository = attendanceRepository;
+            _attendanceService = attendanceService;
+            _emailReportRepository = emailReportRepository; // Assign the new dependency
         }
 
         public async Task GenerateAndSendMonthlyExpensesReport()
@@ -55,19 +58,27 @@ namespace OMSV1.Application.Helpers
                     var pdfData = await _pdfService.GenerateMonthlyExpensesPdfAsync(expenses);
                     _logger.LogInformation("PDF generated successfully");
 
-                    var recipients = new[] { "yass22185@gmail.com", "ali.yaas@scopesky.iq" };
+                    // Fetch recipients based on report type "Incident Report"
+                    var recipients = await _emailReportRepository.GetEmailsByReportTypeAsync("Monthly Expenses");
 
-                    foreach (var recipient in recipients)
+                    if (recipients != null && recipients.Any())
                     {
-                        await _emailService.SendEmailAsync(
-                            from: "omc@scopesky.iq",
-                            to: recipient,
-                            subject: "تقرير الصرفيات الشهري",
-                            body: "المصاريف الشهرية",
-                            pdfData: pdfData
-                        );
+                        foreach (var recipient in recipients)
+                        {
+                            await _emailService.SendEmailAsync(
+                                from: "omc@scopesky.iq",
+                                to: recipient,
+                                subject: "تقرير الصرفيات الشهري",
+                                body: "المصاريف الشهرية",
+                                pdfData: pdfData
+                            );
 
-                        _logger.LogInformation($"Monthly expenses report email sent successfully to {recipient}.");
+                            _logger.LogInformation($"Monthly expenses report email sent successfully to {recipient}.");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("No recipients found for report type 'Incident Report'");
                     }
                 }
                 else
@@ -82,53 +93,58 @@ namespace OMSV1.Application.Helpers
             }
         }
 
-public async Task GenerateAndSendDailyAttendanceReport()
-{
-    try
-    {
-        _logger.LogInformation("Starting daily attendance report generation and email sending");
-
-        // Get today's date
-        var today = DateTime.UtcNow.Date;
-
-        // Fetch attendance records for today
-        var attendances = await _attendanceRepository.GetAttendanceByDateAsync(today);
-
-        if (attendances != null && attendances.Any())
+        public async Task GenerateAndSendDailyAttendanceReport()
         {
-            // Generate the PDF as a byte array
-            var pdfData = await _attendanceService.GenerateDailyAttendancePdfAsync(attendances);
-            _logger.LogInformation("PDF generated successfully");
-
-            // Recipients list
-            var recipients = new[] { "yass22185@gmail.com", "ali.yaas@scopesky.iq" };
-
-            // Send the email with the PDF attached to multiple recipients
-            foreach (var recipient in recipients)
+            try
             {
-                await _emailService.SendEmailAsync(
-                    from: "omc@scopesky.iq",
-                    to: recipient,
-                    subject: "تقرير الحضور اليومي",
-                    body: "تقرير الحضور اليومي مرفق",
-                    pdfData: pdfData
-                );
+                _logger.LogInformation("Starting daily attendance report generation and email sending");
 
-                _logger.LogInformation($"Daily attendance report email sent successfully to {recipient}.");
+                // Get today's date
+                var today = DateTime.UtcNow.Date;
+
+                // Fetch attendance records for today
+                var attendances = await _attendanceRepository.GetAttendanceByDateAsync(today);
+
+                if (attendances != null && attendances.Any())
+                {
+                    // Generate the PDF as a byte array
+                    var pdfData = await _attendanceService.GenerateDailyAttendancePdfAsync(attendances);
+                    _logger.LogInformation("PDF generated successfully");
+
+                    // Fetch recipients based on report type "Incident Report"
+                    var recipients = await _emailReportRepository.GetEmailsByReportTypeAsync("Daily Attendances");
+
+                    if (recipients != null && recipients.Any())
+                    {
+                        foreach (var recipient in recipients)
+                        {
+                            await _emailService.SendEmailAsync(
+                                from: "omc@scopesky.iq",
+                                to: recipient,
+                                subject: "تقرير الحضور اليومي",
+                                body: "تقرير الحضور اليومي مرفق",
+                                pdfData: pdfData
+                            );
+
+                            _logger.LogInformation($"Daily attendance report email sent successfully to {recipient}.");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("No recipients found for report type 'Incident Report'");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("No attendance records found for today.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating or sending daily attendance report");
+                throw;
             }
         }
-        else
-        {
-            _logger.LogWarning("No attendance records found for today.");
-        }
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error generating or sending daily attendance report");
-        throw;
-    }
-}
-
 
         public async Task GenerateAndSendDailyDamagedPassportsReport()
         {
@@ -144,19 +160,27 @@ public async Task GenerateAndSendDailyAttendanceReport()
                     var pdfData = await _damagedPassportService.GenerateDailyDamagedPassportsPdfAsync(damagedPassports);
                     _logger.LogInformation("PDF generated successfully");
 
-                    var recipients = new[] { "yass22185@gmail.com", "ali.yaas@scopesky.iq" };
+                    // Fetch recipients based on report type "Incident Report"
+                    var recipients = await _emailReportRepository.GetEmailsByReportTypeAsync("Daily Passports");
 
-                    foreach (var recipient in recipients)
+                    if (recipients != null && recipients.Any())
                     {
-                        await _emailService.SendEmailAsync(
-                            from: "omc@scopesky.iq",
-                            to: recipient,
-                            subject: "تقرير الجوازات التالفة اليومية",
-                            body: "تقرير الجوازات التالفة المسجلة اليوم",
-                            pdfData: pdfData
-                        );
+                        foreach (var recipient in recipients)
+                        {
+                            await _emailService.SendEmailAsync(
+                                from: "omc@scopesky.iq",
+                                to: recipient,
+                                subject: "تقرير الجوازات التالفة اليومية",
+                                body: "تقرير الجوازات التالفة المسجلة اليوم",
+                                pdfData: pdfData
+                            );
 
-                        _logger.LogInformation($"Daily damaged passports report email sent successfully to {recipient}.");
+                            _logger.LogInformation($"Daily damaged passports report email sent successfully to {recipient}.");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("No recipients found for report type 'Incident Report'");
                     }
                 }
                 else
