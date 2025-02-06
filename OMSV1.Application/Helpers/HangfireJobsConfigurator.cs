@@ -22,7 +22,7 @@ public static class HangfireJobsConfigurator
         RecurringJob.AddOrUpdate<HangfireJobs>(
             "GenerateAndSendDailyDamagedPassportsReport",
             job => job.GenerateAndSendDailyDamagedPassportsReport(),
-            Cron.Daily(20, 0), // 20:00 in 24-hour format = 8:00 PM
+            Cron.Daily(0, 1), // 00:01 in 24-hour format = 12:01 AM
             new RecurringJobOptions
             {
                 TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Arabic Standard Time")
@@ -32,7 +32,7 @@ public static class HangfireJobsConfigurator
         RecurringJob.AddOrUpdate<HangfireJobs>(
             "GenerateAndSendDailyDamagedPassportsZipArchiveReport",
             job => job.GenerateAndSendDailyDamagedPassportsZipArchiveReport(),
-            Cron.Daily(20, 0),
+            Cron.Daily(0, 5), // 00:03 in 24-hour format = 12:03 AM
             new RecurringJobOptions
             {
                 TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Arabic Standard Time")
@@ -44,7 +44,7 @@ public static class HangfireJobsConfigurator
         RecurringJob.AddOrUpdate<HangfireJobs>(
             "GenerateAndSendDailyAttendanceReport",
             job => job.GenerateAndSendDailyAttendanceReport(),
-            Cron.Daily(20, 5), // 20:05 in 24-hour format = 8:05 PM
+            Cron.Daily(0, 10), // 00:05 in 24-hour format = 12:05 AM
             new RecurringJobOptions
             {
                 TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Arabic Standard Time")
