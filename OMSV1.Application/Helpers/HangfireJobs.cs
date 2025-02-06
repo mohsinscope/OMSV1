@@ -207,7 +207,7 @@ namespace OMSV1.Application.Helpers
    private string GetAttachmentFilePath(Domain.Entities.DamagedPassport.DamagedPassport passport)
 {
     // Define the folder where the images are stored.
-    string folder = @"C:\Uploads\damagedpassport";
+    string folder = @"\\172.16.108.26\samba\damagedpassport";
 
     // Build a search pattern using the passport ID.
     // For example, if files start with "DamagedPassport_{passport.Id}_"
