@@ -106,13 +106,16 @@ namespace OMSV1.Application.Controllers.Expenses
             }
         }
         //Add Daily Expenses
+        // Add Daily Expenses (parent with optional subexpenses)
         [HttpPost("{monthlyExpensesId}/daily-expenses")]
         [RequirePermission("EXc")]
         public async Task<IActionResult> AddDailyExpense(Guid monthlyExpensesId, [FromBody] AddDailyExpensesCommand command)
         {
             try
             {
+                // Set the MonthlyExpensesId from the route (only applicable for parent expense creation)
                 command.MonthlyExpensesId = monthlyExpensesId;
+                
                 var id = await _mediator.Send(command);
                 return Ok(new { Id = id });
             }
@@ -121,6 +124,7 @@ namespace OMSV1.Application.Controllers.Expenses
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
         [HttpPost("{id}/status")]
         [RequirePermission("EXr")]
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateMonthlyExpensesStatusCommand command)

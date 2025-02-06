@@ -3,41 +3,56 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OMSV1.Domain.Entities.Expenses;
 
-namespace OMSV1.Infrastructure.Configurations;
-
-public class DailyExpensesConfiguration : IEntityTypeConfiguration<DailyExpenses>
+namespace OMSV1.Infrastructure.Configurations
 {
-    public void Configure(EntityTypeBuilder<DailyExpenses> builder)
+    public class DailyExpensesConfiguration : IEntityTypeConfiguration<DailyExpenses>
     {
-        builder.HasKey(de => de.Id);
+        public void Configure(EntityTypeBuilder<DailyExpenses> builder)
+        {
+            // Primary Key
+            builder.HasKey(de => de.Id);
 
-        builder.Property(de => de.Price)
-            .HasColumnType("decimal(18,2)")
-            .IsRequired();
+            // Scalar properties configuration
+            builder.Property(de => de.Price)
+                .HasColumnType("decimal(18,2)")
+                .IsRequired();
 
-        builder.Property(de => de.Quantity)
-            .IsRequired();
+            builder.Property(de => de.Quantity)
+                .IsRequired();
 
-        builder.Property(de => de.Amount)
-            .HasColumnType("decimal(18,2)")
-            .IsRequired();
+            builder.Property(de => de.Amount)
+                .HasColumnType("decimal(18,2)")
+                .IsRequired();
 
-        builder.Property(de => de.Notes)
-            .HasMaxLength(500);
+            builder.Property(de => de.Notes)
+                .HasMaxLength(500);
 
-        builder.Property(de => de.ExpenseDate)
-            .IsRequired();
+            builder.Property(de => de.ExpenseDate)
+                .IsRequired();
 
-        builder.HasOne(de => de.ExpenseType)
-            .WithMany()
-            .HasForeignKey(de => de.ExpenseTypeId)
-            .OnDelete(DeleteBehavior.Restrict);
+            // Foreign key to ExpenseType
+            builder.HasOne(de => de.ExpenseType)
+                .WithMany()
+                .HasForeignKey(de => de.ExpenseTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(de => de.MonthlyExpenses)
-            .WithMany(me => me.dailyExpenses)
-            .HasForeignKey(de => de.MonthlyExpensesId)
-            .OnDelete(DeleteBehavior.Cascade);
+            // Foreign key to MonthlyExpenses
+            builder.HasOne(de => de.MonthlyExpenses)
+                .WithMany(me => me.dailyExpenses)
+                .HasForeignKey(de => de.MonthlyExpensesId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-        builder.ToTable("DailyExpenses");
+            // Self-referencing relationship configuration:
+            builder.HasMany(de => de.SubExpenses)
+                .WithOne(de => de.ParentExpense)
+                .HasForeignKey(de => de.ParentExpenseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure ParentExpenseId as optional since not all DailyExpenses are children.
+            builder.Property(de => de.ParentExpenseId)
+                .IsRequired(false);
+
+            builder.ToTable("DailyExpenses");
+        }
     }
 }

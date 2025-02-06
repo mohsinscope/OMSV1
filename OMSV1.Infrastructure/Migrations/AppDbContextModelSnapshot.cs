@@ -486,6 +486,9 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<Guid?>("ParentExpenseId")
+                        .HasColumnType("uuid");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -497,6 +500,8 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasIndex("ExpenseTypeId");
 
                     b.HasIndex("MonthlyExpensesId");
+
+                    b.HasIndex("ParentExpenseId");
 
                     b.ToTable("DailyExpenses", (string)null);
                 });
@@ -1174,9 +1179,16 @@ namespace OMSV1.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("OMSV1.Domain.Entities.Expenses.DailyExpenses", "ParentExpense")
+                        .WithMany("SubExpenses")
+                        .HasForeignKey("ParentExpenseId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.Navigation("ExpenseType");
 
                     b.Navigation("MonthlyExpenses");
+
+                    b.Navigation("ParentExpense");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.MonthlyExpenses", b =>
@@ -1346,6 +1358,11 @@ namespace OMSV1.Infrastructure.Migrations
             modelBuilder.Entity("OMSV1.Domain.Entities.Companies.Company", b =>
                 {
                     b.Navigation("LectureTypes");
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.DailyExpenses", b =>
+                {
+                    b.Navigation("SubExpenses");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.MonthlyExpenses", b =>

@@ -21,33 +21,34 @@ namespace OMSV1.Application.Handlers.Expenses
             _mapper = mapper;
         }
 
-        public async Task<List<DailyExpensesDto>> Handle(GetDailyExpensesByMonthlyExpensesIdQuery request, CancellationToken cancellationToken)
-        {
-            try
-            {
-                // Retrieve DailyExpenses filtered by MonthlyExpensesId
-                var dailyExpensesQuery = _repository.GetAllAsQueryable()
-                    .Where(de => de.MonthlyExpensesId == request.MonthlyExpensesId) // Filter by MonthlyExpensesId
-                    .OrderByDescending(de => de.DateCreated) // Order by DateCreated in descending order
-                    .Include(de => de.ExpenseType); // Include ExpenseType for mapping
+public async Task<List<DailyExpensesDto>> Handle(GetDailyExpensesByMonthlyExpensesIdQuery request, CancellationToken cancellationToken)
+{
+    try
+    {
+        // Retrieve DailyExpenses filtered by MonthlyExpensesId and ensure ParentExpenseId is null
+        var dailyExpensesQuery = _repository.GetAllAsQueryable()
+            .Where(de => de.MonthlyExpensesId == request.MonthlyExpensesId && de.ParentExpenseId == null) // Ensure ParentExpenseId is null
+            .OrderByDescending(de => de.DateCreated) // Order by DateCreated in descending order
+            .Include(de => de.ExpenseType); // Include ExpenseType for mapping
 
-                // Map to DailyExpensesDto using AutoMapper's ProjectTo
-                var dailyExpensesDtoList = await dailyExpensesQuery
-                    .ProjectTo<DailyExpensesDto>(_mapper.ConfigurationProvider)
-                    .ToListAsync(cancellationToken); // Fetch and project the data
+        // Map to DailyExpensesDto using AutoMapper's ProjectTo
+        var dailyExpensesDtoList = await dailyExpensesQuery
+            .ProjectTo<DailyExpensesDto>(_mapper.ConfigurationProvider)
+            .ToListAsync(cancellationToken); // Fetch and project the data
 
-                return dailyExpensesDtoList; // Return the list of mapped DTOs
-            }
-            catch (HandlerException ex)
-            {
-                // Log and rethrow the custom exception
-                throw new HandlerException("Error occurred while retrieving daily expenses.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Catch unexpected errors and rethrow them as HandlerException
-                throw new HandlerException("An unexpected error occurred while retrieving daily expenses.", ex);
-            }
-        }
+        return dailyExpensesDtoList; // Return the list of mapped DTOs
+    }
+    catch (HandlerException ex)
+    {
+        // Log and rethrow the custom exception
+        throw new HandlerException("Error occurred while retrieving daily expenses.", ex);
+    }
+    catch (Exception ex)
+    {
+        // Catch unexpected errors and rethrow them as HandlerException
+        throw new HandlerException("An unexpected error occurred while retrieving daily expenses.", ex);
+    }
+}
+
     }
 }
