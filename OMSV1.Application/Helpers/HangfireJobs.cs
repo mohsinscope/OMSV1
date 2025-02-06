@@ -104,79 +104,79 @@ namespace OMSV1.Application.Helpers
                 throw;
             }
         }
-        public async Task GenerateAndSendDailyDamagedPassportsZipArchiveReport()
+public async Task GenerateAndSendDailyDamagedPassportsZipArchiveReport()
+{
+    try
+    {
+        _logger.LogInformation("Starting in-memory daily damaged passports archive generation");
+
+        // Get today's damaged passports.
+        var today = DateTime.UtcNow.Date;
+        var damagedPassports = await _damagedPassportRepository.GetDamagedPassportsByDateAsync(today);
+
+        if (damagedPassports == null || !damagedPassports.Any())
         {
-            try
+            _logger.LogWarning("No damaged passports found for today");
+            return;
+        }
+
+        // Create a MemoryStream to hold the ZIP archive.
+        using var archiveStream = new MemoryStream();
+
+        // Create a ZIP archive within the MemoryStream.
+        using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, leaveOpen: true))
+        {
+            // Group passports by their DamageTypeName instead of DamagedTypeId.
+            var groups = damagedPassports.GroupBy(dp => dp.DamagedType.Name);
+
+            foreach (var group in groups)
             {
-                _logger.LogInformation("Starting in-memory daily damaged passports archive generation");
+                // Use the damage type name as the folder name inside the ZIP.
+                string folderName = group.Key;
 
-                // Get today's damaged passports.
-                var today = DateTime.UtcNow.Date;
-                var damagedPassports = await _damagedPassportRepository.GetDamagedPassportsByDateAsync(today);
-
-                if (damagedPassports == null || !damagedPassports.Any())
+                foreach (var passport in group)
                 {
-                    _logger.LogWarning("No damaged passports found for today");
-                    return;
-                }
+                    // Retrieve the file path for the attachment.
+                    // (Implement this method based on how you store or reference files for damaged passports.)
+                    string filePath = GetAttachmentFilePath(passport);
 
-                // Create a MemoryStream to hold the ZIP archive.
-                using var archiveStream = new MemoryStream();
-
-                // Create a ZIP archive within the MemoryStream.
-                using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, leaveOpen: true))
-                {
-                    // Group passports by their DamagedTypeId.
-                    var groups = damagedPassports.GroupBy(dp => dp.DamagedTypeId);
-
-                    foreach (var group in groups)
+                    if (File.Exists(filePath))
                     {
-                        // Use the damage type as the folder name inside the ZIP.
-                        string folderName = group.Key.ToString();
+                        string fileName = Path.GetFileName(filePath);
 
-                        foreach (var passport in group)
-                        {
-                            // Retrieve the file path for the attachment.
-                            // (Implement this method based on how you store or reference files for damaged passports.)
-                            string filePath = GetAttachmentFilePath(passport);
+                        // Build an entry name that places the file within a folder (damage type name).
+                        string entryName = $"{folderName}/{fileName}";
 
-                            if (File.Exists(filePath))
-                            {
-                                string fileName = Path.GetFileName(filePath);
+                        // Create an entry in the ZIP archive.
+                        var entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
 
-                                // Build an entry name that places the file within a folder (damage type).
-                                string entryName = $"{folderName}/{fileName}";
-
-                                // Create an entry in the ZIP archive.
-                                var entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
-
-                                // Open the entry stream and copy the file content.
-                                using var entryStream = entry.Open();
-                                using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                                await fileStream.CopyToAsync(entryStream);
-                            }
-                        }
+                        // Open the entry stream and copy the file content.
+                        using var entryStream = entry.Open();
+                        using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                        await fileStream.CopyToAsync(entryStream);
                     }
                 }
+            }
+        }
 
-                // Reset the MemoryStream position to the beginning.
-                archiveStream.Position = 0;
+        // Reset the MemoryStream position to the beginning.
+        archiveStream.Position = 0;
 
-                // Convert the MemoryStream to a byte array.
-                byte[] zipBytes = archiveStream.ToArray();
+        // Convert the MemoryStream to a byte array.
+        byte[] zipBytes = archiveStream.ToArray();
 
-                // Prepare a simple email body.
-                string emailBody = "Please find attached the daily damaged passports archive.";
+        // Prepare a simple email body.
+        string emailBody = "Please find attached the daily damaged passports archive.";
 
-                // Retrieve recipients for the "Daily Passports Archives" report type.
-                var recipients = await _emailReportRepository.GetEmailsByReportTypeAsync("Daily Passports Archives");
+        // Retrieve recipients for the "Daily Passports Archives" report type.
+        var recipients = await _emailReportRepository.GetEmailsByReportTypeAsync("Daily Passports Archives");
 
-                if (recipients != null && recipients.Any())
-                {
-                    // For each recipient, send an email with the ZIP archive attached.
-                    foreach (var recipient in recipients)
-                    {
-                   await _emailService.SendEmailWithAttachmentAsync(
+        if (recipients != null && recipients.Any())
+        {
+            // For each recipient, send an email with the ZIP archive attached.
+            foreach (var recipient in recipients)
+            {
+                await _emailService.SendEmailWithAttachmentAsync(
                     from: "omc@scopesky.iq",
                     to: recipient,
                     subject: $"Daily Damaged Passports Archive - {today:yyyyMMdd}",
@@ -185,20 +185,21 @@ namespace OMSV1.Application.Helpers
                     attachmentName: $"DamagedPassports_{today:yyyyMMdd}.zip"
                 );
 
-                        _logger.LogInformation($"Daily damaged passports archive email sent successfully to {recipient}.");
-                    }
-                }
-                else
-                {
-                    _logger.LogWarning("No recipients found for report type 'Daily Passports Archives'");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error generating or sending daily damaged passports archive report");
-                throw;
+                _logger.LogInformation($"Daily damaged passports archive email sent successfully to {recipient}.");
             }
         }
+        else
+        {
+            _logger.LogWarning("No recipients found for report type 'Daily Passports Archives'");
+        }
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error generating or sending daily damaged passports archive report");
+        throw;
+    }
+}
+
 
         /// <summary>
         /// Dummy helper method to obtain the file path for a damaged passport attachment.
@@ -207,7 +208,7 @@ namespace OMSV1.Application.Helpers
    private string GetAttachmentFilePath(Domain.Entities.DamagedPassport.DamagedPassport passport)
 {
     // Define the folder where the images are stored.
-    string folder = @"C:\Uploads\damagedpassport";
+    string folder = @"\\172.16.108.26\samba\damagedpassport";
 
     // Build a search pattern using the passport ID.
     // For example, if files start with "DamagedPassport_{passport.Id}_"
