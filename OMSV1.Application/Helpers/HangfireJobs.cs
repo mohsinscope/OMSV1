@@ -110,13 +110,16 @@ public async Task GenerateAndSendDailyDamagedPassportsZipArchiveReport()
     {
         _logger.LogInformation("Starting in-memory daily damaged passports archive generation");
 
-        // Get today's damaged passports.
-        var today = DateTime.UtcNow.Date;
-        var damagedPassports = await _damagedPassportRepository.GetDamagedPassportsByDateAsync(today);
+        // Convert current UTC time to UTC+3 and then get yesterday's date.
+        var localNow = DateTime.UtcNow.AddHours(3);
+        var reportDate = localNow.Date.AddDays(-1);
+
+        // Retrieve passports created yesterday using the DateCreated property.
+        var damagedPassports = await _damagedPassportRepository.GetDamagedPassportsByDateAsync(reportDate);
 
         if (damagedPassports == null || !damagedPassports.Any())
         {
-            _logger.LogWarning("No damaged passports found for today");
+            _logger.LogWarning($"No damaged passports found for {reportDate:yyyy-MM-dd}");
             return;
         }
 
@@ -126,7 +129,7 @@ public async Task GenerateAndSendDailyDamagedPassportsZipArchiveReport()
         // Create a ZIP archive within the MemoryStream.
         using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, leaveOpen: true))
         {
-            // Group passports by their DamageTypeName instead of DamagedTypeId.
+            // Group passports by their DamageTypeName.
             var groups = damagedPassports.GroupBy(dp => dp.DamagedType.Name);
 
             foreach (var group in groups)
@@ -179,10 +182,10 @@ public async Task GenerateAndSendDailyDamagedPassportsZipArchiveReport()
                 await _emailService.SendEmailWithAttachmentAsync(
                     from: "omc@scopesky.iq",
                     to: recipient,
-                    subject: $"Daily Damaged Passports Archive - {today:yyyyMMdd}",
+                    subject: $"Daily Damaged Passports Archive - {reportDate:yyyyMMdd}",
                     body: emailBody,
                     attachmentBytes: zipBytes,
-                    attachmentName: $"DamagedPassports_{today:yyyyMMdd}.zip"
+                    attachmentName: $"DamagedPassports_{reportDate:yyyyMMdd}.zip"
                 );
 
                 _logger.LogInformation($"Daily damaged passports archive email sent successfully to {recipient}.");
@@ -201,6 +204,7 @@ public async Task GenerateAndSendDailyDamagedPassportsZipArchiveReport()
 }
 
 
+
         /// <summary>
         /// Dummy helper method to obtain the file path for a damaged passport attachment.
         /// Replace this with your actual logic to locate the file.
@@ -208,7 +212,7 @@ public async Task GenerateAndSendDailyDamagedPassportsZipArchiveReport()
    private string GetAttachmentFilePath(Domain.Entities.DamagedPassport.DamagedPassport passport)
 {
     // Define the folder where the images are stored.
-    string folder = @"\\172.16.108.26\samba\damagedpassport";
+    string folder = @"\\172.16.108.26\sambadamagedpassport";
 
     // Build a search pattern using the passport ID.
     // For example, if files start with "DamagedPassport_{passport.Id}_"
@@ -232,106 +236,111 @@ public async Task GenerateAndSendDailyDamagedPassportsZipArchiveReport()
 }
 
 
-        public async Task GenerateAndSendDailyAttendanceReport()
+    public async Task GenerateAndSendDailyAttendanceReport()
+    {
+        try
         {
-            try
+            _logger.LogInformation("Starting daily attendance report generation and email sending");
+
+            // Get yesterday's date (UTC)
+            var localNow = DateTime.UtcNow.AddHours(3);
+            var reportDate = localNow.Date.AddDays(-1);
+            // Fetch attendance records for yesterday
+            var attendances = await _attendanceRepository.GetAttendanceByDateAsync(reportDate);
+
+            if (attendances != null && attendances.Any())
             {
-                _logger.LogInformation("Starting daily attendance report generation and email sending");
+                // Generate the PDF as a byte array
+                var pdfData = await _attendanceService.GenerateDailyAttendancePdfAsync(attendances);
+                _logger.LogInformation("PDF generated successfully");
 
-                // Get today's date
-                var today = DateTime.UtcNow.Date;
+                // Fetch recipients based on report type "Daily Attendances"
+                var recipients = await _emailReportRepository.GetEmailsByReportTypeAsync("Daily Attendances");
 
-                // Fetch attendance records for today
-                var attendances = await _attendanceRepository.GetAttendanceByDateAsync(today);
-
-                if (attendances != null && attendances.Any())
+                if (recipients != null && recipients.Any())
                 {
-                    // Generate the PDF as a byte array
-                    var pdfData = await _attendanceService.GenerateDailyAttendancePdfAsync(attendances);
-                    _logger.LogInformation("PDF generated successfully");
-
-                    // Fetch recipients based on report type "Incident Report"
-                    var recipients = await _emailReportRepository.GetEmailsByReportTypeAsync("Daily Attendances");
-
-                    if (recipients != null && recipients.Any())
+                    foreach (var recipient in recipients)
                     {
-                        foreach (var recipient in recipients)
-                        {
-                            await _emailService.SendEmailAsync(
-                                from: "omc@scopesky.iq",
-                                to: recipient,
-                                subject: "تقرير الحضور اليومي",
-                                body: "تقرير الحضور اليومي مرفق",
-                                pdfData: pdfData
-                            );
+                        await _emailService.SendEmailAsync(
+                            from: "omc@scopesky.iq",
+                            to: recipient,
+                            subject: $"تقرير الحضور اليومي - {reportDate:yyyyMMdd}",
+                            body: "تقرير الحضور اليومي مرفق",
+                            pdfData: pdfData
+                        );
 
-                            _logger.LogInformation($"Daily attendance report email sent successfully to {recipient}.");
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogWarning("No recipients found for report type 'Incident Report'");
+                        _logger.LogInformation($"Daily attendance report email sent successfully to {recipient}.");
                     }
                 }
                 else
                 {
-                    _logger.LogWarning("No attendance records found for today.");
+                    _logger.LogWarning("No recipients found for report type 'Daily Attendances'");
                 }
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Error generating or sending daily attendance report");
-                throw;
+                _logger.LogWarning("No attendance records found for yesterday.");
             }
         }
-
-        public async Task GenerateAndSendDailyDamagedPassportsReport()
+        catch (Exception ex)
         {
-            try
+            _logger.LogError(ex, "Error generating or sending daily attendance report");
+            throw;
+        }
+    }
+
+
+    public async Task GenerateAndSendDailyDamagedPassportsReport()
+    {
+        try
+        {
+            _logger.LogInformation("Starting daily damaged passports report generation and email sending");
+
+            // Get yesterday's date (UTC)
+        var localNow = DateTime.UtcNow.AddHours(3);
+        var reportDate = localNow.Date.AddDays(-1);
+            // Retrieve damaged passports created yesterday using the DateCreated (or Date) property.
+            var damagedPassports = await _damagedPassportRepository.GetDamagedPassportsByDateAsync(reportDate);
+
+            if (damagedPassports != null && damagedPassports.Any())
             {
-                _logger.LogInformation("Starting daily damaged passports report generation and email sending");
+                var pdfData = await _damagedPassportService.GenerateDailyDamagedPassportsPdfAsync(damagedPassports);
+                _logger.LogInformation("PDF generated successfully");
 
-                var today = DateTime.UtcNow.Date;
-                var damagedPassports = await _damagedPassportRepository.GetDamagedPassportsByDateAsync(today);
+                // Fetch recipients based on report type "Daily Passports"
+                var recipients = await _emailReportRepository.GetEmailsByReportTypeAsync("Daily Passports");
 
-                if (damagedPassports != null && damagedPassports.Any())
+                if (recipients != null && recipients.Any())
                 {
-                    var pdfData = await _damagedPassportService.GenerateDailyDamagedPassportsPdfAsync(damagedPassports);
-                    _logger.LogInformation("PDF generated successfully");
-
-                    // Fetch recipients based on report type "Incident Report"
-                    var recipients = await _emailReportRepository.GetEmailsByReportTypeAsync("Daily Passports");
-
-                    if (recipients != null && recipients.Any())
+                    foreach (var recipient in recipients)
                     {
-                        foreach (var recipient in recipients)
-                        {
-                            await _emailService.SendEmailAsync(
-                                from: "omc@scopesky.iq",
-                                to: recipient,
-                                subject: "تقرير الجوازات التالفة اليومية",
-                                body: "تقرير الجوازات التالفة المسجلة اليوم",
-                                pdfData: pdfData
-                            );
+                        await _emailService.SendEmailAsync(
+                            from: "omc@scopesky.iq",
+                            to: recipient,
+                            subject: $"تقرير الجوازات التالفة اليومية - {reportDate:yyyyMMdd}",
+                            body: "تقرير الجوازات التالفة المسجلة البارحة",
+                            pdfData: pdfData
+                        );
 
-                            _logger.LogInformation($"Daily damaged passports report email sent successfully to {recipient}.");
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogWarning("No recipients found for report type 'Incident Report'");
+                        _logger.LogInformation($"Daily damaged passports report email sent successfully to {recipient}.");
                     }
                 }
                 else
                 {
-                    _logger.LogWarning("No damaged passports found for today");
+                    _logger.LogWarning("No recipients found for report type 'Daily Passports'");
                 }
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Error generating or sending daily damaged passports report");
-                throw;
+                _logger.LogWarning($"No damaged passports found for {reportDate:yyyy-MM-dd}");
             }
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating or sending daily damaged passports report");
+            throw;
+        }
+    }
+
     }
 }

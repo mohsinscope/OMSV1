@@ -5,22 +5,27 @@ using Microsoft.AspNetCore.Http;
 using OMSV1.Infrastructure.Interfaces;
 using OMSV1.Application.Dtos.Attachments;
 using OMSV1.Domain.Enums;
+using OMSV1.Domain.Entities.DamagedPassport;
+using OMSV1.Domain.SeedWork;  // For IGenericRepository<T>
 
 namespace OMSV1.Infrastructure.Services;
 
 public class PhotoService : IPhotoService, IDisposable
 {
     private readonly IWebHostEnvironment _webHostEnvironment;
-    //private readonly string _networkStoragePath = @"\\172.16.108.26\samba";
-    private readonly string _networkStoragePath = @"C:\Uploads";
+    // Use the generic repository for DamagedPassport
+    private readonly IGenericRepository<DamagedPassport> _damagedPassportRepository;
+    private readonly string _networkStoragePath = @"\\172.16.108.26\samba";
+    //private readonly string _networkStoragePath = @"C:\Uploads";
     private const int MaxImageDimension = 1920; // Max dimension for images
     private const long MaxFileSize = 2048; // 2MB max file size
     private const int ImageQuality = 75; // JPEG quality (0-100)
     private const long MaxFolderSize = 50L * 1024L * 1024L * 1024L; // 50GB in bytes
 
-    public PhotoService(IWebHostEnvironment webHostEnvironment)
+    public PhotoService(IWebHostEnvironment webHostEnvironment, IGenericRepository<DamagedPassport> damagedPassportRepository)
     {
         _webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));
+        _damagedPassportRepository = damagedPassportRepository ?? throw new ArgumentNullException(nameof(damagedPassportRepository));
     }
 
     private string GetNextAvailableFolder(string baseFolder)
@@ -62,12 +67,25 @@ public class PhotoService : IPhotoService, IDisposable
             string targetFolder = GetNextAvailableFolder(baseFolder);
             
             // Generate a unique filename
-            string uniqueFileName = $"{entityType}_{entityId}_{Guid.NewGuid()}_{file.FileName}";
+            string uniqueFileName;
+            if (entityType == EntityType.DamagedPassport)
+            {
+                // For DamagedPassport, use the PassportNumber from the entity
+                var damagedPassport = await _damagedPassportRepository.GetByIdAsync(entityId);
+                if (damagedPassport == null)
+                    throw new Exception("DamagedPassport not found for the provided entityId.");
+                uniqueFileName = $"{entityType}_{damagedPassport.PassportNumber}_{file.FileName}";
+            }
+            else
+            {
+                uniqueFileName = $"{entityType}_{entityId}_{Guid.NewGuid()}_{file.FileName}";
+            }
+            
             string filePath = Path.Combine(targetFolder, uniqueFileName);
             
             // Calculate the relative path from network storage root
             string relativePath = Path.GetRelativePath(_networkStoragePath, filePath);
-            string fileUrl = $"/{relativePath.Replace('\\', '/')}";
+            string fileUrl = $"/{relativePath.Replace('\\', '/')}" ;
 
             // Process file based on its type
             if (IsImage(file.ContentType))
@@ -179,7 +197,7 @@ public class PhotoService : IPhotoService, IDisposable
         using (var compressionStream = new System.IO.Compression.GZipStream(
                 memoryStream,
                 System.IO.Compression.CompressionLevel.Optimal,
-                leaveOpen: true)) // Leave the MemoryStream open
+                leaveOpen: true))
         {
             await sourceStream.CopyToAsync(compressionStream);
         }
@@ -191,7 +209,7 @@ public class PhotoService : IPhotoService, IDisposable
         }
 
         // If the size is within the limit, write to the destination file
-        memoryStream.Position = 0; // Reset the stream position before writing
+        memoryStream.Position = 0;
         using var destinationStream = new FileStream(outputPath, FileMode.Create);
         await memoryStream.CopyToAsync(destinationStream);
     }
