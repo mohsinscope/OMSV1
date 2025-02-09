@@ -34,7 +34,7 @@ namespace OMSV1.Infrastructure.Repositories
                 .Include(dp => dp.Office)      // Include related Office
                 .Include(dp => dp.Profile)     // Include related Profile
                 .Include(dp => dp.DamagedType) // Include related DamagedType
-                .Where(dp => dp.Date.Date == date.Date) // Filter by the specified date
+                .Where(dp => dp.DateCreated.Date == date.Date)
                 .ToListAsync();
         }
     }

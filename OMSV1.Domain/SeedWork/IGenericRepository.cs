@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
-
-using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Specifications;
 
 namespace OMSV1.Domain.SeedWork
