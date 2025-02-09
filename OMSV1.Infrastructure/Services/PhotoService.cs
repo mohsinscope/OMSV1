@@ -74,7 +74,7 @@ public class PhotoService : IPhotoService, IDisposable
                 var damagedPassport = await _damagedPassportRepository.GetByIdAsync(entityId);
                 if (damagedPassport == null)
                     throw new Exception("DamagedPassport not found for the provided entityId.");
-                uniqueFileName = $"{entityType}_{damagedPassport.PassportNumber}_{file.FileName}";
+                uniqueFileName = $"{entityType}__{entityId}_{damagedPassport.PassportNumber}_{file.FileName}";
             }
             else
             {
