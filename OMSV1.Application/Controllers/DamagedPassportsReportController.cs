@@ -143,28 +143,35 @@ namespace OMSV1.Api.Controllers
         }
 
         // Helper method for determining the attachment file path.
-        private string GetAttachmentFilePath(Domain.Entities.DamagedPassport.DamagedPassport passport)
+private string GetAttachmentFilePath(Domain.Entities.DamagedPassport.DamagedPassport passport)
+{
+    // Define the base folder where all entity folders are stored.
+    string baseFolder = @"\\172.16.108.26\samba";
+    
+    // Use a search pattern to get all folders starting with "damagedpassport"
+    // (adjust the pattern if your naming convention differs in case or format)
+    string folderSearchPattern = "damagedpassport*";
+    string[] directories = Directory.GetDirectories(baseFolder, folderSearchPattern, SearchOption.TopDirectoryOnly);
+
+    // Build a file search pattern using the passport ID.
+    string fileSearchPattern = $"DamagedPassport_{passport.Id}_*.jpg";
+
+    // Loop through each matching directory and search for the file.
+    foreach (string directory in directories)
+    {
+        // Search only within the current directory.
+        string[] matches = Directory.GetFiles(directory, fileSearchPattern, SearchOption.TopDirectoryOnly);
+        if (matches.Length > 0)
         {
-            // Define the folder where the images are stored.
-            string folder = @"\\172.16.108.26\samba\damagedpassport";
-
-            // Build a search pattern using the passport ID.
-            string pattern = $"DamagedPassport_{passport.Id}_*.jpg";
-
-            // Get matching files in the folder.
-            string[] matches = Directory.GetFiles(folder, pattern);
-
-            // If at least one match is found, return the first match.
-            if (matches.Length > 0)
-            {
-                return matches[0];
-            }
-            else
-            {
-                // Log that no file was found for this passport.
-                Console.WriteLine($"No file found for passport ID {passport.Id} using pattern: {pattern}");
-                return string.Empty;
-            }
+            // Return the first found file.
+            return matches[0];
         }
+    }
+
+    // Log if no file was found in any folder.
+    Console.WriteLine($"No file found for passport ID {passport.Id} using pattern: {fileSearchPattern}");
+    return string.Empty;
+}
+
     }
 }
