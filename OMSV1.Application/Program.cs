@@ -62,6 +62,10 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
                 "https://oms.scopesky.org",
                 "http://oms.scopesky.org",
+                "http://omsapistaging.scopesky.org",
+                "http://omsstaging.scopesky.org",
+                "https://omsapistaging.scopesky.org",
+                "https://omsstaging.scopesky.org",
                 "http://172.16.108.27",
                 "http://172.16.108.28",
                 "http://localhost:5173"
