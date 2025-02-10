@@ -58,7 +58,7 @@ namespace OMSV1.Infrastructure.Services
 
             // Configure current time for Baghdad (UTC+3)
             var baghdadNow = DateTime.UtcNow.AddHours(3);
-            var todayBaghdad = baghdadNow.Date;
+            var todayBaghdad = baghdadNow.Date.AddDays(-1);
 
             // Fetch all offices along with their Governorate in a single query
             var allOffices = await _context.Offices
@@ -126,7 +126,7 @@ namespace OMSV1.Infrastructure.Services
 
             // Report Date Table using Baghdad date
             var dateFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12);
-            var dateCell = new PdfPCell(new Phrase(ShapeArabicText($"تاريخ التقرير: {baghdadNow:yyyy-MM-dd}"), dateFont))
+            var dateCell = new PdfPCell(new Phrase(ShapeArabicText($"تاريخ التقرير: {todayBaghdad:yyyy-MM-dd}"), dateFont))
             {
                 BackgroundColor = BaseColor.WHITE,
                 HorizontalAlignment = Element.ALIGN_RIGHT,

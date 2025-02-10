@@ -218,8 +218,8 @@ private string GetAttachmentFilePath(Domain.Entities.DamagedPassport.DamagedPass
     string[] directories = Directory.GetDirectories(baseFolder, "damagedpassport*", SearchOption.TopDirectoryOnly);
 
     // Build a file search pattern using the passport ID.
-    // For example: "DamagedPassport_{passport.Id}_*.jpg"
-    string filePattern = $"DamagedPassport_{passport.Id}_*.jpg";
+    // Now accepts any extension by using "*.*" at the end.
+    string filePattern = $"DamagedPassport_{passport.Id}_*.*";
 
     // Loop through each matching directory and search for the file.
     foreach (string directory in directories)
