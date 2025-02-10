@@ -5,6 +5,7 @@ using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.LOV;
 using OMSV1.Application.CQRS.Lov.DamagedPassport;
 using OMSV1.Application.Helpers;
+using OMSV1.Infrastructure.Extensions;
 using System.Net;
 
 namespace OMSV1.Application.Controllers.LOV
@@ -38,21 +39,29 @@ namespace OMSV1.Application.Controllers.LOV
             }
         }
 
-        // Get All Damaged Types
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAllDamagedTypes()
-        {
-            try
-            {
-                var query = new GetAllDamagedTypesQuery();
-                var damagedTypes = await _mediator.Send(query);
-                return Ok(damagedTypes);
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving damaged types.", new[] { ex.Message });
-            }
-        }
+[HttpGet("all")]
+public async Task<IActionResult> GetAllDamagedTypes([FromQuery] PaginationParams paginationParams)
+{
+    try
+    {
+        // Send the query to retrieve a paginated list of DamagedTypeDto
+        var damagedTypes = await _mediator.Send(new GetAllDamagedTypesQuery(paginationParams));
+        
+        // Add pagination details to the response headers
+        Response.AddPaginationHeader(damagedTypes);
+        
+        // Return the paginated list (PagedList<DamagedTypeDto>)
+        return Ok(damagedTypes);
+    }
+    catch (Exception ex)
+    {
+        return ResponseHelper.CreateErrorResponse(
+            HttpStatusCode.InternalServerError, 
+            "An error occurred while retrieving the damaged types.", 
+            new[] { ex.Message }
+        );
+    }
+}
 
         // Get a Specific Damaged Type by ID
         [HttpGet("{id}")]

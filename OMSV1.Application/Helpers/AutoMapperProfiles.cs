@@ -13,6 +13,7 @@ using OMSV1.Application.Dtos.Expenses;
 using OMSV1.Application.Dtos.Governorates;
 using OMSV1.Application.Dtos.Lectures;
 using OMSV1.Application.Dtos.LectureTypes;
+using OMSV1.Application.Dtos.LOV;
 using OMSV1.Application.Dtos.Offices;
 using OMSV1.Application.Dtos.Profiles;
 using OMSV1.Application.DTOs.Expenses;
@@ -72,6 +73,7 @@ public class AutoMapperProfiles : Profile
             CreateMap<ReportType, ReportTypeDto>();
             CreateMap<EmailReport, EmailReportDto>()
             .ForMember(dest => dest.ReportTypes, opt => opt.MapFrom(src => src.ReportTypes));
+            CreateMap<DamagedType, DamagedTypeDto>();
 
 
 

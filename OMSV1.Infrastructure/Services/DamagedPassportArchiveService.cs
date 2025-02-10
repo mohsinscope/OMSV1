@@ -10,7 +10,7 @@ namespace OMSV1.Infrastructure.Services
     public class DamagedPassportArchiveService : IDamagedPassportArchiveService
     {
         /// <summary>
-        /// Creates a ZIP archive in memory containing all .jpg files from the source folder.
+        /// Creates a ZIP archive in memory containing all files (of any extension) from the source folder.
         /// Returns a dictionary with a key ("all") and a temporary file path where the archive is stored.
         /// </summary>
         public async Task<Dictionary<string, string>> GenerateArchivesAsync(
@@ -31,17 +31,9 @@ namespace OMSV1.Infrastructure.Services
                 return new Dictionary<string, string>();
             }
             
-            // List all files in the folder (you can log everything to verify the files exist).
-            string[] allFiles = Directory.GetFiles(sourceFolder);
-            Console.WriteLine($"Found {allFiles.Length} files in the folder (without filter):");
-            foreach (var file in allFiles)
-            {
-                Console.WriteLine($"  {file}");
-            }
-            
-            // Use a filter for .jpg files.
-            string[] files = Directory.GetFiles(sourceFolder, "*.jpg");
-            Console.WriteLine($"Found {files.Length} .jpg files in the folder:");
+            // List all files in the folder.
+            string[] files = Directory.GetFiles(sourceFolder);
+            Console.WriteLine($"Found {files.Length} files in the folder:");
             foreach (var file in files)
             {
                 Console.WriteLine($"  {file}");

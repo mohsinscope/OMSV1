@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using OMSV1.Domain.Entities.DamagedPassport;
 using OMSV1.Domain.Interfaces;
 using OMSV1.Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OMSV1.Api.Controllers
 {
@@ -36,6 +37,8 @@ namespace OMSV1.Api.Controllers
         }
 
         [HttpPost("zip")]
+        [Authorize(Policy = "RequireSuperAdminRole")]
+
         public async Task<IActionResult> GenerateAndSendDailyDamagedPassportsZipArchiveReport([FromBody] DamagedPassportsReportRequest request)
         {
             try
@@ -154,7 +157,8 @@ private string GetAttachmentFilePath(Domain.Entities.DamagedPassport.DamagedPass
     string[] directories = Directory.GetDirectories(baseFolder, folderSearchPattern, SearchOption.TopDirectoryOnly);
 
     // Build a file search pattern using the passport ID.
-    string fileSearchPattern = $"DamagedPassport_{passport.Id}_*.jpg";
+    // The pattern now accepts any extension by using "*.*"
+    string fileSearchPattern = $"DamagedPassport_{passport.Id}_*.*";
 
     // Loop through each matching directory and search for the file.
     foreach (string directory in directories)
@@ -172,6 +176,7 @@ private string GetAttachmentFilePath(Domain.Entities.DamagedPassport.DamagedPass
     Console.WriteLine($"No file found for passport ID {passport.Id} using pattern: {fileSearchPattern}");
     return string.Empty;
 }
+
 
     }
 }

@@ -53,12 +53,14 @@ namespace OMSV1.Infrastructure.Services
 
             // Configure Baghdad time (UTC+3)
             var baghdadNow = DateTime.UtcNow.AddHours(3);
-            var startOfTodayBaghdad = baghdadNow.Date;
-            var endOfTodayBaghdad = startOfTodayBaghdad.AddDays(1).AddTicks(-1);
+            // Adjust to use the report date (yesterday) instead of today:
+            var reportDate = baghdadNow.Date.AddDays(-1);
+            var startOfReportDay = reportDate;
+            var endOfReportDay = reportDate.AddDays(1).AddTicks(-1);
 
-            // Filter the provided list to get only the passports created today (in Baghdad time)
+            // Filter the provided list to get only the passports created on the report date (in Baghdad time)
             var dailyDamagedPassports = damagedPassports
-                .Where(dp => dp.DateCreated >= startOfTodayBaghdad && dp.DateCreated <= endOfTodayBaghdad)
+                .Where(dp => dp.DateCreated >= startOfReportDay && dp.DateCreated <= endOfReportDay)
                 .ToList();
 
             // Fetch all offices along with their Governorate in a single query
@@ -69,7 +71,7 @@ namespace OMSV1.Infrastructure.Services
             if (!allOffices.Any())
                 throw new InvalidOperationException("No offices found in the system.");
 
-            // For each office, count the number of damaged passports registered today.
+            // For each office, count the number of damaged passports registered on the report date.
             // This is a left join: if no damaged passports are found for an office, the count is zero.
             var officesWithDamagedPassports = allOffices
                 .Select(office => new
@@ -111,9 +113,9 @@ namespace OMSV1.Infrastructure.Services
             titleTable.AddCell(titleCell);
             document.Add(titleTable);
 
-            // Report Date Table using Baghdad time
+            // Report Date Table using the report date (yesterday)
             var dateFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12);
-            var dateCell = new PdfPCell(new Phrase(ShapeArabicText($"تاريخ التقرير: {baghdadNow:yyyy-MM-dd}"), dateFont))
+            var dateCell = new PdfPCell(new Phrase(ShapeArabicText($"تاريخ التقرير: {reportDate:yyyy-MM-dd}"), dateFont))
             {
                 BackgroundColor = BaseColor.WHITE,
                 HorizontalAlignment = Element.ALIGN_RIGHT,
