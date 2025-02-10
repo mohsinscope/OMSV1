@@ -214,26 +214,26 @@ private string GetAttachmentFilePath(Domain.Entities.DamagedPassport.DamagedPass
     // Define the base folder where the images are stored.
     string baseFolder = @"\\172.16.108.26\samba";
 
-    // Use a search pattern to get all directories whose names start with "damagedpassport"
+    // Get directories that start with "damagedpassport" (case insensitive on many file systems).
     string[] directories = Directory.GetDirectories(baseFolder, "damagedpassport*", SearchOption.TopDirectoryOnly);
 
-    // Build a file search pattern using the passport ID.
-    // Now accepts any extension by using "*.*" at the end.
-    string filePattern = $"DamagedPassport_{passport.Id}_*.*";
-
-    // Loop through each matching directory and search for the file.
+    // Loop through each matching directory.
     foreach (string directory in directories)
     {
-        // Get matching files in the current directory.
-        string[] matches = Directory.GetFiles(directory, filePattern, SearchOption.TopDirectoryOnly);
-        if (matches.Length > 0)
+        // Enumerate all files in the current directory.
+       var file = Directory.EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly)
+    .FirstOrDefault(f => Path.GetFileName(f)
+        .IndexOf(passport.Id.ToString(), StringComparison.OrdinalIgnoreCase) >= 0);
+
+
+        if (!string.IsNullOrEmpty(file))
         {
-            return matches[0]; // Return the first match found.
+            return file; // Return the first match found.
         }
     }
 
-    // Optionally log that no file was found for this passport.
-    Console.WriteLine($"No file found for passport ID {passport.Id} using pattern: {filePattern}");
+    // Log a warning that no file was found.
+    _logger?.LogWarning($"No file found for passport ID {passport.Id}");
     return string.Empty;
 }
 
