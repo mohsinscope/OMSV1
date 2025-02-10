@@ -68,7 +68,9 @@ builder.Services.AddCors(options =>
                 "https://omsstaging.scopesky.org",
                 "http://172.16.108.27",
                 "http://172.16.108.28",
-                "http://localhost:5173"
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://127.0.0.1:5500"
             )
             .WithMethods("GET", "POST", "PUT", "DELETE")
             .WithHeaders("Content-Type", "Authorization")
