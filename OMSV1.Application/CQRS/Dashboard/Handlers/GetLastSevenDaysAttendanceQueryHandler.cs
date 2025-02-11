@@ -22,10 +22,12 @@ namespace OMSV1.Application.Dashboard.Handlers
 
         public async Task<DashboardLastSevenDaysAttendanceDto> Handle(GetLastSevenDaysAttendanceQuery request, CancellationToken cancellationToken)
         {
-            // 1. Retrieve all offices. (The expected staff count is assumed constant across the days.)
+            // 1. Retrieve all offices.
             var offices = await _officeRepository.GetAllAsync();
+
+            // Adjust expected staff count for two shifts by multiplying by 2.
             int totalExpectedStaff = offices.Sum(o => 
-                o.ReceivingStaff + o.AccountStaff + o.PrintingStaff + o.QualityStaff + o.DeliveryStaff);
+                o.ReceivingStaff + o.AccountStaff + o.PrintingStaff + o.QualityStaff + o.DeliveryStaff) * 2;
 
             // 2. Retrieve all attendance records.
             var allAttendances = await _attendanceRepository.GetAllAsync();
@@ -47,7 +49,6 @@ namespace OMSV1.Application.Dashboard.Handlers
                     .ToList();
 
                 // b) Group by OfficeId and sum the attended staff numbers.
-                // This handles the possibility that an office might have multiple attendance records on the same day.
                 var attendanceByOffice = attendancesForDate
                     .GroupBy(a => a.OfficeId)
                     .ToDictionary(
