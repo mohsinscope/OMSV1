@@ -57,8 +57,9 @@ namespace OMSV1.Application.Dashboard.Handlers
             // 6. Calculate the attendance percentage for today's attendances,
             // including all offices—even if they didn't record attendance today.
             // a) The expected staff count comes from **all** offices.
+            // Multiply by 2 to account for the two shifts.
             int totalExpectedStaff = offices.Sum(o => 
-                o.ReceivingStaff + o.AccountStaff + o.PrintingStaff + o.QualityStaff + o.DeliveryStaff);
+                o.ReceivingStaff + o.AccountStaff + o.PrintingStaff + o.QualityStaff + o.DeliveryStaff) * 2;
 
             // b) Retrieve today's attendance records.
             var allAttendances = await _attendanceRepository.GetAllAsync();
