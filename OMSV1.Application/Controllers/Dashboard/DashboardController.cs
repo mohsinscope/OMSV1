@@ -24,6 +24,7 @@ namespace OMSV1.Application.Controllers.Dashboard
         // Returns aggregated dashboard statistics such as total offices, governorates, staff counts,
         // total damaged passports registered today, and attendance percentage.
         [HttpGet("statistics")]
+        [RequirePermission("Db")]
         public async Task<IActionResult> GetDashboardStatistics()
         {
             try
