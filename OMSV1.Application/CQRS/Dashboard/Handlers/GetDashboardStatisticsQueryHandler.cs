@@ -49,10 +49,12 @@ namespace OMSV1.Application.Dashboard.Handlers
                                          totalPrintingStaff + totalQualityStaff +
                                          totalDeliveryStaff;
 
-            // 5. Count the number of damaged passports registered today.
+            // 5. Count the number of damaged passports registered this month.
             DateTime today = DateTime.UtcNow.Date;
+            DateTime startOfMonth = new DateTime(today.Year, today.Month, 1);
             var damagedPassports = await _damagedPassportRepository.GetAllAsync();
-            int totalDamagedPassportsToday = damagedPassports.Count(dp => dp.Date.Date == today);
+            int totalDamagedPassportsThisMonth = damagedPassports
+                .Count(dp => dp.Date.Date >= startOfMonth && dp.Date.Date <= today);
 
             // 6. Calculate the attendance percentage for today's attendances,
             // including all offices—even if they didn't record attendance today.
@@ -93,7 +95,8 @@ namespace OMSV1.Application.Dashboard.Handlers
                 TotalQualityStaff = totalQualityStaff,
                 TotalDeliveryStaff = totalDeliveryStaff,
                 TotalStaffInAllOffices = totalStaffInAllOffices,
-                TotalDamagedPassportsToday = totalDamagedPassportsToday,
+                // Assign the monthly count to this property.
+                TotalDamagedPassportsToday = totalDamagedPassportsThisMonth,
                 AttendancePercentage = attendancePercentage
             };
         }
