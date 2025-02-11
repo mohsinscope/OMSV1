@@ -109,7 +109,7 @@ namespace OMSV1.Api.Controllers
         private string GetAttachmentFilePath(Domain.Entities.DamagedPassport.DamagedPassport passport)
         {
             // Define the base folder where all entity folders are stored.
-            string baseFolder = @"C:\Uploads";
+            string baseFolder = @"\\172.16.108.26\samba";
             
             // Use a search pattern to get all folders starting with "damagedpassport"
             string folderSearchPattern = "damagedpassport*";
