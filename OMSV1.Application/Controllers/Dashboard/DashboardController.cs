@@ -45,5 +45,28 @@ namespace OMSV1.Application.Controllers.Dashboard
                 );
             }
         }
+                // Returns the attendance percentages for each of the last seven days (including today)
+        [HttpGet("last-seven-days-attendance")]
+        [RequirePermission("DB")]
+        public async Task<IActionResult> GetLastSevenDaysAttendance()
+        {
+            try
+            {
+                // Send the query for the last seven days attendance data via MediatR.
+                var lastSevenDaysAttendance = await _mediator.Send(new GetLastSevenDaysAttendanceQuery());
+
+                // Return 200 OK with the attendance data DTO
+                return Ok(lastSevenDaysAttendance);
+            }
+            catch (Exception ex)
+            {
+                // In case of an error, return a 500 Internal Server Error with the error details.
+                return ResponseHelper.CreateErrorResponse(
+                    HttpStatusCode.InternalServerError,
+                    "An error occurred while retrieving the last seven days attendance data.",
+                    new[] { ex.Message }
+                );
+            }
+        }
     }
 }
