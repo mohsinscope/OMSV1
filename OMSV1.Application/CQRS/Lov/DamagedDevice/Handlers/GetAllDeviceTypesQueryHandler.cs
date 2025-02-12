@@ -1,12 +1,14 @@
 using MediatR;
 using OMSV1.Application.Dtos.LOV;
-using OMSV1.Domain.SeedWork;
+using OMSV1.Application.Helpers; // For HandlerException and PagedList
 using OMSV1.Domain.Entities.DamagedDevices;
-using OMSV1.Application.Helpers; // Assuming HandlerException is defined here
+using OMSV1.Domain.SeedWork;
+using System.Linq;
 
 namespace OMSV1.Application.CQRS.Lov.DamagedDevice
 {
-    public class GetAllDeviceTypesQueryHandler : IRequestHandler<GetAllDeviceTypesQuery, List<DeviceTypeDto>>
+    // Note: Return type has been changed to PagedList<DeviceTypeDto>
+    public class GetAllDeviceTypesQueryHandler : IRequestHandler<GetAllDeviceTypesQuery, PagedList<DeviceTypeDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -15,26 +17,40 @@ namespace OMSV1.Application.CQRS.Lov.DamagedDevice
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<DeviceTypeDto>> Handle(GetAllDeviceTypesQuery request, CancellationToken cancellationToken)
+        public async Task<PagedList<DeviceTypeDto>> Handle(GetAllDeviceTypesQuery request, CancellationToken cancellationToken)
         {
             try
             {
-                // Fetch all device types from the repository
-                var deviceTypes = await _unitOfWork.Repository<DeviceType>().GetAllAsync();
+                // Retrieve the DeviceTypes as an IQueryable
+                var deviceTypesQuery = _unitOfWork.Repository<DeviceType>().GetAllAsQueryable();
+                
+                if (deviceTypesQuery == null)
+                {
+                    throw new NullReferenceException("DeviceType query returned null.");
+                }
 
-                // Map the entities to DTOs
-                var deviceTypesDto = deviceTypes.Select(dt => new DeviceTypeDto
+                // Order the results (adjust the ordering field as needed)
+                deviceTypesQuery = deviceTypesQuery.OrderBy(dt => dt.Name);
+
+                // Project the query to DeviceTypeDto
+                var mappedQuery = deviceTypesQuery.Select(dt => new DeviceTypeDto
                 {
                     Id = dt.Id,
                     Name = dt.Name,
                     Description = dt.Description
-                }).ToList();
+                });
 
-                return deviceTypesDto;
+                // Create a paginated list using the provided pagination parameters
+                var pagedDeviceTypes = await PagedList<DeviceTypeDto>.CreateAsync(
+                    mappedQuery,
+                    request.PaginationParams.PageNumber,
+                    request.PaginationParams.PageSize
+                );
+
+                return pagedDeviceTypes;
             }
             catch (Exception ex)
             {
-                // Log and throw a custom exception if an error occurs
                 throw new HandlerException("An error occurred while fetching all device types.", ex);
             }
         }

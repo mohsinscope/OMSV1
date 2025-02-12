@@ -5,6 +5,7 @@ using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.LOV;
 using OMSV1.Application.CQRS.Lov.DamagedDevice;
 using OMSV1.Application.Helpers;
+using OMSV1.Infrastructure.Extensions;
 using System.Net;
 
 namespace OMSV1.Application.Controllers.LOV
@@ -39,20 +40,29 @@ namespace OMSV1.Application.Controllers.LOV
         }
 
         // Get All DeviceTypes
-        [HttpGet]
-        public async Task<IActionResult> GetAllDeviceTypes()
-        {
-            try
-            {
-                var query = new GetAllDeviceTypesQuery(); 
-                var deviceTypes = await _mediator.Send(query);  
-                return Ok(deviceTypes);  
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving device types.", new[] { ex.Message });
-            }
-        }
+[HttpGet]
+public async Task<IActionResult> GetAllDeviceTypes([FromQuery] PaginationParams paginationParams)
+{
+    try
+    {
+        var query = new GetAllDeviceTypesQuery(paginationParams);
+        var deviceTypes = await _mediator.Send(query);
+        
+        // Add pagination details to the response headers
+        Response.AddPaginationHeader(deviceTypes);
+        
+        return Ok(deviceTypes);
+    }
+    catch (Exception ex)
+    {
+        return ResponseHelper.CreateErrorResponse(
+            HttpStatusCode.InternalServerError, 
+            "An error occurred while retrieving device types.", 
+            new[] { ex.Message }
+        );
+    }
+}
+
 
         // Get DeviceType by Id
         [HttpGet("{id}")]
