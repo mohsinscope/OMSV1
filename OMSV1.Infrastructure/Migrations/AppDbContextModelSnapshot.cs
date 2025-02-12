@@ -605,6 +605,9 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool?>("IsCountry")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -732,6 +735,9 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.Property<Guid>("GovernorateId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool?>("IsEmbassy")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()

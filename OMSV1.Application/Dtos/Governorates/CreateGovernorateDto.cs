@@ -4,5 +4,7 @@ namespace OMSV1.Application.Dtos.Governorates
     {
         public string Name { get; set; } = null!;
         public string Code { get; set; } = null!;
+        public bool? IsCountry { get; set; }
+
     }
 }

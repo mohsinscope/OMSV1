@@ -11,5 +11,7 @@ namespace OMSV1.Application.Dtos.Offices
         public int DeliveryStaff { get; set; }
         public Guid GovernorateId { get; set; }
         public decimal? Budget { get; set; } // Nullable Budget property
+        public bool? IsEmbassy { get; set; }
+
     }
 }
