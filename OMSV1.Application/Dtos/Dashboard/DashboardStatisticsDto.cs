@@ -21,6 +21,5 @@
         public int TotalDamagedPassportsToday { get; set; }
         
         // 6. Percentage of attendances (attended vs. expected staff) for today, across all offices.
-public decimal AttendancePercentageMorning { get; set; }
-public decimal AttendancePercentageEvening { get; set; }
+        public decimal AttendancePercentage { get; set; }
     }
