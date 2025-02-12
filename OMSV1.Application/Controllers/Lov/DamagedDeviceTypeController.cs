@@ -7,6 +7,7 @@ using OMSV1.Application.Helpers;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using OMSV1.Application.Authorization.Attributes;
+using OMSV1.Infrastructure.Extensions;
 
 namespace OMSV1.Application.Controllers
 {
@@ -20,29 +21,37 @@ namespace OMSV1.Application.Controllers
         }
 
         // GET ALL Damaged Device Types
-        [HttpGet("all")]
-
-        public async Task<IActionResult> GetAllDamagedDeviceTypes()
+[HttpGet("all")]
+public async Task<IActionResult> GetAllDamagedDeviceTypes([FromQuery] PaginationParams paginationParams)
+{
+    try
+    {
+        var query = new GetAllDamagedDeviceTypesQuery(paginationParams);
+        var result = await _mediator.Send(query);
+        
+        if (result == null || result.Count == 0)
         {
-            try
-            {
-                var query = new GetAllDamagedDeviceTypesQuery();
-                var result = await _mediator.Send(query);
-                
-                    if (result == null || result.Count == 0)
-                {
-                    return ResponseHelper.CreateErrorResponse(HttpStatusCode.NotFound, "No damaged device types found.", Array.Empty<string>());
-                }
-
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while retrieving damaged device types.", new[] { ex.Message });
-            }
+            return ResponseHelper.CreateErrorResponse(
+                HttpStatusCode.NotFound, 
+                "No damaged device types found.", 
+                Array.Empty<string>()
+            );
         }
-
+        
+        // Add pagination details to the response headers
+        Response.AddPaginationHeader(result);
+        
+        return Ok(result);
+    }
+    catch (Exception ex)
+    {
+        return ResponseHelper.CreateErrorResponse(
+            HttpStatusCode.InternalServerError, 
+            "An error occurred while retrieving damaged device types.", 
+            new[] { ex.Message }
+        );
+    }
+}
         // GET Damaged Device Type by ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDamagedDeviceType(Guid id)

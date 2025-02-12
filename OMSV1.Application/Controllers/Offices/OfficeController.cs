@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OMSV1.Application.Commands.Offices;
+using OMSV1.Application.CQRS.Offices.Queries;
 using OMSV1.Application.Dtos.Offices;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Offices;
@@ -55,40 +56,56 @@ namespace OMSV1.Application.Controllers.Offices
         }
 
         // POST: api/Office
-[HttpPost]
-[Authorize(Policy = "RequireAdminRole")]
-public async Task<IActionResult> CreateOffice([FromBody] CreateOfficeDto officeDto)
-{
-    if (!ModelState.IsValid)
-    {
-        return BadRequest(ModelState);
-    }
-
-    try
-    {
-        // Manually map CreateOfficeDto to AddOfficeCommand
-        var command = new AddOfficeCommand
+        [HttpPost]
+        [Authorize(Policy = "RequireAdminRole")]
+        public async Task<IActionResult> CreateOffice([FromBody] CreateOfficeDto officeDto)
         {
-            Name = officeDto.Name,
-            Code = officeDto.Code,
-            ReceivingStaff = officeDto.ReceivingStaff,
-            AccountStaff = officeDto.AccountStaff,
-            PrintingStaff = officeDto.PrintingStaff,
-            QualityStaff = officeDto.QualityStaff,
-            DeliveryStaff = officeDto.DeliveryStaff,
-            GovernorateId = officeDto.GovernorateId,
-            Budget = officeDto.Budget // Explicitly map Budget
-        };
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        // Delegate the command to the mediator
-        var officeId = await _mediator.Send(command);
-        return CreatedAtAction(nameof(GetOfficeById), new { id = officeId }, officeId);
-    }
-    catch (Exception ex)
-    {
-        return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while creating the office.", new[] { ex.Message });
-    }
-}
+            try
+            {
+                // Manually map CreateOfficeDto to AddOfficeCommand
+                var command = new AddOfficeCommand
+                {
+                    Name = officeDto.Name,
+                    Code = officeDto.Code,
+                    ReceivingStaff = officeDto.ReceivingStaff,
+                    AccountStaff = officeDto.AccountStaff,
+                    PrintingStaff = officeDto.PrintingStaff,
+                    QualityStaff = officeDto.QualityStaff,
+                    DeliveryStaff = officeDto.DeliveryStaff,
+                    GovernorateId = officeDto.GovernorateId,
+                    Budget = officeDto.Budget, // Explicitly map Budget
+                    IsEmbassy= officeDto.IsEmbassy
+                };
+
+                // Delegate the command to the mediator
+                var officeId = await _mediator.Send(command);
+                return CreatedAtAction(nameof(GetOfficeById), new { id = officeId }, officeId);
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, "An error occurred while creating the office.", new[] { ex.Message });
+            }
+        }
+        // POST method for searching offices with filters.
+        [HttpPost("search")]
+        public async Task<IActionResult> GetOffices([FromBody] GetOfficesQuery query)
+        {
+            try
+            {
+                var result = await _mediator.Send(query);
+                Response.AddPaginationHeader(result);  // Add pagination headers (assuming your helper extension exists)
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+            }
+        }
 
 
         // GET: api/Office/dropdown

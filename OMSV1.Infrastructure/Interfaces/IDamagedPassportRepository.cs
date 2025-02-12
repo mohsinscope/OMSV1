@@ -9,5 +9,7 @@ namespace OMSV1.Domain.Interfaces
     {
         //Task<List<DamagedPassport>> GetAllDamagedPassportsAsync();
         Task<List<DamagedPassport>> GetDamagedPassportsByDateAsync(DateTime date);
+        Task<List<DamagedPassport>> GetDamagedPassportsByDateCreatedAsync(DateTime date);
+
     }
 }

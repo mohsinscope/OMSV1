@@ -13,6 +13,8 @@ namespace OMSV1.Application.Dtos.Offices
         public Guid GovernorateId { get; set; }
         public string? GovernorateName { get; set; } // New property
         public decimal? Budget { get; set; } // Nullable Budget property
+        public bool? IsEmbassy { get; set; }
+
 
     }
 }

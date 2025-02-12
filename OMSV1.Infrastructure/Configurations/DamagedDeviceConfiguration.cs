@@ -11,11 +11,11 @@ public class DamagedDeviceConfiguration : IEntityTypeConfiguration<DamagedDevice
         builder.HasKey(dd => dd.Id); // Assuming `Entity` has a primary key `Id`.
 
         builder.Property(dd => dd.SerialNumber)
-            .IsRequired()
+            .IsRequired(false)
             .HasMaxLength(100); // Adjust length as needed.
                  // Add index on SerialNumber
             builder.HasIndex(dd => dd.SerialNumber)
-                .IsUnique(true); // Set to true if you want a unique index
+                .IsUnique(false); // Set to true if you want a unique index
 
           builder.Property(d => d.Date)
             .IsRequired(); // Ensures the column is not nullable

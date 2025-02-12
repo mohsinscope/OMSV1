@@ -13,6 +13,8 @@ namespace OMSV1.Application.Commands.Offices
         public int DeliveryStaff { get; set; }
         public Guid GovernorateId { get; set; }
         public decimal? Budget { get; set; } // Ensure this is included
+        public bool? IsEmbassy { get; set; }
+
     }
 
 }

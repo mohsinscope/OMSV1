@@ -285,7 +285,6 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("SerialNumber")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
@@ -301,8 +300,7 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasIndex("ProfileId");
 
-                    b.HasIndex("SerialNumber")
-                        .IsUnique();
+                    b.HasIndex("SerialNumber");
 
                     b.ToTable("DamagedDevices", (string)null);
                 });
@@ -605,6 +603,9 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool?>("IsCountry")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -732,6 +733,9 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.Property<Guid>("GovernorateId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool?>("IsEmbassy")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()

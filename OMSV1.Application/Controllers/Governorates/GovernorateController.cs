@@ -102,7 +102,7 @@ namespace OMSV1.Application.Controllers.Governorates
 
             try
             {
-                var command = new AddGovernorateCommand(governorateDto.Name, governorateDto.Code);
+                var command = new AddGovernorateCommand(governorateDto.Name, governorateDto.Code,governorateDto.IsCountry);
                 var governorateId = await _mediator.Send(command);
 
                 return CreatedAtAction(nameof(GetGovernorateById), new { id = governorateId }, governorateId);

@@ -5,6 +5,7 @@ using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.Entities.DamagedPassport;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Offices;
+using OMSV1.Domain.Enums; // Needed for WorkingHours enum
 using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Application.Dashboard.Handlers
@@ -54,35 +55,55 @@ namespace OMSV1.Application.Dashboard.Handlers
             DateTime startOfMonth = new DateTime(today.Year, today.Month, 1);
             var damagedPassports = await _damagedPassportRepository.GetAllAsync();
             int totalDamagedPassportsThisMonth = damagedPassports
-                .Count(dp => dp.Date.Date >= startOfMonth && dp.Date.Date <= today);
+                .Count(dp => dp.DateCreated.Date >= startOfMonth && dp.DateCreated.Date <= today);
 
-            // 6. Calculate the attendance percentage for today's attendances,
-            // including all offices—even if they didn't record attendance today.
-            // a) The expected staff count comes from **all** offices.
-            // Multiply by 2 to account for the two shifts.
-            int totalExpectedStaff = offices.Sum(o => 
-                o.ReceivingStaff + o.AccountStaff + o.PrintingStaff + o.QualityStaff + o.DeliveryStaff) * 2;
+            // 6. Calculate the attendance percentages separately for the two shifts.
+            // a) The expected staff count for one shift (each shift uses the same staff count from all offices).
+            int totalExpectedStaffPerShift = offices.Sum(o =>
+                o.ReceivingStaff + o.AccountStaff + o.PrintingStaff + o.QualityStaff + o.DeliveryStaff);
 
             // b) Retrieve today's attendance records.
             var allAttendances = await _attendanceRepository.GetAllAsync();
             var todayAttendances = allAttendances.Where(a => a.Date.Date == today).ToList();
 
-            // Build a lookup for attendance sums by OfficeId.
-            // In case an office has multiple attendance records today, we sum them.
-            var attendanceByOffice = todayAttendances
+            // c) Filter today's attendances by shift.
+            var morningAttendances = todayAttendances
+                .Where(a => a.WorkingHours.HasFlag(WorkingHours.Morning))
+                .ToList();
+
+            var eveningAttendances = todayAttendances
+                .Where(a => a.WorkingHours.HasFlag(WorkingHours.Evening))
+                .ToList();
+
+            // d) Group attendances by OfficeId and sum the attended staff for each shift.
+            var attendanceByOfficeMorning = morningAttendances
                 .GroupBy(a => a.OfficeId)
                 .ToDictionary(
-                    g => g.Key, 
+                    g => g.Key,
                     g => g.Sum(a => a.ReceivingStaff + a.AccountStaff + a.PrintingStaff + a.QualityStaff + a.DeliveryStaff)
                 );
 
-            // c) Sum up attended staff for every office.
-            int totalAttendedStaff = offices.Sum(o =>
-                attendanceByOffice.TryGetValue(o.Id, out var attendedCount) ? attendedCount : 0);
+            var attendanceByOfficeEvening = eveningAttendances
+                .GroupBy(a => a.OfficeId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Sum(a => a.ReceivingStaff + a.AccountStaff + a.PrintingStaff + a.QualityStaff + a.DeliveryStaff)
+                );
 
-            // Round the attendance percentage to 2 decimal places.
-            decimal attendancePercentage = totalExpectedStaff > 0 
-                ? Math.Round(((decimal)totalAttendedStaff * 100) / totalExpectedStaff, 2)
+            // e) Sum up attended staff across all offices for morning and evening shifts.
+            int totalAttendedStaffMorning = offices.Sum(o =>
+                attendanceByOfficeMorning.TryGetValue(o.Id, out var attendedCount) ? attendedCount : 0);
+
+            int totalAttendedStaffEvening = offices.Sum(o =>
+                attendanceByOfficeEvening.TryGetValue(o.Id, out var attendedCount) ? attendedCount : 0);
+
+            // f) Calculate the attendance percentages for each shift.
+            decimal attendancePercentageMorning = totalExpectedStaffPerShift > 0
+                ? Math.Round(((decimal)totalAttendedStaffMorning * 100) / totalExpectedStaffPerShift, 2)
+                : 0;
+
+            decimal attendancePercentageEvening = totalExpectedStaffPerShift > 0
+                ? Math.Round(((decimal)totalAttendedStaffEvening * 100) / totalExpectedStaffPerShift, 2)
                 : 0;
 
             return new DashboardStatisticsDto
@@ -95,9 +116,10 @@ namespace OMSV1.Application.Dashboard.Handlers
                 TotalQualityStaff = totalQualityStaff,
                 TotalDeliveryStaff = totalDeliveryStaff,
                 TotalStaffInAllOffices = totalStaffInAllOffices,
-                // Assign the monthly count to this property.
+                // Note: if you want to rename this property to "TotalDamagedPassportsThisMonth" in your DTO, adjust accordingly.
                 TotalDamagedPassportsToday = totalDamagedPassportsThisMonth,
-                AttendancePercentage = attendancePercentage
+                AttendancePercentageMorning = attendancePercentageMorning,
+                AttendancePercentageEvening = attendancePercentageEvening
             };
         }
     }

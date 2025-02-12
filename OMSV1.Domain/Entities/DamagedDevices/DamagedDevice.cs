@@ -7,7 +7,7 @@ namespace OMSV1.Domain.Entities.DamagedDevices
 {
     public class DamagedDevice : Entity
     {
-        public string SerialNumber { get; private set; }
+        public string? SerialNumber { get; private set; }
         public DateTime Date { get; private set; }
         public Guid DamagedDeviceTypeId { get; private set; }
         public Guid DeviceTypeId { get; private set; }
