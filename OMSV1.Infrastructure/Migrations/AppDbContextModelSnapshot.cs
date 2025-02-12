@@ -285,7 +285,6 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("SerialNumber")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
@@ -301,8 +300,7 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasIndex("ProfileId");
 
-                    b.HasIndex("SerialNumber")
-                        .IsUnique();
+                    b.HasIndex("SerialNumber");
 
                     b.ToTable("DamagedDevices", (string)null);
                 });
