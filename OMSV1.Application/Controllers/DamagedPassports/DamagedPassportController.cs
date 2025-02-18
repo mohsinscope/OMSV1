@@ -69,10 +69,9 @@ namespace OMSV1.Application.Controllers.DamagedPassports
         }
 
         // POST method to add a new damaged passport
-// Controller action
 [HttpPost]
 [RequirePermission("DPc")]
-public async Task<IActionResult> AddDamagedPassport([FromBody] AddDamagedPassportCommand command)
+public async Task<IActionResult> AddDamagedPassport([FromForm] AddDamagedPassportWithAttachmentCommand command)
 {
     try
     {
@@ -90,6 +89,7 @@ public async Task<IActionResult> AddDamagedPassport([FromBody] AddDamagedPasspor
         return StatusCode(500, $"Internal server error: {ex.Message}");
     }
 }
+
         // PUT method to update the damaged passport
         [HttpPut("{id}")]
         [RequirePermission("DPu")]

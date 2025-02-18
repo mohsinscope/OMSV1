@@ -32,13 +32,8 @@ namespace OMSV1.Infrastructure.Services
                 // Register additional encoding providers
                 System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
-                // Register Arabic font
-                var fontPath = @"C:\Fonts\Amiri-Regular.ttf";
-                if (!System.IO.File.Exists(fontPath))
-                {
-                    throw new FileNotFoundException($"Font file not found at {fontPath}");
-                }
-                FontFactory.Register(fontPath, "Amiri");
+                // Register Times New Roman font instead of Amiri
+                FontFactory.Register(@"C:\Windows\Fonts\times.ttf", "Times New Roman");
             }
             catch (Exception ex)
             {
@@ -94,7 +89,7 @@ namespace OMSV1.Infrastructure.Services
             document.Open();
 
             // Title Table
-            var titleFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 24);
+            var titleFont = FontFactory.GetFont("Times New Roman", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 24, Font.NORMAL);
             var titleCell = new PdfPCell(new Phrase(ShapeArabicText("تقرير الجوازات التالفة اليومية"), titleFont))
             {
                 BackgroundColor = BaseColor.WHITE,
@@ -114,12 +109,14 @@ namespace OMSV1.Infrastructure.Services
             document.Add(titleTable);
 
             // Report Date Table using the report date (yesterday)
-            var dateFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12);
-            var dateCell = new PdfPCell(new Phrase(ShapeArabicText($"تاريخ التقرير: {reportDate:yyyy-MM-dd}"), dateFont))
+            var dateFont = FontFactory.GetFont("Times New Roman", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.NORMAL);
+            var dateParagraph = new Paragraph(ShapeArabicText($"تاريخ التقرير: {reportDate:yyyy-MM-dd}"), dateFont)
+            {
+                Alignment = Element.ALIGN_RIGHT
+            };
+            var dateCell = new PdfPCell(dateParagraph)
             {
                 BackgroundColor = BaseColor.WHITE,
-                HorizontalAlignment = Element.ALIGN_RIGHT,
-                VerticalAlignment = Element.ALIGN_MIDDLE,
                 Padding = 10f,
                 Border = iTextRectangle.NO_BORDER,
                 RunDirection = PdfWriter.RUN_DIRECTION_RTL
@@ -128,17 +125,19 @@ namespace OMSV1.Infrastructure.Services
             var dateTable = new PdfPTable(1)
             {
                 WidthPercentage = 100,
-                SpacingAfter = 10f
+                SpacingAfter = 10f,
+                RunDirection = PdfWriter.RUN_DIRECTION_RTL
             };
             dateTable.AddCell(dateCell);
             document.Add(dateTable);
 
-            // Build the Main Data Table
+            // Build the Main Data Table with an added تسلسل column.
             // Column order:
-            // 1. اسم المحافظة (Governorate Name)
-            // 2. اسم المكتب (Office Name)
-            // 3. عدد الجوازات التالفة (Damaged Passport Count)
-            var mainTable = new PdfPTable(3)
+            // 1. تسلسل (Sequence)
+            // 2. اسم المحافظة (Governorate Name)
+            // 3. اسم المكتب (Office Name)
+            // 4. عدد الجوازات التالفة (Damaged Passport Count)
+            var mainTable = new PdfPTable(4)
             {
                 WidthPercentage = 100,
                 SpacingBefore = 10f,
@@ -146,26 +145,31 @@ namespace OMSV1.Infrastructure.Services
                 RunDirection = PdfWriter.RUN_DIRECTION_RTL
             };
 
-            float[] columnWidths = new float[] { 40f, 30f, 30f }; // Adjust widths if needed
+            // Adjust column widths (example: 10% for sequence, 40% for governorate, 30% for office, 20% for count)
+            float[] columnWidths = new float[] { 12f, 40f, 30f, 20f };
             mainTable.SetWidths(columnWidths);
 
             AddTableHeader(mainTable, new[]
             {
+                ShapeArabicText("تسلسل"),
                 ShapeArabicText("اسم المحافظة"),
                 ShapeArabicText("اسم المكتب"),
                 ShapeArabicText("عدد الجوازات التالفة")
             });
 
+            int sequence = 1;
             foreach (var entry in officesWithDamagedPassports)
             {
                 // Set red highlight if no damaged passports exist for the office
                 var backgroundColor = entry.DamagedPassportCount == 0 ? NO_DAMAGED_PASSPORT_ROW_COLOR : BaseColor.WHITE;
                 AddTableRow(mainTable, new[]
                 {
+                    sequence.ToString(),
                     ShapeArabicText(entry.GovernorateName),
                     ShapeArabicText(entry.OfficeName),
                     entry.DamagedPassportCount.ToString()
                 }, backgroundColor);
+                sequence++;
             }
 
             // Add the main table to the document.
@@ -173,7 +177,7 @@ namespace OMSV1.Infrastructure.Services
 
             // Calculate the total damaged passports across all offices.
             var totalDamagedPassportCount = officesWithDamagedPassports.Sum(x => x.DamagedPassportCount);
-            var totalFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD);
+            var totalFont = FontFactory.GetFont("Times New Roman", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD);
 
             // Create the summary cell (green box) for "اجمالي الجوازات"
             var summaryCell = new PdfPCell(new Phrase(ShapeArabicText($"اجمالي الجوازات: {totalDamagedPassportCount}"), totalFont))
@@ -186,20 +190,21 @@ namespace OMSV1.Infrastructure.Services
                 RunDirection = PdfWriter.RUN_DIRECTION_RTL
             };
 
-            // Create a one-column table for the summary box that spans the full width of the main table.
+            // Create a one-column table for the summary box that spans the full width.
             var summaryTable = new PdfPTable(1)
             {
                 WidthPercentage = 100,
                 SpacingBefore = 10f,
-                SpacingAfter = 10f
+                SpacingAfter = 10f,
+                RunDirection = PdfWriter.RUN_DIRECTION_RTL
             };
             summaryTable.AddCell(summaryCell);
 
-            // Add the summary table to the document (it will appear at the bottom).
+            // Add the summary table to the document.
             document.Add(summaryTable);
 
             // Footer Table
-            var footerFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 8);
+            var footerFont = FontFactory.GetFont("Times New Roman", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 8, Font.NORMAL);
             var footerCell = new PdfPCell(new Phrase(ShapeArabicText("تم إنشاؤه بواسطة OMS"), footerFont))
             {
                 BackgroundColor = BaseColor.WHITE,
@@ -212,7 +217,8 @@ namespace OMSV1.Infrastructure.Services
 
             var footerTable = new PdfPTable(1)
             {
-                WidthPercentage = 100
+                WidthPercentage = 100,
+                RunDirection = PdfWriter.RUN_DIRECTION_RTL
             };
             footerTable.AddCell(footerCell);
             document.Add(footerTable);
@@ -231,14 +237,13 @@ namespace OMSV1.Infrastructure.Services
             if (cells == null) throw new ArgumentNullException(nameof(cells));
 
             backgroundColor ??= BaseColor.WHITE;
-            var cellFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 10);
+            var cellFont = FontFactory.GetFont("Times New Roman", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 10, Font.NORMAL);
 
             foreach (string cellContent in cells)
             {
                 var cell = new PdfPCell(new Phrase(ShapeArabicText(cellContent ?? "-"), cellFont))
                 {
                     BackgroundColor = backgroundColor,
-                    // Changed from ALIGN_RIGHT to ALIGN_CENTER
                     HorizontalAlignment = Element.ALIGN_CENTER,
                     VerticalAlignment = Element.ALIGN_MIDDLE,
                     Padding = 6f,
@@ -255,14 +260,13 @@ namespace OMSV1.Infrastructure.Services
         /// </summary>
         private void AddTableHeader(PdfPTable table, string[] headers)
         {
-            var headerFont = FontFactory.GetFont("Amiri", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12);
+            var headerFont = FontFactory.GetFont("Times New Roman", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD);
 
             foreach (string header in headers)
             {
                 var cell = new PdfPCell(new Phrase(ShapeArabicText(header), headerFont))
                 {
                     BackgroundColor = TABLE_HEADER_COLOR,
-                    // Changed from ALIGN_RIGHT to ALIGN_CENTER
                     HorizontalAlignment = Element.ALIGN_CENTER,
                     VerticalAlignment = Element.ALIGN_MIDDLE,
                     Padding = 8f,

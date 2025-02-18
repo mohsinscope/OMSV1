@@ -60,7 +60,7 @@ public class AutoMapperProfiles : Profile
             CreateMap<Governorate, GovernorateWithOfficesDto>()
             .ForMember(dest => dest.Offices, opt => opt.MapFrom(src => src.Offices));
             //Mapping for adding a new damaged paspport
-            CreateMap<AddDamagedPassportCommand, DamagedPassport>();
+            CreateMap<AddDamagedPassportWithAttachmentCommand, DamagedPassport>();
             CreateMap<UpdateDamagedPassportCommand, DamagedPassport>();
             CreateMap<DamagedPassport, DamagedPassportDto>();
             CreateMap<DamagedPassport, DamagedPassportAllDto>();
