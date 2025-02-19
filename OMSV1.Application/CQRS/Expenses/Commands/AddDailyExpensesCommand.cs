@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 
@@ -17,6 +18,9 @@ namespace OMSV1.Application.Commands.Expenses
         // Optional list of subexpense items.
         public List<SubExpenseItem>? SubExpenses { get; set; }
 
+        // Optional file attachment (for example, a receipt).
+        public IFormFile? Receipt { get; set; }
+
         /// <summary>
         /// Constructor for creating a main (parent) daily expense.
         /// </summary>
@@ -30,17 +34,15 @@ namespace OMSV1.Application.Commands.Expenses
             MonthlyExpensesId = monthlyExpensesId;
         }
 
-        // Parameterless constructor to allow model binding for the subexpenses collection
+        // Parameterless constructor to allow model binding for the subexpenses collection.
         public AddDailyExpensesCommand() { }
     }
 
-    // Updated DTO representing a subexpense item.
     public class SubExpenseItem
     {
         public decimal Price { get; set; }
         public int Quantity { get; set; }
         public string Notes { get; set; } = string.Empty;
-        // New property so that each subexpense can have its own ExpenseTypeId.
         public Guid ExpenseTypeId { get; set; }
     }
 }

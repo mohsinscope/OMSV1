@@ -8,7 +8,7 @@ namespace OMSV1.Application.Commands.DamagedPassports
         // Damaged passport properties
         public required string PassportNumber { get; set; }
         public DateTime Date { get; set; }
-        public string Note { get; set; } = "";
+        public string? Note { get; set; } 
         public Guid OfficeId { get; set; }
         public Guid GovernorateId { get; set; }
         public Guid DamagedTypeId { get; set; }

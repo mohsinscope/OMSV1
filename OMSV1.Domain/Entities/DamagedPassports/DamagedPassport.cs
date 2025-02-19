@@ -11,7 +11,7 @@ public class DamagedPassport : Entity
     public string PassportNumber { get; private set; }
     public DateTime Date { get; private set; }
     public Guid DamagedTypeId { get; private set; }
-    public string Note { get; private set; }
+    public string? Note { get; private set; }
 
     public Guid OfficeId { get; private set; }
     public Guid GovernorateId { get; private set; }
@@ -23,7 +23,7 @@ public class DamagedPassport : Entity
     public DamagedType DamagedType { get; private set; }= null!;
 
     // Main constructor that handles all properties
-    public DamagedPassport(string passportNumber, DateTime date, string note,
+    public DamagedPassport(string passportNumber, DateTime date, string? note,
                             Guid officeId, Guid governorateId, 
                             Guid damagedTypeId, Guid profileId) : base()
     {

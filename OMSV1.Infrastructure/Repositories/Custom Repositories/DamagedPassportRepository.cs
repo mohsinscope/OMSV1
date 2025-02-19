@@ -51,23 +51,14 @@ namespace OMSV1.Infrastructure.Repositories
 //         .Where(dp => dp.DateCreated >= startUtc && dp.DateCreated < endUtc)
 //         .ToListAsync();
 // }
-public async Task<List<DamagedPassport>> GetDamagedPassportsByDateAsync(DateTime date)
+public async Task<List<DamagedPassport>> GetDamagedPassportsByDateAsync(DateTime localDate)
 {
-    // Define the UTC+3 offset.
-    TimeSpan utcPlus3 = TimeSpan.FromHours(3);
-
-    // Assume that the incoming 'date' is in UTC (as sent by the client).
-    // Add 3 hours to determine the local day in UTC+3.
-    DateTime reportDateUtc3 = date.Add(utcPlus3);
-    DateTime localReportDay = reportDateUtc3.Date;
-
-    // Convert the start of the UTC+3 day back to UTC.
-    DateTime startUtc = localReportDay - utcPlus3;
-    DateTime endUtc = startUtc.AddDays(1);
-
-    // (Optional) Log the boundaries here if needed:
-    // _logger.LogInformation("Repository Query UTC Boundaries: Start = {StartUtc}, End = {EndUtc}",
-    //     startUtc.ToString("yyyy-MM-ddTHH:mm:ssZ"), endUtc.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+    // Convert local date (UTC+3) to UTC time range
+    var utcPlus3 = TimeSpan.FromHours(3);
+    
+    // Calculate UTC start and end times
+    DateTime startUtc = localDate.Subtract(utcPlus3);  // Convert local midnight to UTC
+    DateTime endUtc = startUtc.AddDays(1);            // Add 24 hours for the full day
 
     return await _context.DamagedPassports
         .Include(dp => dp.Governorate)
@@ -77,7 +68,6 @@ public async Task<List<DamagedPassport>> GetDamagedPassportsByDateAsync(DateTime
         .Where(dp => dp.DateCreated >= startUtc && dp.DateCreated < endUtc)
         .ToListAsync();
 }
-
 
         public async Task<List<DamagedPassport>> GetDamagedPassportsByDateCreatedAsync(DateTime date)
         {

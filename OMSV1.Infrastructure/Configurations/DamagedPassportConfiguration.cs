@@ -27,7 +27,9 @@ public class DamagedPassportConfiguration : IEntityTypeConfiguration<DamagedPass
             .IsRequired();
 
         builder.Property(a => a.Note)
-            .HasMaxLength(500); 
+            .HasMaxLength(500)
+            .IsRequired(false);
+ 
 
         builder.Property(dp => dp.OfficeId)
             .IsRequired();

@@ -32,30 +32,13 @@ namespace OMSV1.Api.Controllers
             {
                 _logger.LogInformation("Starting in-memory daily damaged passports archive generation.");
 
-                // For our purposes, we assume that:
-                // - The database stores DateCreated in UTC.
-                // - The client sends a ReportDate (as ISO string) which represents a date (with time, perhaps set to midnight)
-                //   in local time (UTC+3). When converted to ISO (toISOString), it becomes a UTC value.
-                //
-                // To ensure we return the passports for the UTC+3 day the user selected, we convert the incoming date
-                // to a local day in UTC+3.
-                //
-                // NOTE: The repository method below (see its implementation sample) also applies this logic,
-                // so here we compute it just for logging purposes.
+                // Convert the input UTC date to UTC+3 timezone for report generation
+                var utcPlus3 = TimeSpan.FromHours(3);
+                var localReportDay = request.ReportDate.Date;  // Get just the date part
+                
+                _logger.LogInformation("Generating report for date (UTC+3): {LocalReportDay}", localReportDay.ToString("yyyy-MM-dd"));
 
-                TimeSpan utcPlus3 = TimeSpan.FromHours(3);
-
-                // Assume the incoming ReportDate is in UTC (from the ISO string sent by the front end).
-                // Adding the UTC+3 offset will give us the "local" date as seen in UTC+3.
-                DateTime reportDateUtc = request.ReportDate;
-                DateTime reportDateUtc3 = reportDateUtc.Add(utcPlus3);
-                DateTime localReportDay = reportDateUtc3.Date;  // the selected day in UTC+3
-
-                _logger.LogInformation("Execution day (UTC+3): {LocalReportDay}", localReportDay.ToString("yyyy-MM-dd"));
-
-                // Retrieve passports created on the specified date.
-                // The repository method is expected to calculate the UTC boundaries for the day based on UTC+3.
-                var damagedPassports = await _damagedPassportRepository.GetDamagedPassportsByDateAsync(request.ReportDate);
+                var damagedPassports = await _damagedPassportRepository.GetDamagedPassportsByDateAsync(localReportDay);
 
                 if (damagedPassports == null || !damagedPassports.Any())
                 {
@@ -63,8 +46,11 @@ namespace OMSV1.Api.Controllers
                     return NotFound($"No damaged passports found for {localReportDay:yyyy-MM-dd}");
                 }
 
-                int count = damagedPassports.Count;
-                _logger.LogInformation("Found {Count} damaged passports for day {LocalReportDay}", count, localReportDay.ToString("yyyy-MM-dd"));
+                int totalPassports = damagedPassports.Count;
+                _logger.LogInformation("Found {Count} damaged passports for day {LocalReportDay}", totalPassports, localReportDay.ToString("yyyy-MM-dd"));
+
+                // Counter for the number of files added to the ZIP archive.
+                int fileCountInZip = 0;
 
                 // Create a MemoryStream to hold the ZIP archive.
                 using var archiveStream = new MemoryStream();
@@ -99,6 +85,8 @@ namespace OMSV1.Api.Controllers
                                 using var entryStream = entry.Open();
                                 using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
                                 await fileStream.CopyToAsync(entryStream);
+
+                                fileCountInZip++;
                             }
                             else
                             {
@@ -106,6 +94,13 @@ namespace OMSV1.Api.Controllers
                             }
                         }
                     }
+                }
+
+                // Ensure the number of files in the ZIP matches the number of damaged passports retrieved.
+                if (fileCountInZip != totalPassports)
+                {
+                    _logger.LogError("Mismatch in file count: Retrieved {TotalPassports} passports but added {FileCount} files to the ZIP archive.", totalPassports, fileCountInZip);
+                    return StatusCode(500, "Internal server error: Not all damaged passport files were found.");
                 }
 
                 // Reset the MemoryStream position to the beginning.
@@ -128,27 +123,25 @@ namespace OMSV1.Api.Controllers
         }
 
         // Helper method for determining the attachment file path.
-private string GetAttachmentFilePath(Domain.Entities.DamagedPassport.DamagedPassport passport)
-{
-    // Define the base folder where all entity folders are stored.
-    string baseFolder = @"\\172.16.108.26\samba";
-    
-    // Build a generic file search pattern that includes the passport ID.
-    string fileSearchPattern = $"*{passport.Id}*.*";
-    
-    // Search recursively in all subdirectories of the base folder.
-    var matches = Directory.GetFiles(baseFolder, fileSearchPattern, SearchOption.AllDirectories);
-    
-    if (matches.Length > 0)
-    {
-        return matches[0];
-    }
+        private string GetAttachmentFilePath(Domain.Entities.DamagedPassport.DamagedPassport passport)
+        {
+            // Define the base folder where all entity folders are stored.
+            string baseFolder = @"\\172.16.108.26\samba";
+            
+            // Build a generic file search pattern that includes the passport ID.
+            string fileSearchPattern = $"*{passport.Id}*.*";
+            
+            // Search recursively in all subdirectories of the base folder.
+            var matches = Directory.GetFiles(baseFolder, fileSearchPattern, SearchOption.AllDirectories);
+            
+            if (matches.Length > 0)
+            {
+                return matches[0];
+            }
 
-    // Log if no file was found.
-    _logger.LogWarning("No file found for passport ID {PassportId} using pattern: {Pattern}", passport.Id, fileSearchPattern);
-    return string.Empty;
-}
-
-
+            // Log if no file was found.
+            _logger.LogWarning("No file found for passport ID {PassportId} using pattern: {Pattern}", passport.Id, fileSearchPattern);
+            return string.Empty;
+        }
     }
 }

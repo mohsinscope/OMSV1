@@ -106,24 +106,52 @@ namespace OMSV1.Application.Controllers.Expenses
             }
         }
         //Add Daily Expenses
-        // Add Daily Expenses (parent with optional subexpenses)
-        [HttpPost("{monthlyExpensesId}/daily-expenses")]
-        [RequirePermission("EXc")]
-        public async Task<IActionResult> AddDailyExpense(Guid monthlyExpensesId, [FromBody] AddDailyExpensesCommand command)
+[HttpPost("{monthlyExpensesId}/daily-expenses")]
+[RequirePermission("EXc")]
+public async Task<IActionResult> AddDailyExpense(
+    Guid monthlyExpensesId, 
+    [FromForm] AddDailyExpensesCommand command,
+    [FromForm] string? subExpensesJson) // Separate field for subexpenses JSON
+{
+    try
+    {
+        // Set the MonthlyExpensesId from the route.
+        command.MonthlyExpensesId = monthlyExpensesId;
+        
+        // If subExpensesJson is provided, deserialize it and assign to command.SubExpenses.
+        if (!string.IsNullOrWhiteSpace(subExpensesJson))
         {
-            try
-            {
-                // Set the MonthlyExpensesId from the route (only applicable for parent expense creation)
-                command.MonthlyExpensesId = monthlyExpensesId;
-                
-                var id = await _mediator.Send(command);
-                return Ok(new { Id = id });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            command.SubExpenses = Newtonsoft.Json.JsonConvert.DeserializeObject<List<SubExpenseItem>>(subExpensesJson);
         }
+        
+        var id = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetById), new { id }, id);  // 201 Created response.
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+    }
+}
+
+
+        // Add Daily Expenses (parent with optional subexpenses)
+        // [HttpPost("{monthlyExpensesId}/daily-expenses")]
+        // [RequirePermission("EXc")]
+        // public async Task<IActionResult> AddDailyExpense(Guid monthlyExpensesId, [FromBody] AddDailyExpensesCommand command)
+        // {
+        //     try
+        //     {
+        //         // Set the MonthlyExpensesId from the route (only applicable for parent expense creation)
+        //         command.MonthlyExpensesId = monthlyExpensesId;
+                
+        //         var id = await _mediator.Send(command);
+        //         return Ok(new { Id = id });
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return StatusCode(500, $"Internal server error: {ex.Message}");
+        //     }
+        // }
 
         [HttpPost("{id}/status")]
         [RequirePermission("EXr")]
