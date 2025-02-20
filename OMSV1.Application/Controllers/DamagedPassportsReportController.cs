@@ -121,6 +121,46 @@ namespace OMSV1.Api.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+        [HttpPost("missing-attachments")]
+        [Authorize(Policy = "RequireSuperAdminRole")]
+        public async Task<IActionResult> GetDamagedPassportsMissingAttachments([FromBody] DamagedPassportsReportRequest request)
+        {
+            try
+            {
+                _logger.LogInformation("Checking for damaged passports missing attachments for report date.");
+
+                // Convert the input UTC date to UTC+3 timezone for report generation
+                var localReportDay = request.ReportDate.Date;
+                _logger.LogInformation("Report date (UTC+3): {LocalReportDay}", localReportDay.ToString("yyyy-MM-dd"));
+
+                var damagedPassports = await _damagedPassportRepository.GetDamagedPassportsByDateAsync(localReportDay);
+
+                if (damagedPassports == null || !damagedPassports.Any())
+                {
+                    _logger.LogWarning("No damaged passports found for {LocalReportDay}", localReportDay.ToString("yyyy-MM-dd"));
+                    return NotFound($"No damaged passports found for {localReportDay:yyyy-MM-dd}");
+                }
+
+                // Filter passports where no attachment is found.
+                var passportsMissingAttachments = damagedPassports
+                    .Where(passport =>
+                    {
+                        string filePath = GetAttachmentFilePath(passport);
+                        return string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath);
+                    })
+                    .ToList();
+
+                _logger.LogInformation("Found {Count} damaged passports missing attachments for {LocalReportDay}", passportsMissingAttachments.Count, localReportDay.ToString("yyyy-MM-dd"));
+
+                return Ok(passportsMissingAttachments);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving damaged passports missing attachments");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
 
         // Helper method for determining the attachment file path.
         private string GetAttachmentFilePath(Domain.Entities.DamagedPassport.DamagedPassport passport)
