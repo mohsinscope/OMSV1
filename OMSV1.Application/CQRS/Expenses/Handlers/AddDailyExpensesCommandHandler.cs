@@ -63,10 +63,14 @@ namespace OMSV1.Application.Handlers.Expenses
                 // 4. Add the DailyExpenses entity to the repository.
                 await _unitOfWork.Repository<DailyExpenses>().AddAsync(dailyExpense);
 
-                // 5. Associate the DailyExpense with the MonthlyExpenses (which may update thresholds, etc.).
-                monthlyExpenses.AddDailyExpense(dailyExpense, await _unitOfWork.Repository<Threshold>().GetAllAsync());
+                // 5. Get the total amount of the daily expense
+                var totalAmount = dailyExpense.GetTotalAmount();
 
-                // 6. If a receipt file was provided, validate and process it.
+                // 6. Associate the DailyExpense with the MonthlyExpenses and adjust its total amount
+                monthlyExpenses.AddDailyExpense(dailyExpense, await _unitOfWork.Repository<Threshold>().GetAllAsync());
+                monthlyExpenses.AdjustTotalAmount(totalAmount);
+
+                // 7. If a receipt file was provided, validate and process it.
                 if (request.Receipt != null)
                 {
                     if (request.Receipt.Length == 0)
@@ -88,10 +92,10 @@ namespace OMSV1.Application.Handlers.Expenses
                     await _unitOfWork.Repository<AttachmentCU>().AddAsync(attachment);
                 }
 
-                // 7. Update the MonthlyExpenses entity.
+                // 8. Update the MonthlyExpenses entity.
                 await _unitOfWork.Repository<MonthlyExpenses>().UpdateAsync(monthlyExpenses);
 
-                // 8. Save all changes to the database.
+                // 9. Save all changes to the database.
                 if (!await _unitOfWork.SaveAsync(cancellationToken))
                 {
                     throw new Exception("Failed to save DailyExpenses (and attachment, if any) to the database.");
