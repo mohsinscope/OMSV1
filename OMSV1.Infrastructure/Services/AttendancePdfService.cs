@@ -15,6 +15,22 @@ namespace OMSV1.Infrastructure.Services
     public class AttendancePdfService : IAttendanceService
     {
         private readonly IGenericRepository<Office> _officeRepository;
+        // Add this helper method to your AttendancePdfService class:
+private string GetArabicDayName(DayOfWeek day)
+{
+    return day switch
+    {
+        DayOfWeek.Sunday => "الأحد",
+        DayOfWeek.Monday => "الاثنين",
+        DayOfWeek.Tuesday => "الثلاثاء",
+        DayOfWeek.Wednesday => "الأربعاء",
+        DayOfWeek.Thursday => "الخميس",
+        DayOfWeek.Friday => "الجمعة",
+        DayOfWeek.Saturday => "السبت",
+        _ => string.Empty
+    };
+}
+
         private readonly AppDbContext _context; // Inject the DbContext
 
         // Existing colors for header and border
@@ -124,28 +140,31 @@ namespace OMSV1.Infrastructure.Services
             document.Add(titleTable);
 
             // Report Date Table using Baghdad date, aligned to right
-            var dateFont = FontFactory.GetFont("Times New Roman", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.NORMAL);
-            var dateParagraph = new Paragraph(ShapeArabicText($"تاريخ التقرير: {todayBaghdad:yyyy-MM-dd}"), dateFont)
-            {
-                Alignment = Element.ALIGN_RIGHT
-            };
+            
+// Report Date Table using Baghdad date, aligned to right
+var dateFont = FontFactory.GetFont("Times New Roman", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.NORMAL);
+var arabicDayName = GetArabicDayName(todayBaghdad.DayOfWeek);
+var dateParagraph = new Paragraph(ShapeArabicText($"تاريخ التقرير: {arabicDayName} {todayBaghdad:yyyy-MM-dd}"), dateFont)
+{
+    Alignment = Element.ALIGN_RIGHT
+};
 
-            var dateCell = new PdfPCell(dateParagraph)
-            {
-                BackgroundColor = BaseColor.WHITE,
-                Padding = 10f,
-                Border = iTextRectangle.NO_BORDER,
-                RunDirection = PdfWriter.RUN_DIRECTION_RTL
-            };
+var dateCell = new PdfPCell(dateParagraph)
+{
+    BackgroundColor = BaseColor.WHITE,
+    Padding = 10f,
+    Border = iTextRectangle.NO_BORDER,
+    RunDirection = PdfWriter.RUN_DIRECTION_RTL
+};
 
-            var dateTable = new PdfPTable(1)
-            {
-                WidthPercentage = 100,
-                SpacingAfter = 10f,
-                RunDirection = PdfWriter.RUN_DIRECTION_RTL
-            };
-            dateTable.AddCell(dateCell);
-            document.Add(dateTable);
+var dateTable = new PdfPTable(1)
+{
+    WidthPercentage = 100,
+    SpacingAfter = 10f,
+    RunDirection = PdfWriter.RUN_DIRECTION_RTL
+};
+dateTable.AddCell(dateCell);
+document.Add(dateTable);
 
             // Main Data Table with an additional تسلسل column.
             // Column order:
