@@ -27,13 +27,16 @@ namespace OMSV1.Application.Handlers.Attendances
         {
             try
             {
-                // Step 1: Get offices filtered by governorate if specified
-                var officesQuery = _officeRepository.GetAllAsQueryable();
-                if (request.GovernorateId.HasValue)
-                {
-                    officesQuery = officesQuery.Where(o => o.GovernorateId == request.GovernorateId);
-                }
-                var offices = await officesQuery.ToListAsync(cancellationToken);
+        // Step 1: Get offices filtered by governorate if specified and exclude embassies
+        var officesQuery = _officeRepository.GetAllAsQueryable();
+        if (request.GovernorateId.HasValue)
+        {
+            officesQuery = officesQuery.Where(o => o.GovernorateId == request.GovernorateId);
+        }
+        // Exclude offices where IsEmbassy is true
+        officesQuery = officesQuery.Where(o => o.IsEmbassy != true);
+
+        var offices = await officesQuery.ToListAsync(cancellationToken);
 
 
                 // Step 2: Create the attendance specification
