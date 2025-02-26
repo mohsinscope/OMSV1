@@ -7,6 +7,7 @@ using OMSV1.Domain.SeedWork;
 using OMSV1.Infrastructure.Interfaces; // For IPhotoService.
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -63,12 +64,17 @@ namespace OMSV1.Application.Handlers.Expenses
                 // 4. Add the DailyExpenses entity to the repository.
                 await _unitOfWork.Repository<DailyExpenses>().AddAsync(dailyExpense);
 
-                // 5. Get the total amount of the daily expense
-                var totalAmount = dailyExpense.GetTotalAmount();
-
-                // 6. Associate the DailyExpense with the MonthlyExpenses and adjust its total amount
+                // 5. Associate the DailyExpense with the MonthlyExpenses.
+                // This method adds the parent's own amount (dailyExpense.Amount) to the monthly total.
                 monthlyExpenses.AddDailyExpense(dailyExpense, await _unitOfWork.Repository<Threshold>().GetAllAsync());
-                monthlyExpenses.AdjustTotalAmount(totalAmount);
+
+                // 6. Adjust the total amount only if subexpenses exist.
+                // If subexpenses are present, dailyExpense.GetTotalAmount() returns their sum.
+                // Adding that amount will result in: parent's amount + subexpenses = desired total.
+                if (dailyExpense.SubExpenses.Any())
+                {
+                    monthlyExpenses.AdjustTotalAmount(dailyExpense.GetTotalAmount());
+                }
 
                 // 7. If a receipt file was provided, validate and process it.
                 if (request.Receipt != null)
@@ -105,7 +111,7 @@ namespace OMSV1.Application.Handlers.Expenses
             }
             catch (Exception ex)
             {
-                // Optionally, wrap exceptions in a custom HandlerException if you have one.
+                // Optionally wrap exceptions in a custom HandlerException if desired.
                 throw new Exception($"An error occurred while adding daily expense: {ex.Message}", ex);
             }
         }
