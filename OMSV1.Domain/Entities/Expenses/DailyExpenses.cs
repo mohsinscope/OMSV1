@@ -58,12 +58,22 @@ namespace OMSV1.Domain.Entities.Expenses
         /// <param name="quantity">Subexpense quantity.</param>
         /// <param name="notes">Subexpense notes.</param>
         /// <param name="expenseTypeId">Subexpense ExpenseTypeId (can be different from the parent's).</param>
-        public void AddSubExpense(decimal price, int quantity, string notes, Guid expenseTypeId)
-        {
-            // Pass the parent's MonthlyExpensesId to the subexpense.
-            var subExpense = new DailyExpenses(price, quantity, notes, this.Id, expenseTypeId, this.MonthlyExpensesId);
-            _subExpenses.Add(subExpense);
-        }
+public void AddSubExpense(decimal price, int quantity, string notes, Guid expenseTypeId)
+{
+    var subExpense = new DailyExpenses(
+        price,
+        quantity,
+        notes,
+        this.Id,
+        expenseTypeId,
+        this.MonthlyExpensesId
+    );
+    
+    // Force the sub-expense date to match the parent's date:
+    subExpense.ExpenseDate = this.ExpenseDate;
+
+    _subExpenses.Add(subExpense);
+}
 
         // // Update existing expense or sub-expense
         // public void Update(decimal price, int quantity, string notes)
