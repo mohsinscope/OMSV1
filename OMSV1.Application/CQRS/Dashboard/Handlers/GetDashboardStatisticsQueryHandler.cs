@@ -30,37 +30,36 @@ namespace OMSV1.Application.Dashboard.Handlers
 
         public async Task<DashboardStatisticsDto> Handle(GetDashboardStatisticsQuery request, CancellationToken cancellationToken)
         {
-            // 1. Retrieve all offices and count them.
+            // 1. Retrieve all offices and filter out embassies (only consider offices with IsEmbassy == false)
             var offices = await _officeRepository.GetAllAsync();
-            int totalOffices = offices.Count;
+            var nonEmbassyOffices = offices.Where(o => o.IsEmbassy == false).ToList();
+            int totalOffices = nonEmbassyOffices.Count;
 
             // 2. Retrieve all governorates and count them.
             var governorates = await _governorateRepository.GetAllAsync();
             int totalGovernorates = governorates.Count;
 
-            // 3 & 4. Sum up the staff counts from each office.
-            int totalReceivingStaff = offices.Sum(o => o.ReceivingStaff);
-            int totalAccountStaff   = offices.Sum(o => o.AccountStaff);
-            int totalPrintingStaff  = offices.Sum(o => o.PrintingStaff);
-            int totalQualityStaff   = offices.Sum(o => o.QualityStaff);
-            int totalDeliveryStaff  = offices.Sum(o => o.DeliveryStaff);
+            // 3 & 4. Sum up the staff counts from each non-embassy office.
+            int totalReceivingStaff = nonEmbassyOffices.Sum(o => o.ReceivingStaff);
+            int totalAccountStaff   = nonEmbassyOffices.Sum(o => o.AccountStaff);
+            int totalPrintingStaff  = nonEmbassyOffices.Sum(o => o.PrintingStaff);
+            int totalQualityStaff   = nonEmbassyOffices.Sum(o => o.QualityStaff);
+            int totalDeliveryStaff  = nonEmbassyOffices.Sum(o => o.DeliveryStaff);
 
             int totalStaffInAllOffices = totalReceivingStaff + totalAccountStaff +
                                          totalPrintingStaff + totalQualityStaff +
                                          totalDeliveryStaff;
-
             // 5. Count the number of damaged passports registered this month.
-        DateTime today = DateTime.UtcNow.Date;
-        DateTime startOfMonth = new DateTime(today.Year, today.Month, 1);
-        var damagedPassports = await _damagedPassportRepository.GetAllAsync();
-        int totalDamagedPassportsThisMonth = damagedPassports
-            .Count(dp => dp.DateCreated.Date >= startOfMonth && dp.DateCreated.Date <= today);
+            DateTime today = DateTime.UtcNow.Date;
+            DateTime startOfMonth = new DateTime(today.Year, today.Month, 1);
+            var damagedPassports = await _damagedPassportRepository.GetAllAsync();
+            int totalDamagedPassportsThisMonth = damagedPassports
+                .Count(dp => dp.DateCreated.Date >= startOfMonth && dp.DateCreated.Date <= today);
 
-            // 6. Calculate the attendance percentage for today's attendances,
-            // including all offices—even if they didn't record attendance today.
-            // a) The expected staff count comes from **all** offices.
+            // 6. Calculate the attendance percentage for today's attendances from non-embassy offices.
+            // a) The expected staff count comes from non-embassy offices.
             // Multiply by 2 to account for the two shifts.
-            int totalExpectedStaff = offices.Sum(o => 
+            int totalExpectedStaff = nonEmbassyOffices.Sum(o => 
                 o.ReceivingStaff + o.AccountStaff + o.PrintingStaff + o.QualityStaff + o.DeliveryStaff) * 2;
 
             // b) Retrieve today's attendance records.
@@ -76,8 +75,8 @@ namespace OMSV1.Application.Dashboard.Handlers
                     g => g.Sum(a => a.ReceivingStaff + a.AccountStaff + a.PrintingStaff + a.QualityStaff + a.DeliveryStaff)
                 );
 
-            // c) Sum up attended staff for every office.
-            int totalAttendedStaff = offices.Sum(o =>
+            // c) Sum up attended staff for every non-embassy office.
+            int totalAttendedStaff = nonEmbassyOffices.Sum(o =>
                 attendanceByOffice.TryGetValue(o.Id, out var attendedCount) ? attendedCount : 0);
 
             // Round the attendance percentage to 2 decimal places.
@@ -95,7 +94,6 @@ namespace OMSV1.Application.Dashboard.Handlers
                 TotalQualityStaff = totalQualityStaff,
                 TotalDeliveryStaff = totalDeliveryStaff,
                 TotalStaffInAllOffices = totalStaffInAllOffices,
-                // Assign the monthly count to this property.
                 TotalDamagedPassportsToday = totalDamagedPassportsThisMonth,
                 AttendancePercentage = attendancePercentage
             };
