@@ -49,6 +49,7 @@ namespace OMSV1.Application.Queries.Attendances
 
                 // Fetch office data filtered by Governorate ID
                 var offices = await _officeRepo.GetAllAsQueryable()
+                    .Where(o=> o.IsEmbassy==false)
                     .Where(o => !request.GovernorateId.HasValue || o.GovernorateId == request.GovernorateId)
                     .Select(o => new OfficeStatisticsDto
                     {
