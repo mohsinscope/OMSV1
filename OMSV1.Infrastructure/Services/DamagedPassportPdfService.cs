@@ -127,8 +127,8 @@ private string GetArabicDayName(DayOfWeek day)
             // Report Date Table using the report date (yesterday)
            // Report Date Table using Baghdad date, aligned to right
 var dateFont = FontFactory.GetFont("Times New Roman", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.NORMAL);
-var arabicDayName = GetArabicDayName(baghdadNow.DayOfWeek);
-var dateParagraph = new Paragraph(ShapeArabicText($"تاريخ التقرير: {arabicDayName} {baghdadNow:yyyy-MM-dd}"), dateFont)
+var arabicDayName = GetArabicDayName(reportDate.DayOfWeek);
+var dateParagraph = new Paragraph(ShapeArabicText($"تاريخ التقرير: {arabicDayName} {reportDate:yyyy-MM-dd}"), dateFont)
 {
     Alignment = Element.ALIGN_RIGHT
 };
