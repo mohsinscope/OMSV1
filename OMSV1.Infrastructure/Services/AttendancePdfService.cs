@@ -74,8 +74,9 @@ private string GetArabicDayName(DayOfWeek day)
 
             // Fetch all offices along with their Governorate in a single query
             var allOffices = await _context.Offices
-                .Include(o => o.Governorate)
-                .ToListAsync();
+            .Where(o => o.IsEmbassy == false)
+            .Include(o => o.Governorate)
+            .ToListAsync();
 
             if (!allOffices.Any())
                 throw new InvalidOperationException("No offices found in the system.");
