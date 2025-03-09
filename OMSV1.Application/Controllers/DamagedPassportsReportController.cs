@@ -3,12 +3,13 @@ using System.IO.Compression;
 using OMSV1.Domain.Interfaces;
 using OMSV1.Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using OMSV1.Application.Controllers;
+using OMSV1.Application.Authorization.Attributes;
 
 namespace OMSV1.Api.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class DamagedPassportsReportController : ControllerBase
+
+    public class DamagedPassportsReportController : BaseApiController
     {
         private readonly ILogger<DamagedPassportsReportController> _logger;
         private readonly IDamagedPassportRepository _damagedPassportRepository;
@@ -25,7 +26,8 @@ namespace OMSV1.Api.Controllers
         }
 
         [HttpPost("zip")]
-        [Authorize(Policy = "RequireSuperAdminRole")]
+        [RequirePermission("archive")]
+
         public async Task<IActionResult> DownloadDailyDamagedPassportsZipArchiveReport([FromBody] DamagedPassportsReportRequest request)
         {
             try
