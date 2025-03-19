@@ -19,7 +19,7 @@ namespace OMSV1.Application.Commands.Expenses
         public List<SubExpenseItem>? SubExpenses { get; set; }
 
         // Optional file attachment (for example, a receipt).
-        public IFormFile? Receipt { get; set; }
+        public List<IFormFile>? Receipt { get; set; }
 
         /// <summary>
         /// Constructor for creating a main (parent) daily expense.

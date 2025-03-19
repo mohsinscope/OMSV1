@@ -15,6 +15,6 @@ namespace OMSV1.Application.Commands.DamagedPassports
         public Guid ProfileId { get; set; }
 
         // Attachment property
-        public required IFormFile File { get; set; }
+        public required List<IFormFile> File { get; set; }
     }
 }
