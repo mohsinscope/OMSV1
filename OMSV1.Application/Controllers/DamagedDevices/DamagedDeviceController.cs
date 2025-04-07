@@ -176,11 +176,6 @@ namespace OMSV1.Application.Controllers.DamagedDevices
                 var id = await _mediator.Send(command);
                 return CreatedAtAction(nameof(GetDamagedDeviceById), new { id }, id);
             }
-            catch (DuplicateDeviceException ex)
-            {
-                // Return 409 Conflict for duplicate serial numbers
-                return Conflict(new { message = ex.Message });
-            }
             catch (HandlerException ex)
             {
                 // Return 400 Bad Request for validation errors

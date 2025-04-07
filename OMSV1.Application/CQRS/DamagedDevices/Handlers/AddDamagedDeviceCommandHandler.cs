@@ -28,11 +28,6 @@ public class AddDamagedDeviceCommandHandler : IRequestHandler<AddDamagedDeviceCo
             var existingDevice = await _unitOfWork.Repository<DamagedDevice>()
                 .FirstOrDefaultAsync(dd => dd.SerialNumber == request.SerialNumber);
 
-            if (existingDevice != null)
-            {
-                throw new DuplicateDeviceException($"A damaged device with serial number {request.SerialNumber} already exists.");
-            }
-
             // Validate if the OfficeId belongs to the GovernorateId
             var officeBelongsToGovernorate = await _unitOfWork.Repository<Office>()
                 .AnyAsync(o => o.Id == request.OfficeId && o.GovernorateId == request.GovernorateId, cancellationToken);
@@ -54,11 +49,6 @@ public class AddDamagedDeviceCommandHandler : IRequestHandler<AddDamagedDeviceCo
 
             return damagedDevice.Id;
         }
-        catch (DuplicateDeviceException)
-        {
-            // Re-throw duplicate device exceptions to be handled by the controller
-            throw;
-        }
         catch (HandlerException ex)
         {
             throw new HandlerException("An error occurred while processing the Damaged Device creation request.", ex);
@@ -68,13 +58,6 @@ public class AddDamagedDeviceCommandHandler : IRequestHandler<AddDamagedDeviceCo
             throw new HandlerException("An unexpected error occurred.", ex);
         }
     }
-}
-
-// Custom Exception class (add this to your project)
-public class DuplicateDeviceException : Exception
-{
-    public DuplicateDeviceException(string message) : base(message) { }
-    public DuplicateDeviceException(string message, Exception innerException) : base(message, innerException) { }
 }
 
 }
