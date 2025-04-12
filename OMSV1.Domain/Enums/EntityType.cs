@@ -5,5 +5,6 @@ public enum EntityType
     DamagedDevice = 1,
     DamagedPassport = 2,
     Lecture = 3,
-    Expense = 4
+    Expense = 4,
+    Document=5
 }
