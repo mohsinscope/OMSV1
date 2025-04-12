@@ -107,8 +107,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         entity.Property(up => up.Permission)
             .IsRequired()
             .HasMaxLength(255);
-
-        // Additional configuration (if necessary)
         });
 
             
