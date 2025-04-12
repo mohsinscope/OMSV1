@@ -94,6 +94,29 @@ namespace OMSV1.Application.Controllers.Documents
                 );
             }
         }
+        // GET: api/document/{documentId}/history
+        [HttpGet("{documentId}/history")]
+        public async Task<IActionResult> GetDocumentHistoryByDocumentId(Guid documentId)
+        {
+            try
+            {
+                var query = new GetDocumentHistoryByDocumentIdQuery(documentId);
+                var historyDtos = await _mediator.Send(query);
+                return Ok(historyDtos);
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                return NotFound(knfEx.Message);
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(
+                    HttpStatusCode.InternalServerError,
+                    "An error occurred while retrieving the document history.",
+                    new[] { ex.Message }
+                );
+            }
+        }
          // POST: api/document/{id}/reply
         [HttpPost("{id}/reply")]
         public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm] ReplyDocumentWithAttachmentCommand command)
