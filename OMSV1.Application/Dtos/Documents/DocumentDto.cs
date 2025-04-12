@@ -13,5 +13,7 @@ namespace OMSV1.Application.Dtos.Documents
         public string? Subject { get; set; }
         public Guid? ParentDocumentId { get; set; }
         public Guid? CCId { get; set; }
+            public DateTime Datecreated { get; set; }
+
     }
 }

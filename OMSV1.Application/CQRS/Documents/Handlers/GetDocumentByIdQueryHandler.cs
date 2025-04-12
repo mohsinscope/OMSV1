@@ -53,6 +53,7 @@ namespace OMSV1.Application.Queries.Documents
                 DocumentDate = doc.DocumentDate,
                 PartyId = doc.PartyId,
                 CCId = doc.CCId,
+                Datecreated=doc.DateCreated,
                 ChildDocuments = new List<DocumentDetailedDto>()
             };
 

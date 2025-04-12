@@ -38,7 +38,8 @@ namespace OMSV1.Application.Queries.Documents
                 ActionType = (int)history.ActionType,
                 UserId = history.UserId,
                 ActionDate = history.ActionDate,
-                Notes = history.Notes
+                Notes = history.Notes,
+                Datecreated=history.DateCreated
             }).ToList();
 
             return historyDtos;

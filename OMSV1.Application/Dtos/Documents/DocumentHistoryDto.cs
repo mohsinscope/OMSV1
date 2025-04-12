@@ -8,5 +8,7 @@ namespace OMSV1.Application.Dtos.Documents
         public Guid UserId { get; set; }
         public DateTime ActionDate { get; set; }
         public string? Notes { get; set; }
+        public DateTime Datecreated { get; set; }
+
     }
 }

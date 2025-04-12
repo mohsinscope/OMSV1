@@ -19,6 +19,8 @@ namespace OMSV1.Application.Dtos.Documents
 
         // Nested child documents (if any)
         public List<DocumentDetailedDto> ChildDocuments { get; set; } = new List<DocumentDetailedDto>();
+        public DateTime Datecreated { get; set; }
+
 
     }
 }

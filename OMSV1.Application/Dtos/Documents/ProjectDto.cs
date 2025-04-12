@@ -4,5 +4,7 @@ namespace OMSV1.Application.Dtos.Projects
     {
         public Guid Id { get; set; }
         public required string Name { get; set; }
+        public DateTime Datecreated { get; set; }
+
     }
 }
