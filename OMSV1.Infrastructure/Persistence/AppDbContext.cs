@@ -1,3 +1,5 @@
+using System.Reflection.Metadata;
+using iTextSharp.text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +55,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         public DbSet<Threshold> Thresholds {get;set;}
         public DbSet<EmailReport> EmailReports {get;set;}
         public DbSet<ReportType> ReportTypes {get;set;}
+        public DbSet<OMSV1.Domain.Entities.Documents.Document> Documents {get;set;}
+        public DbSet<OMSV1.Domain.Entities.Documents.DocumentParty> DocumentParties {get;set;}
+        public DbSet<OMSV1.Domain.Entities.DocumentHistories.DocumentHistory> DocumentHistories {get;set;}
+        public DbSet<OMSV1.Domain.Entities.Projects.Project> Projects {get;set;}
+
+
+
+
 
 
 

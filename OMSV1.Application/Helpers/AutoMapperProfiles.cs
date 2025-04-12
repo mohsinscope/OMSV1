@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using AutoMapper;
 using OMSV1.Application.Commands.Attendances;
 using OMSV1.Application.Commands.DamagedDevices;
@@ -9,6 +10,7 @@ using OMSV1.Application.Dtos;
 using OMSV1.Application.Dtos.Attendances;
 using OMSV1.Application.Dtos.Companies;
 using OMSV1.Application.Dtos.DamagedDevices;
+using OMSV1.Application.Dtos.Documents;
 using OMSV1.Application.Dtos.Expenses;
 using OMSV1.Application.Dtos.Governorates;
 using OMSV1.Application.Dtos.Lectures;
@@ -16,16 +18,19 @@ using OMSV1.Application.Dtos.LectureTypes;
 using OMSV1.Application.Dtos.LOV;
 using OMSV1.Application.Dtos.Offices;
 using OMSV1.Application.Dtos.Profiles;
+using OMSV1.Application.Dtos.Projects;
 using OMSV1.Application.DTOs.Expenses;
 using OMSV1.Application.DTOs.Reports;
 using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.Entities.Companies;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.DamagedPassport;
+using OMSV1.Domain.Entities.Documents;
 using OMSV1.Domain.Entities.Expenses;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Lectures;
 using OMSV1.Domain.Entities.Offices;
+using OMSV1.Domain.Entities.Projects;
 using OMSV1.Domain.Entities.Reports;
 using OMSV1.Infrastructure.Identity;
 namespace OMSV1.Application.Helpers{
@@ -50,7 +55,12 @@ public class AutoMapperProfiles : Profile
             CreateMap<MonthlyExpenses, MonthlyExpensesDto>();
             CreateMap<MonthlyExpenses, MonthlyCleanDto>();
             CreateMap<DailyExpenses, DailyExpensesDto>();
-        CreateMap<OMSV1.Domain.Entities.Expenses.Action,ActionDto>();
+            CreateMap<OMSV1.Domain.Entities.Expenses.Action,ActionDto>();
+            //Documents
+            CreateMap<DocumentParty, DocumentPartyDto>();
+            CreateMap<OMSV1.Domain.Entities.Documents.Document, DocumentDto>();
+            CreateMap<Project, ProjectDto>();
+
 
            // Governorate mappings
             CreateMap<Governorate, GovernorateDto>();

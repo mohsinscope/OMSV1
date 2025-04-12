@@ -154,6 +154,9 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("DocumentId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("EntityId")
                         .HasColumnType("uuid");
 
@@ -169,9 +172,11 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DocumentId");
+
                     b.HasIndex("EntityId")
-                        .HasDatabaseName("IX_AttachmentCU_EntityId_Expense")
-                        .HasFilter("\"EntityType\" = 'Expense'");
+                        .HasDatabaseName("IX_AttachmentCU_EntityId_Document")
+                        .HasFilter("\"EntityType\" = 'Document'");
 
                     b.HasIndex("EntityType", "EntityId")
                         .HasDatabaseName("IX_AttachmentCU_EntityType_EntityId");
@@ -424,6 +429,114 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DamagedTypes", (string)null);
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.DocumentHistories.DocumentHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ActionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ActionType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DocumentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("DocumentHistories", (string)null);
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Documents.Document", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CCId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DocumentDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DocumentNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("DocumentType")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsRequiresReply")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("ParentDocumentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CCId");
+
+                    b.HasIndex("ParentDocumentId");
+
+                    b.HasIndex("PartyId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("Documents", (string)null);
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Documents.DocumentParty", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DocumentParties", (string)null);
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.Action", b =>
@@ -795,6 +908,25 @@ namespace OMSV1.Infrastructure.Migrations
                     b.ToTable("Profiles", (string)null);
                 });
 
+            modelBuilder.Entity("OMSV1.Domain.Entities.Projects.Project", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Projects", (string)null);
+                });
+
             modelBuilder.Entity("OMSV1.Domain.Entities.Reports.EmailReport", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1052,6 +1184,13 @@ namespace OMSV1.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OMSV1.Domain.Entities.Attachments.AttachmentCU", b =>
+                {
+                    b.HasOne("OMSV1.Domain.Entities.Documents.Document", null)
+                        .WithMany("Attachments")
+                        .HasForeignKey("DocumentId");
+                });
+
             modelBuilder.Entity("OMSV1.Domain.Entities.Attendances.Attendance", b =>
                 {
                     b.HasOne("OMSV1.Domain.Entities.Governorates.Governorate", "Governorate")
@@ -1155,6 +1294,50 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Navigation("Office");
 
                     b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.DocumentHistories.DocumentHistory", b =>
+                {
+                    b.HasOne("OMSV1.Domain.Entities.Documents.Document", "Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Documents.Document", b =>
+                {
+                    b.HasOne("OMSV1.Domain.Entities.Documents.DocumentParty", "CC")
+                        .WithMany()
+                        .HasForeignKey("CCId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OMSV1.Domain.Entities.Documents.Document", "ParentDocument")
+                        .WithMany("ChildDocuments")
+                        .HasForeignKey("ParentDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OMSV1.Domain.Entities.Documents.DocumentParty", "Party")
+                        .WithMany()
+                        .HasForeignKey("PartyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OMSV1.Domain.Entities.Projects.Project", "Project")
+                        .WithMany("Documents")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CC");
+
+                    b.Navigation("ParentDocument");
+
+                    b.Navigation("Party");
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.Action", b =>
@@ -1363,6 +1546,13 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Navigation("LectureTypes");
                 });
 
+            modelBuilder.Entity("OMSV1.Domain.Entities.Documents.Document", b =>
+                {
+                    b.Navigation("Attachments");
+
+                    b.Navigation("ChildDocuments");
+                });
+
             modelBuilder.Entity("OMSV1.Domain.Entities.Expenses.DailyExpenses", b =>
                 {
                     b.Navigation("SubExpenses");
@@ -1388,6 +1578,11 @@ namespace OMSV1.Infrastructure.Migrations
             modelBuilder.Entity("OMSV1.Domain.Entities.Lectures.LectureType", b =>
                 {
                     b.Navigation("LectureLectureTypes");
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Projects.Project", b =>
+                {
+                    b.Navigation("Documents");
                 });
 
             modelBuilder.Entity("OMSV1.Infrastructure.Identity.AppRole", b =>
