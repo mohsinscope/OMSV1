@@ -28,8 +28,11 @@ namespace OMSV1.Application.Handlers.Documents
             try
             {
                 // Get all Document entities as an IQueryable.
-                var queryable = _repository.GetAllAsQueryable();
-                queryable = queryable.Where(d => d.ParentDocumentId == null);
+            // Get all Document entities as an IQueryable.
+            var queryable = _repository.GetAllAsQueryable();
+                queryable = queryable.Where(d => d.ParentDocumentId == null)
+                     .OrderByDescending(d => d.DocumentNumber);
+
 
                 // Project the queryable to DocumentDto using AutoMapper.
                 var mappedQuery = queryable.ProjectTo<DocumentDto>(_mapper.ConfigurationProvider);

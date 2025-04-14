@@ -1,41 +1,41 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos.Documents;
 using OMSV1.Domain.Entities.Documents;
 using OMSV1.Domain.SeedWork;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace OMSV1.Application.Queries.Documents
 {
-    public class GetDocumentByIdDetailedQueryHandler : IRequestHandler<GetDocumentByIdDetailedQuery, DocumentDetailedDto>
+    public class GetDocumentByDocumentNumberDetailedQueryHandler : IRequestHandler<GetDocumentByDocumentNumberDetailedQuery, DocumentDetailedDto>
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public GetDocumentByIdDetailedQueryHandler(IUnitOfWork unitOfWork)
+        public GetDocumentByDocumentNumberDetailedQueryHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<DocumentDetailedDto> Handle(GetDocumentByIdDetailedQuery request, CancellationToken cancellationToken)
+        public async Task<DocumentDetailedDto> Handle(GetDocumentByDocumentNumberDetailedQuery request, CancellationToken cancellationToken)
         {
-            // Use the repository method that returns IQueryable<Document>.
+            // Get the document using the repository's GetAllAsQueryable, filtering by document number.
+            // We eagerly load ChildDocuments and their ChildDocuments using Include/ThenInclude.
             var document = await _unitOfWork.Repository<Document>()
                 .GetAllAsQueryable()
+                .Where(d => d.DocumentNumber == request.DocumentNumber)
                 .Include(d => d.ChildDocuments)
                     .ThenInclude(child => child.ChildDocuments)
-                .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+                .SingleOrDefaultAsync(cancellationToken);
 
             if (document == null)
             {
-                throw new KeyNotFoundException($"Document with ID {request.Id} was not found.");
+                throw new KeyNotFoundException($"Document with DocumentNumber {request.DocumentNumber} was not found.");
             }
 
-            // Map the document and its nested children recursively.
+            // Map the document recursively.
             return MapDocumentToDto(document);
         }
 
@@ -58,7 +58,7 @@ namespace OMSV1.Application.Queries.Documents
                 IsReplied = doc.IsReplied,
                 IsAudited = doc.IsAudited,
                 Datecreated = doc.DateCreated,
-                ChildDocuments = new List<DocumentDetailedDto>()
+                ChildDocuments = new System.Collections.Generic.List<DocumentDetailedDto>()
             };
 
             if (doc.ChildDocuments != null && doc.ChildDocuments.Any())

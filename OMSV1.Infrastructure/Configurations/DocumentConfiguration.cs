@@ -13,20 +13,27 @@ namespace OMSV1.Infrastructure.Configurations
             // Primary Key
             builder.HasKey(d => d.Id);
 
+            // Ensure DocumentNumber is unique.
+            builder.HasIndex(d => d.DocumentNumber).IsUnique();
+
             // Property configurations
             builder.Property(d => d.DocumentNumber)
                 .IsRequired()
-                .HasMaxLength(100); // Adjust the max length as needed.
+                .HasMaxLength(100);
 
             builder.Property(d => d.Title)
                 .IsRequired()
-                .HasMaxLength(200); // Adjust as required.
+                .HasMaxLength(200);
 
             builder.Property(d => d.DocumentType)
                 .IsRequired();
 
+            // Configure ResponseType as optional since not all documents may have a response.
+            builder.Property(d => d.ResponseType)
+                .IsRequired(true);
+
             builder.Property(d => d.Subject)
-                .HasMaxLength(500); // Optional property with max length.
+                .HasMaxLength(500);
 
             builder.Property(d => d.IsRequiresReply)
                 .IsRequired();
@@ -34,9 +41,18 @@ namespace OMSV1.Infrastructure.Configurations
             builder.Property(d => d.DocumentDate)
                 .IsRequired();
 
+            // New boolean flags, default to false.
+            builder.Property(d => d.IsReplied)
+                .HasDefaultValue(false)
+                .IsRequired();
+
+            builder.Property(d => d.IsAudited)
+                .HasDefaultValue(false)
+                .IsRequired();
+
             // Relationship: Document -> Project (Required)
             builder.HasOne(d => d.Project)
-                .WithMany() // Adjust navigation property in Project if necessary.
+                .WithMany() 
                 .HasForeignKey(d => d.ProjectId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -48,21 +64,23 @@ namespace OMSV1.Infrastructure.Configurations
 
             // Relationship: Document -> Party (Required)
             builder.HasOne(d => d.Party)
-                .WithMany() // Adjust navigation property in DocumentParty if necessary.
+                .WithMany()
                 .HasForeignKey(d => d.PartyId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Relationship: Document -> CC (Optional)
             builder.HasOne(d => d.CC)
-                .WithMany() // Adjust navigation property in DocumentParty if necessary.
+                .WithMany()
                 .HasForeignKey(d => d.CCId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(false);
 
-            // Configure Attachments
-            // Note: This configuration assumes that the AttachmentCU entity has a shadow property "EntityId"
-            // used as a foreign key to Document's Id. Adjust as needed if AttachmentCU
-            // instead contains a direct navigation property to Document.
+            // New: Relationship to Profile (the main creator)
+            builder.HasOne(d => d.Profile)
+                .WithMany() // Adjust navigation on the Profile entity if necessary.
+                .HasForeignKey(d => d.ProfileId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Table Mapping
             builder.ToTable("Documents");
         }

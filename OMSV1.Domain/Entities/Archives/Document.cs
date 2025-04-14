@@ -1,18 +1,29 @@
 using OMSV1.Domain.Entities.Attachments;
+using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.Entities.Projects;
 using OMSV1.Domain.Enums;
 using OMSV1.Domain.SeedWork;
+using System;
+using System.Collections.Generic;
 
 namespace OMSV1.Domain.Entities.Documents
 {
     public class Document : Entity
     {
-        // Default initialization prevents CS8618 warnings.
+        // Unique Document Number.
         public string DocumentNumber { get; private set; } = string.Empty;
         public string Title { get; private set; } = string.Empty;
+        
+        // Document type now only supports Incoming and Outgoing.
         public DocumentType DocumentType { get; private set; }
+
+        // New property for Response Type.
+        public ResponseType ResponseType { get; private set; }
+
         public string? Subject { get; private set; }
-        public bool IsRequiresReply { get; private set; }  // Indicates whether a reply is required
+        
+        // Indicates whether a reply is required.
+        public bool IsRequiresReply { get; private set; }
 
         // Relationship to Project
         public Guid ProjectId { get; private set; }
@@ -25,7 +36,7 @@ namespace OMSV1.Domain.Entities.Documents
 
         // Instead of a string, we use a full entity to represent the party (e.g., From, To, or CC)
         public Guid PartyId { get; private set; }
-        public DocumentParty Party { get; private set; } = null!;  // Assumes DocumentParty is an entity
+        public DocumentParty Party { get; private set; } = null!;
 
         public Guid? CCId { get; private set; }
         public DocumentParty? CC { get; private set; }
@@ -34,6 +45,14 @@ namespace OMSV1.Domain.Entities.Documents
 
         // Attachments
         public ICollection<AttachmentCU> Attachments { get; private set; }
+
+        // New: Profile (main creator) relationship. Every document has a known creator.
+        public Guid ProfileId { get; private set; }
+        public Profile Profile { get; private set; } = null!;
+
+        // New: Additional status flags
+        public bool IsReplied { get; private set; }
+        public bool IsAudited { get; private set; }
 
         // EF / Serialization constructor
         protected Document()
@@ -52,10 +71,14 @@ public Document(
     bool requiresReply,
     Guid partyId,
     DocumentParty party,
+    Guid profileId,
+    Profile profile,
+    ResponseType responseType,
     string? subject = null,
     Guid? parentDocumentId = null,
     Guid? ccId = null,
-    DocumentParty? cc = null)
+    DocumentParty? cc = null
+    )  // No default value!
     : this()
 {
     DocumentNumber = documentNumber;
@@ -68,8 +91,12 @@ public Document(
     Party = party;
     Subject = subject;
     ParentDocumentId = parentDocumentId;
+    ProfileId = profileId;
+    Profile = profile;
+    
+    // Now, no default is applied—the provided value is used.
+    ResponseType = responseType;
 
-    // Use null if no CC is provided.
     if (ccId.HasValue && cc is not null)
     {
         CCId = ccId.Value;
@@ -77,50 +104,79 @@ public Document(
     }
     else
     {
-        // Assign null, not Guid.Empty.
         CCId = null;
         CC = null;
     }
+
+    IsReplied = false;
+    IsAudited = false;
 }
 
-        // Domain method to create a reply document.
-        public Document CreateReply(DocumentType replyType, DateTime replyDate, bool requiresReply, Guid? ccId = null, DocumentParty? cc = null)
-        {
-            var reply = new Document(
-                documentNumber: this.DocumentNumber, // or generate a new number if needed
-                title: this.Title,
-                docType: replyType,
-                projectId: this.ProjectId,
-                documentDate: replyDate,
-                requiresReply: requiresReply,
-                partyId: this.PartyId,
-                party: this.Party,
-                subject: this.Subject,
-                parentDocumentId: this.Id,
-                ccId: ccId,
-                cc: cc
-            );
 
-            ChildDocuments.Add(reply);
-            return reply;
+// Domain method to create a reply document.// In your Document domain entity:
+public Document CreateReply(
+    string documentNumber, // <-- using the supplied reply number!
+    DocumentType replyType, 
+    DateTime replyDate, 
+    bool requiresReply, 
+    Guid profileId, 
+    Profile profile,
+    ResponseType responseType, 
+    Guid? ccId = null, 
+    DocumentParty? cc = null)
+{
+    var reply = new Document(
+        documentNumber: documentNumber,  // Use the unique number passed in
+        title: this.Title,
+        docType: replyType,
+        projectId: this.ProjectId,
+        documentDate: replyDate,
+        requiresReply: requiresReply,
+        partyId: this.PartyId,
+        party: this.Party,
+        profileId: profileId,
+        profile: profile,
+        subject: this.Subject,
+        parentDocumentId: this.Id,
+        ccId: ccId,
+        cc: cc,
+        responseType: responseType
+    );
+
+    ChildDocuments.Add(reply);
+    return reply;
+}
+        /// <summary>
+        /// Updates modifiable properties of the document.
+        /// </summary>
+        public void Update(string title, string? subject, DateTime documentDate,
+                           DocumentType docType, bool isRequiresReply, ResponseType responseType)
+        {
+            Title = title;
+            Subject = subject;
+            DocumentDate = DateTime.SpecifyKind(documentDate, DateTimeKind.Utc);
+            DocumentType = docType;
+            IsRequiresReply = isRequiresReply;
+            ResponseType = responseType;
         }
 
 
         public void ConfirmIncoming()
         {
-            if (DocumentType == DocumentType.Incoming)
-            {
-                DocumentType = DocumentType.IncomingConfirmation;
-            }
-            // else handle other states, or throw if disallowed
+            // For this revised model, you'll use the ResponseType to indicate reply/confirmation states.
+            // E.g., you could set ResponseType = ResponseType.IncomingConfirmation.
         }
+                public void MarkAsReplied()
+        {
+            IsReplied = true;
+        }
+
 
         public void MarkNoLongerRequiresReply()
         {
             IsRequiresReply = false;
         }
 
-        
-
+        // Methods to update IsReplied and IsAudited can be added as needed.
     }
 }

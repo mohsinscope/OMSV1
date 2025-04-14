@@ -14,6 +14,11 @@ namespace OMSV1.Application.Commands.Documents
         public Guid ParentDocumentId { get; set; }
         
         /// <summary>
+        /// The unique document number for the reply.
+        /// </summary>
+        public string ReplyDocumentNumber { get; set; } = string.Empty;
+        
+        /// <summary>
         /// The type for the reply document (for instance, IncomingReply or OutgoingReply).
         /// </summary>
         public DocumentType ReplyType { get; set; }
@@ -29,9 +34,14 @@ namespace OMSV1.Application.Commands.Documents
         public bool RequiresReply { get; set; }
         
         /// <summary>
-        /// The user performing this reply action.
+        /// The profile (main creator) of the reply document.
         /// </summary>
-        public Guid UserId { get; set; }
+        public Guid ProfileId { get; set; }
+        
+        /// <summary>
+        /// The response type for the reply document.
+        /// </summary>
+        public ResponseType ResponseType { get; set; }
         
         /// <summary>
         /// Optional notes for the reply.
