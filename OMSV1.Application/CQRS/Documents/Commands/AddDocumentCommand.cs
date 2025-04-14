@@ -1,5 +1,8 @@
 using MediatR;
 using OMSV1.Domain.Enums;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
 
 namespace OMSV1.Application.Commands.Documents
 {
@@ -13,9 +16,14 @@ namespace OMSV1.Application.Commands.Documents
         public DateTime DocumentDate { get; set; }
         public bool IsRequiresReply { get; set; }
         public Guid PartyId { get; set; }
+        // New required property for Profile (main creator)
+        public required Guid ProfileId { get; set; }
         public string? Subject { get; set; }
         public Guid? ParentDocumentId { get; set; } = null;
         public Guid? CCId { get; set; } = null;
+
+        // NEW: Required ResponseType property
+        public ResponseType ResponseType { get; set; }
 
         // Attachment property
         public required List<IFormFile> File { get; set; }

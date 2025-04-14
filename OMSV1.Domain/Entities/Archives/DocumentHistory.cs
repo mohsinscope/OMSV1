@@ -1,4 +1,5 @@
 using OMSV1.Domain.Entities.Documents;
+using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.Enums;
 using OMSV1.Domain.SeedWork;
 using System;
@@ -13,10 +14,9 @@ namespace OMSV1.Domain.Entities.DocumentHistories
         // Use the new enum DocumentActions
         public DocumentActions ActionType { get; private set; }
 
-        // Which user performed this action
-        public Guid UserId { get; private set; }
-        // If you have a User entity:
-        // public User User { get; private set; } = null!;
+        // Use ProfileId and the associated Profile entity instead of UserId
+        public Guid ProfileId { get; private set; }
+        public Profile Profile { get; private set; } = null!;
 
         public DateTime ActionDate { get; private set; }
         public string? Notes { get; private set; }
@@ -25,16 +25,17 @@ namespace OMSV1.Domain.Entities.DocumentHistories
         protected DocumentHistory() { }
 
         public DocumentHistory(Guid documentId,
-                               Guid userId,
+                               Guid profileId,
                                DocumentActions actionType,
                                DateTime actionDate,
                                string? notes = null)
         {
             DocumentId = documentId;
-            UserId     = userId;
+            ProfileId = profileId;
             ActionType = actionType;
+            // Ensure UTC specification for DateTime
             ActionDate = DateTime.SpecifyKind(actionDate, DateTimeKind.Utc);
-            Notes      = notes;
+            Notes = notes;
         }
     }
 }

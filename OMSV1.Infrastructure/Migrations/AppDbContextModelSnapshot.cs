@@ -453,12 +453,14 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("ProfileId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DocumentId");
+
+                    b.HasIndex("ProfileId");
 
                     b.ToTable("DocumentHistories", (string)null);
                 });
@@ -486,6 +488,16 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Property<int>("DocumentType")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsAudited")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsReplied")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.Property<bool>("IsRequiresReply")
                         .HasColumnType("boolean");
 
@@ -495,8 +507,14 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Property<Guid>("PartyId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("ResponseType")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Subject")
                         .HasMaxLength(500)
@@ -511,9 +529,14 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasIndex("CCId");
 
+                    b.HasIndex("DocumentNumber")
+                        .IsUnique();
+
                     b.HasIndex("ParentDocumentId");
 
                     b.HasIndex("PartyId");
+
+                    b.HasIndex("ProfileId");
 
                     b.HasIndex("ProjectId");
 
@@ -1304,7 +1327,15 @@ namespace OMSV1.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("OMSV1.Domain.Entities.Profiles.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Document");
+
+                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Documents.Document", b =>
@@ -1325,6 +1356,12 @@ namespace OMSV1.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("OMSV1.Domain.Entities.Profiles.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("OMSV1.Domain.Entities.Projects.Project", "Project")
                         .WithMany("Documents")
                         .HasForeignKey("ProjectId")
@@ -1336,6 +1373,8 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Navigation("ParentDocument");
 
                     b.Navigation("Party");
+
+                    b.Navigation("Profile");
 
                     b.Navigation("Project");
                 });

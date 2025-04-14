@@ -4,11 +4,8 @@ using OMSV1.Application.Commands.Documents;
 using OMSV1.Application.Dtos.Documents;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Documents;
-using System;
 using System.Net;
-using System.Threading.Tasks;
 using OMSV1.Infrastructure.Extensions;                // For Response.AddPaginationHeader if needed
-using OMSV1.Application.Helpers;                      // For ResponseHelper
 
 namespace OMSV1.Application.Controllers.Documents
 {
@@ -70,7 +67,6 @@ namespace OMSV1.Application.Controllers.Documents
             }
         }
         // GET: api/document/{id}
-        // GET: api/document/{id}
         // Returns a detailed document including all child documents and attachments.
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDocumentById(Guid id)
@@ -84,6 +80,29 @@ namespace OMSV1.Application.Controllers.Documents
             catch (KeyNotFoundException knfEx)
             {
                 return NotFound(knfEx.Message);
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(
+                    HttpStatusCode.InternalServerError,
+                    "An error occurred while retrieving the document.",
+                    new[] { ex.Message }
+                );
+            }
+        }
+        // New endpoint to get document details by DocumentNumber
+        [HttpGet("bynumber/{documentNumber}")]
+        public async Task<IActionResult> GetDocumentByDocumentNumber(string documentNumber)
+        {
+            try
+            {
+                var query = new GetDocumentByDocumentNumberDetailedQuery { DocumentNumber = documentNumber };
+                DocumentDetailedDto documentDto = await _mediator.Send(query);
+                return Ok(documentDto);
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                return NotFound(new { message = knfEx.Message });
             }
             catch (Exception ex)
             {
@@ -118,32 +137,108 @@ namespace OMSV1.Application.Controllers.Documents
             }
         }
          // POST: api/document/{id}/reply
-        [HttpPost("{id}/reply")]
-        public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm] ReplyDocumentWithAttachmentCommand command)
+// POST: api/document/{id}/reply
+[HttpPost("{id}/reply")]
+public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm] ReplyDocumentWithAttachmentCommand command)
+{
+    try
+    {
+        if (id != command.ParentDocumentId)
         {
+            return BadRequest("URL document ID mismatch with command's ParentDocumentId.");
+        }
+
+        var replyId = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetDocumentById), new { id = replyId }, new { Message = "Reply document created successfully", ReplyDocumentId = replyId });
+    }
+    catch (KeyNotFoundException knfEx)
+    {
+        return NotFound(knfEx.Message);
+    }
+    catch (Exception ex)
+    {
+        // Construct a more detailed error message.
+        var detailedError = ex.Message;
+        if (ex.InnerException != null)
+        {
+            detailedError += " | Inner Exception: " + ex.InnerException.Message;
+        }
+        
+        // Optionally, include stack trace or other debugging details if appropriate (e.g., in a development environment).
+        // detailedError += " | Stack Trace: " + ex.StackTrace;
+
+        return ResponseHelper.CreateErrorResponse(
+            HttpStatusCode.InternalServerError,
+            "An error occurred while creating the reply document.",
+            new[] { detailedError }
+        );
+    }
+}
+        // PUT: api/document/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateDocument(Guid id, [FromBody] UpdateDocumentCommand command)
+        {
+            // Validate that the URL document id matches the request command's document id.
+            if (id != command.DocumentId)
+            {
+                return BadRequest("The document id in the URL does not match the document id in the request body.");
+            }
+            
             try
             {
-                if (id != command.ParentDocumentId)
-                {
-                    return BadRequest("URL document ID mismatch with command's ParentDocumentId.");
-                }
-
-                var replyId = await _mediator.Send(command);
-                return CreatedAtAction(nameof(GetDocumentById), new { id = replyId }, new { Message = "Reply document created successfully", ReplyDocumentId = replyId });
+                var updatedDocumentId = await _mediator.Send(command);
+                return Ok(new { Message = "Document updated successfully", DocumentId = updatedDocumentId });
             }
             catch (KeyNotFoundException knfEx)
             {
                 return NotFound(knfEx.Message);
             }
+            catch (UnauthorizedAccessException uaEx)
+            {
+                return StatusCode((int)HttpStatusCode.Forbidden, new { Message = uaEx.Message });
+            }
             catch (Exception ex)
             {
-                return ResponseHelper.CreateErrorResponse(
-                    HttpStatusCode.InternalServerError,
-                    "An error occurred while creating the reply document.",
-                    new[] { ex.Message }
-                );
+                return StatusCode((int)HttpStatusCode.InternalServerError,
+                    ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, 
+                                                       "An error occurred while updating the document.", 
+                                                       new[] { ex.Message }));
             }
         }
+        
+        // DELETE: api/document/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteDocument(Guid id)
+        {
+            try
+            {
+                var result = await _mediator.Send(new DeleteDocumentCommand(id));
+                
+                if (result)
+                {
+                    return Ok(new { Message = "Document and its history records deleted successfully." });
+                }
+                else
+                {
+                    return StatusCode((int)HttpStatusCode.InternalServerError, new { Message = "Deletion failed." });
+                }
+            }
+            catch (HandlerException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError,
+                    ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                                                       "An error occurred while deleting the document.",
+                                                       new[] { ex.Message }));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError,
+                    ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError,
+                                                       "An unexpected error occurred while deleting the document.",
+                                                       new[] { ex.Message }));
+            }
+        }
+
         
         // POST: api/document/{id}/changestatus
         [HttpPost("{id}/changestatus")]

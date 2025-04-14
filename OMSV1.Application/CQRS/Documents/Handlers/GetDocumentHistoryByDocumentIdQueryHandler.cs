@@ -36,7 +36,7 @@ namespace OMSV1.Application.Queries.Documents
                 Id = history.Id,
                 DocumentId = history.DocumentId,
                 ActionType = (int)history.ActionType,
-                UserId = history.UserId,
+                ProfileId = history.ProfileId,
                 ActionDate = history.ActionDate,
                 Notes = history.Notes,
                 Datecreated=history.DateCreated

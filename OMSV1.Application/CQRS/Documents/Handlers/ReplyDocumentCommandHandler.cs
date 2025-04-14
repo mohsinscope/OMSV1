@@ -4,6 +4,7 @@ using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.DocumentHistories;
 using OMSV1.Domain.Entities.Documents;
 using OMSV1.Domain.Entities.Projects;
+using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.Enums;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Application.Helpers;
@@ -30,34 +31,46 @@ namespace OMSV1.Application.Handlers.Documents
         {
             try
             {
-                // 1. Retrieve the parent Document
+                // 1. Retrieve the parent Document.
                 var parentDoc = await _unitOfWork.Repository<Document>()
                     .GetByIdAsync(request.ParentDocumentId);
                 if (parentDoc == null)
                     throw new KeyNotFoundException($"Document with ID {request.ParentDocumentId} not found.");
 
-                // 2. Retrieve the CC DocumentParty if a valid CCId is provided
+                // 2. Retrieve the CC DocumentParty if a valid CCId is provided.
                 DocumentParty? ccParty = null;
                 if (request.CCId.HasValue && request.CCId.Value != Guid.Empty)
                 {
                     ccParty = await _unitOfWork.Repository<DocumentParty>()
                         .GetByIdAsync(request.CCId.Value);
-                    // Optionally throw if CC is required but not found.
                 }
 
-                // 3. Create the reply Document using a domain method that accepts optional CC values
+                // 3. Retrieve the Profile for the replying user using the provided ProfileId.
+                var profile = await _unitOfWork.Repository<Profile>().GetByIdAsync(request.ProfileId);
+                if (profile == null)
+                    throw new KeyNotFoundException($"Profile with ID {request.ProfileId} was not found.");
+
+                // 4. Create the reply Document using the parent's domain method.
+                // Pass the user-supplied ReplyDocumentNumber into the CreateReply method.
                 var replyDoc = parentDoc.CreateReply(
+                    documentNumber: request.ReplyDocumentNumber,
                     replyType: request.ReplyType,
                     replyDate: request.ReplyDate,
                     requiresReply: request.RequiresReply,
-                    ccId: request.CCId,   // may be null if not provided
+                    profileId: request.ProfileId,
+                    profile: profile,
+                    responseType: request.ResponseType,
+                    ccId: request.CCId,
                     cc: ccParty
                 );
 
-                // 4. Add the reply document to the repository
+                // 5. Mark the parent document as replied.
+                parentDoc.MarkAsReplied();
+
+                // 6. Add the reply document to the repository.
                 await _unitOfWork.Repository<Document>().AddAsync(replyDoc);
 
-                // 5. Process file attachments if any
+                // 7. Process file attachments.
                 if (request.File == null || request.File.Count == 0)
                     throw new ArgumentException("No files were uploaded for the attachments.");
 
@@ -65,30 +78,27 @@ namespace OMSV1.Application.Handlers.Documents
                 {
                     if (file != null && file.Length > 0)
                     {
-                        // Upload file using photo service; EntityType.Document is assumed.
-                        var photoResult = await _photoService.AddPhotoAsync(file, replyDoc.Id, OMSV1.Domain.Enums.EntityType.Document);
-                        
-                        // Create a new attachment entity.
+                        var photoResult = await _photoService.AddPhotoAsync(file, replyDoc.Id, EntityType.Document);
                         var attachment = new AttachmentCU(
                             filePath: photoResult.FilePath,
-                            entityType: OMSV1.Domain.Enums.EntityType.Document,
+                            entityType: EntityType.Document,
                             entityId: replyDoc.Id
                         );
                         await _unitOfWork.Repository<AttachmentCU>().AddAsync(attachment);
                     }
                 }
 
-                // 6. Create a DocumentHistory entry for the reply action
+                // 8. Create a DocumentHistory entry for the reply action using ProfileId.
                 var history = new DocumentHistory(
-                    documentId: parentDoc.Id,  // or replyDoc.Id if you wish to track the reply separately
-                    userId: request.UserId,
+                    documentId: parentDoc.Id,
+                    profileId: request.ProfileId,
                     actionType: DocumentActions.Reply,
                     actionDate: DateTime.UtcNow,
                     notes: request.Notes
                 );
                 await _unitOfWork.Repository<DocumentHistory>().AddAsync(history);
 
-                // 7. Commit all changes in one transaction
+                // 9. Commit all changes in one transaction.
                 if (!await _unitOfWork.SaveAsync(cancellationToken))
                 {
                     throw new Exception("Failed to save the reply document and its attachments to the database.");

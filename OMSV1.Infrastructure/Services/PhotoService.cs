@@ -15,6 +15,8 @@ public class PhotoService : IPhotoService, IDisposable
     private readonly IWebHostEnvironment _webHostEnvironment;
     // Use the generic repository for DamagedPassport
     private readonly IGenericRepository<DamagedPassport> _damagedPassportRepository;
+    private readonly IGenericRepository<OMSV1.Domain.Entities.Documents.Document> _documentRepository;
+
     //private readonly string _networkStoragePath = @"\\172.16.108.26\samba";
     private readonly string _networkStoragePath = @"C:\Uploads";
     private const int MaxImageDimension = 1920; // Max dimension for images
@@ -22,10 +24,11 @@ public class PhotoService : IPhotoService, IDisposable
     private const int ImageQuality = 75; // JPEG quality (0-100)
     private const long MaxFolderSize = 50L * 1024L * 1024L * 1024L; // 50GB in bytes
 
-    public PhotoService(IWebHostEnvironment webHostEnvironment, IGenericRepository<DamagedPassport> damagedPassportRepository)
+    public PhotoService(IWebHostEnvironment webHostEnvironment, IGenericRepository<DamagedPassport> damagedPassportRepository,IGenericRepository<OMSV1.Domain.Entities.Documents.Document> documentRepository)
     {
         _webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));
         _damagedPassportRepository = damagedPassportRepository ?? throw new ArgumentNullException(nameof(damagedPassportRepository));
+        _documentRepository=documentRepository?? throw new ArgumentNullException(nameof(documentRepository));
     }
 
     private string GetNextAvailableFolder(string baseFolder)
@@ -68,9 +71,19 @@ public class PhotoService : IPhotoService, IDisposable
             
             // Generate a unique filename
             string uniqueFileName;
-            if (entityType == EntityType.DamagedPassport)
+            if (entityType == EntityType.Document)
             {
-                // For DamagedPassport, use the PassportNumber from the entity
+                // For Document, retrieve the document to get its DocumentNumber.
+                // (Assumes you have an injected repository such as _documentRepository)
+                var document = await _documentRepository.GetByIdAsync(entityId);
+                if (document == null)
+                    throw new Exception("Document not found for the provided entityId.");
+                
+                uniqueFileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{document.DocumentNumber}_{DateTime.Now:yyyyMMdd}{Path.GetExtension(file.FileName)}";
+            }
+            else if (entityType == EntityType.DamagedPassport)
+            {
+                // Existing behavior for DamagedPassport remains unchanged.
                 var damagedPassport = await _damagedPassportRepository.GetByIdAsync(entityId);
                 if (damagedPassport == null)
                     throw new Exception("DamagedPassport not found for the provided entityId.");
@@ -78,9 +91,10 @@ public class PhotoService : IPhotoService, IDisposable
             }
             else
             {
+                // Default naming for other entity types.
                 uniqueFileName = $"{entityType}_{entityId}_{Guid.NewGuid()}_{file.FileName}";
             }
-            
+
             string filePath = Path.Combine(targetFolder, uniqueFileName);
             
             // Calculate the relative path from network storage root
