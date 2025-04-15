@@ -10,13 +10,13 @@ namespace OMSV1.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Document> builder)
         {
-            // Primary Key
+            // Primary Key.
             builder.HasKey(d => d.Id);
 
             // Ensure DocumentNumber is unique.
             builder.HasIndex(d => d.DocumentNumber).IsUnique();
 
-            // Property configurations
+            // Property configurations.
             builder.Property(d => d.DocumentNumber)
                 .IsRequired()
                 .HasMaxLength(100);
@@ -28,7 +28,7 @@ namespace OMSV1.Infrastructure.Configurations
             builder.Property(d => d.DocumentType)
                 .IsRequired();
 
-            // Configure ResponseType as optional since not all documents may have a response.
+            // Configure ResponseType as required.
             builder.Property(d => d.ResponseType)
                 .IsRequired(true);
 
@@ -50,38 +50,54 @@ namespace OMSV1.Infrastructure.Configurations
                 .HasDefaultValue(false)
                 .IsRequired();
 
-            // Relationship: Document -> Project (Required)
+            // Relationship: Document -> Project (Required).
             builder.HasOne(d => d.Project)
                 .WithMany() 
                 .HasForeignKey(d => d.ProjectId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Self-reference Relationship (Parent-Child Documents)
+            // Self-reference Relationship (Parent-Child Documents).
             builder.HasOne(d => d.ParentDocument)
                 .WithMany(d => d.ChildDocuments)
                 .HasForeignKey(d => d.ParentDocumentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Relationship: Document -> Party (Required)
+            // Relationship: Document -> Party (Required).
             builder.HasOne(d => d.Party)
                 .WithMany()
                 .HasForeignKey(d => d.PartyId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Relationship: Document -> CC (Optional)
-            builder.HasOne(d => d.CC)
+            // Updated: Configure many-to-many relationship for CC recipients.
+            builder
+                .HasMany(d => d.CCs)
                 .WithMany()
-                .HasForeignKey(d => d.CCId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .IsRequired(false);
+                .UsingEntity<Dictionary<string, object>>(
+                    "DocumentCCs",
+                    j => j
+                        .HasOne<DocumentParty>()
+                        .WithMany()
+                        .HasForeignKey("DocumentPartyId")
+                        .OnDelete(DeleteBehavior.Restrict),
+                    j => j
+                        .HasOne<Document>()
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("DocumentId", "DocumentPartyId");
+                        j.ToTable("DocumentCCs");
+                    }
+                );
 
-            // New: Relationship to Profile (the main creator)
+            // Relationship: Document -> Profile (the main creator).
             builder.HasOne(d => d.Profile)
                 .WithMany() // Adjust navigation on the Profile entity if necessary.
                 .HasForeignKey(d => d.ProfileId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Table Mapping
+            // Table Mapping.
             builder.ToTable("Documents");
         }
     }

@@ -19,7 +19,7 @@ namespace OMSV1.Application.Dtos.Documents
         public Guid ProjectId { get; set; }
         public DateTime DocumentDate { get; set; }
         public Guid PartyId { get; set; }
-        public Guid? CCId { get; set; }
+        public List<Guid>? CCIds { get; set; }
         
         // New: Main creator Profile reference.
         public Guid ProfileId { get; set; }

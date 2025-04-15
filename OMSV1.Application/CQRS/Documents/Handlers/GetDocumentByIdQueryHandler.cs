@@ -24,11 +24,14 @@ namespace OMSV1.Application.Queries.Documents
         public async Task<DocumentDetailedDto> Handle(GetDocumentByIdDetailedQuery request, CancellationToken cancellationToken)
         {
             // Use the repository method that returns IQueryable<Document>.
-            var document = await _unitOfWork.Repository<Document>()
-                .GetAllAsQueryable()
-                .Include(d => d.ChildDocuments)
-                    .ThenInclude(child => child.ChildDocuments)
-                .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+        var document = await _unitOfWork.Repository<Document>()
+            .GetAllAsQueryable()
+            .Include(d => d.CCs) // Include CCs for the root document
+            .Include(d => d.ChildDocuments)
+                .ThenInclude(child => child.CCs) // Include CCs for first-level child documents
+            .Include(d => d.ChildDocuments)
+                .ThenInclude(child => child.ChildDocuments) // For further nesting (if needed)
+            .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
 
             if (document == null)
             {
@@ -53,7 +56,8 @@ namespace OMSV1.Application.Queries.Documents
                 ProjectId = doc.ProjectId,
                 DocumentDate = doc.DocumentDate,
                 PartyId = doc.PartyId,
-                CCId = doc.CCId,
+                // Updated: Map the multiple CC recipients into a list of their identifiers.
+                CCIds = doc.CCs != null ? doc.CCs.Select(cc => cc.Id).ToList() : new List<Guid>(),
                 ProfileId = doc.ProfileId,
                 IsReplied = doc.IsReplied,
                 IsAudited = doc.IsAudited,
