@@ -49,9 +49,9 @@ namespace OMSV1.Application.Commands.Documents
         public string? Notes { get; set; }
         
         /// <summary>
-        /// Optional CC ID to set on the reply.
+        /// Updated: Collection of CC IDs to set on the reply.
         /// </summary>
-        public Guid? CCId { get; set; }
+        public List<Guid>? CCIds { get; set; } = new List<Guid>();
         
         /// <summary>
         /// One or more file attachments.

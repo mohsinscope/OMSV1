@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace OMSV1.Application.Handlers.Documents
 {
@@ -37,12 +38,21 @@ namespace OMSV1.Application.Handlers.Documents
                 if (parentDoc == null)
                     throw new KeyNotFoundException($"Document with ID {request.ParentDocumentId} not found.");
 
-                // 2. Retrieve the CC DocumentParty if a valid CCId is provided.
-                DocumentParty? ccParty = null;
-                if (request.CCId.HasValue && request.CCId.Value != Guid.Empty)
+                // 2. Retrieve the CC DocumentParties if valid CCIds are provided.
+                var ccParties = new List<DocumentParty>();
+                if (request.CCIds != null && request.CCIds.Any())
                 {
-                    ccParty = await _unitOfWork.Repository<DocumentParty>()
-                        .GetByIdAsync(request.CCId.Value);
+                    foreach (var ccId in request.CCIds)
+                    {
+                        if (ccId != Guid.Empty)
+                        {
+                            var ccParty = await _unitOfWork.Repository<DocumentParty>().GetByIdAsync(ccId);
+                            if (ccParty != null)
+                            {
+                                ccParties.Add(ccParty);
+                            }
+                        }
+                    }
                 }
 
                 // 3. Retrieve the Profile for the replying user using the provided ProfileId.
@@ -60,8 +70,7 @@ namespace OMSV1.Application.Handlers.Documents
                     profileId: request.ProfileId,
                     profile: profile,
                     responseType: request.ResponseType,
-                    ccId: request.CCId,
-                    cc: ccParty
+                    ccs: ccParties
                 );
 
                 // 5. Mark the parent document as replied.

@@ -42,6 +42,21 @@ namespace OMSV1.Infrastructure.Migrations
                     b.ToTable("RolePermissions");
                 });
 
+            modelBuilder.Entity("DocumentCCs", b =>
+                {
+                    b.Property<Guid>("DocumentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DocumentPartyId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("DocumentId", "DocumentPartyId");
+
+                    b.HasIndex("DocumentPartyId");
+
+                    b.ToTable("DocumentCCs", (string)null);
+                });
+
             modelBuilder.Entity("EmailReportReportType", b =>
                 {
                     b.Property<Guid>("EmailReportId")
@@ -471,9 +486,6 @@ namespace OMSV1.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CCId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
 
@@ -526,8 +538,6 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CCId");
 
                     b.HasIndex("DocumentNumber")
                         .IsUnique();
@@ -1156,6 +1166,21 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("DocumentCCs", b =>
+                {
+                    b.HasOne("OMSV1.Domain.Entities.Documents.Document", null)
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OMSV1.Domain.Entities.Documents.DocumentParty", null)
+                        .WithMany()
+                        .HasForeignKey("DocumentPartyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("EmailReportReportType", b =>
                 {
                     b.HasOne("OMSV1.Domain.Entities.Reports.EmailReport", null)
@@ -1340,11 +1365,6 @@ namespace OMSV1.Infrastructure.Migrations
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Documents.Document", b =>
                 {
-                    b.HasOne("OMSV1.Domain.Entities.Documents.DocumentParty", "CC")
-                        .WithMany()
-                        .HasForeignKey("CCId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("OMSV1.Domain.Entities.Documents.Document", "ParentDocument")
                         .WithMany("ChildDocuments")
                         .HasForeignKey("ParentDocumentId")
@@ -1367,8 +1387,6 @@ namespace OMSV1.Infrastructure.Migrations
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("CC");
 
                     b.Navigation("ParentDocument");
 

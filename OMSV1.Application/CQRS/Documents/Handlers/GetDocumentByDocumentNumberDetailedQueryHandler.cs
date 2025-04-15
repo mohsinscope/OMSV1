@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace OMSV1.Application.Queries.Documents
 {
@@ -21,13 +22,19 @@ namespace OMSV1.Application.Queries.Documents
 
         public async Task<DocumentDetailedDto> Handle(GetDocumentByDocumentNumberDetailedQuery request, CancellationToken cancellationToken)
         {
-            // Get the document using the repository's GetAllAsQueryable, filtering by document number.
-            // We eagerly load ChildDocuments and their ChildDocuments using Include/ThenInclude.
+            // Retrieve the document using the repository's queryable method.
+            // The query eagerly loads:
+            //   - CCs for the root document.
+            //   - ChildDocuments and their CCs.
+            //   - ChildDocuments and their ChildDocuments (further nesting).
             var document = await _unitOfWork.Repository<Document>()
                 .GetAllAsQueryable()
                 .Where(d => d.DocumentNumber == request.DocumentNumber)
+                .Include(d => d.CCs) // Include CCs for the root document.
                 .Include(d => d.ChildDocuments)
-                    .ThenInclude(child => child.ChildDocuments)
+                    .ThenInclude(child => child.CCs) // Include CCs for first-level child documents.
+                .Include(d => d.ChildDocuments)
+                    .ThenInclude(child => child.ChildDocuments) // Include any nested child documents.
                 .SingleOrDefaultAsync(cancellationToken);
 
             if (document == null)
@@ -53,12 +60,13 @@ namespace OMSV1.Application.Queries.Documents
                 ProjectId = doc.ProjectId,
                 DocumentDate = doc.DocumentDate,
                 PartyId = doc.PartyId,
-                CCId = doc.CCId,
+                // Updated: Map the CC recipients to a nullable list of their IDs.
+                CCIds = (doc.CCs != null && doc.CCs.Any()) ? doc.CCs.Select(cc => cc.Id).ToList() : null,
                 ProfileId = doc.ProfileId,
                 IsReplied = doc.IsReplied,
                 IsAudited = doc.IsAudited,
                 Datecreated = doc.DateCreated,
-                ChildDocuments = new System.Collections.Generic.List<DocumentDetailedDto>()
+                ChildDocuments = new List<DocumentDetailedDto>()
             };
 
             if (doc.ChildDocuments != null && doc.ChildDocuments.Any())

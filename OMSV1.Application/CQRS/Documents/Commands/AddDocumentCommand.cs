@@ -16,11 +16,15 @@ namespace OMSV1.Application.Commands.Documents
         public DateTime DocumentDate { get; set; }
         public bool IsRequiresReply { get; set; }
         public Guid PartyId { get; set; }
+        
         // New required property for Profile (main creator)
         public required Guid ProfileId { get; set; }
+        
         public string? Subject { get; set; }
         public Guid? ParentDocumentId { get; set; } = null;
-        public Guid? CCId { get; set; } = null;
+        
+        // Updated: Multiple CC recipients are allowed.
+        public List<Guid>? CCIds { get; set; } = new List<Guid>();
 
         // NEW: Required ResponseType property
         public ResponseType ResponseType { get; set; }

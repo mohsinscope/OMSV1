@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace OMSV1.Application.Handlers.Documents
 {
@@ -46,10 +47,19 @@ namespace OMSV1.Application.Handlers.Documents
                 if (profile == null)
                     throw new KeyNotFoundException($"Profile with ID {request.ProfileId} was not found.");
 
-                DocumentParty? ccParty = null;
-                if (request.CCId.HasValue && request.CCId.Value != Guid.Empty)
+                // Retrieve the CC DocumentParties if valid CCIds are provided.
+                var ccParties = new List<DocumentParty>();
+                if (request.CCIds != null && request.CCIds.Any())
                 {
-                    ccParty = await _unitOfWork.Repository<DocumentParty>().GetByIdAsync(request.CCId.Value);
+                    foreach (var ccId in request.CCIds)
+                    {
+                        if (ccId != Guid.Empty)
+                        {
+                            var ccParty = await _unitOfWork.Repository<DocumentParty>().GetByIdAsync(ccId);
+                            if (ccParty != null)
+                                ccParties.Add(ccParty);
+                        }
+                    }
                 }
 
                 // Create the document using client-supplied values.
@@ -66,8 +76,7 @@ namespace OMSV1.Application.Handlers.Documents
                     profile: profile,
                     subject: request.Subject,
                     parentDocumentId: request.ParentDocumentId,
-                    ccId: request.CCId,
-                    cc: ccParty,
+                    ccs: ccParties,
                     responseType: request.ResponseType  // Value supplied by client
                 );
 
