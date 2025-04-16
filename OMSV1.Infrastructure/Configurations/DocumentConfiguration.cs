@@ -50,6 +50,10 @@ namespace OMSV1.Infrastructure.Configurations
                 .HasDefaultValue(false)
                 .IsRequired();
 
+            // ***** Configure Notes as an optional property *****
+            builder.Property(d => d.Notes)
+                .HasMaxLength(1000);
+
             // Relationship: Document -> Project (Required).
             builder.HasOne(d => d.Project)
                 .WithMany() 

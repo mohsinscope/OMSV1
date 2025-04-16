@@ -23,25 +23,49 @@ namespace OMSV1.Application.Queries.Documents
 
         public async Task<DocumentDetailedDto> Handle(GetDocumentByIdDetailedQuery request, CancellationToken cancellationToken)
         {
-            // Use the repository method that returns IQueryable<Document>.
-        var document = await _unitOfWork.Repository<Document>()
-            .GetAllAsQueryable()
-            .Include(d => d.CCs) // Include CCs for the root document
-            .Include(d => d.ChildDocuments)
-                .ThenInclude(child => child.CCs) // Include CCs for first-level child documents
-            .Include(d => d.ChildDocuments)
-                .ThenInclude(child => child.ChildDocuments) // For further nesting (if needed)
-            .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+            // Option 1: If you expect only a limited tree depth, you might use chained Include/ThenInclude.
+            // For arbitrary nesting, Option 2 is recommended as below.
+            // -------------------------------------------------------------------
+            // Option 2: Load all documents (for the scope) and then build the tree in memory.
+            var allDocuments = await _unitOfWork.Repository<Document>()
+                .GetAllAsQueryable()
+                .Include(d => d.Profile)  // Load Profile to map ProfileFullName.
+                .Include(d => d.CCs)      // Load all CCs.
+                .ToListAsync(cancellationToken);
 
-            if (document == null)
+            // Find the root document with the specified Id.
+            var rootDocument = allDocuments.FirstOrDefault(d => d.Id == request.Id);
+            if (rootDocument == null)
             {
                 throw new KeyNotFoundException($"Document with ID {request.Id} was not found.");
             }
 
-            // Map the document and its nested children recursively.
-            return MapDocumentToDto(document);
+            // Build the complete tree recursively.
+            var dtoTree = BuildDocumentTree(rootDocument, allDocuments);
+            return dtoTree;
         }
 
+        /// <summary>
+        /// Recursively builds the document tree from the flat list of documents.
+        /// </summary>
+        private DocumentDetailedDto BuildDocumentTree(Document doc, IEnumerable<Document> allDocs)
+        {
+            // Map the current document (without recursion).
+            var dto = MapDocumentToDto(doc);
+            
+            // Find all child documents (immediate children)
+            var children = allDocs.Where(x => x.ParentDocumentId == doc.Id).ToList();
+            foreach (var child in children)
+            {
+                dto.ChildDocuments.Add(BuildDocumentTree(child, allDocs));
+            }
+
+            return dto;
+        }
+
+        /// <summary>
+        /// Maps a single Document to its DTO. This method does NOT handle recursion.
+        /// </summary>
         private DocumentDetailedDto MapDocumentToDto(Document doc)
         {
             var dto = new DocumentDetailedDto
@@ -56,19 +80,17 @@ namespace OMSV1.Application.Queries.Documents
                 ProjectId = doc.ProjectId,
                 DocumentDate = doc.DocumentDate,
                 PartyId = doc.PartyId,
-                // Updated: Map the multiple CC recipients into a list of their identifiers.
+                // Map the CC recipients into a list of their IDs.
                 CCIds = doc.CCs != null ? doc.CCs.Select(cc => cc.Id).ToList() : new List<Guid>(),
                 ProfileId = doc.ProfileId,
+                ProfileFullName = doc.Profile?.FullName,
                 IsReplied = doc.IsReplied,
                 IsAudited = doc.IsAudited,
                 Datecreated = doc.DateCreated,
+                // Map the optional Notes property.
+                Notes = doc.Notes,
                 ChildDocuments = new List<DocumentDetailedDto>()
             };
-
-            if (doc.ChildDocuments != null && doc.ChildDocuments.Any())
-            {
-                dto.ChildDocuments = doc.ChildDocuments.Select(child => MapDocumentToDto(child)).ToList();
-            }
 
             return dto;
         }

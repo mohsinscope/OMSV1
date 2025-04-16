@@ -29,6 +29,9 @@ namespace OMSV1.Application.Commands.Documents
         // NEW: Required ResponseType property
         public ResponseType ResponseType { get; set; }
 
+        // NEW: Optional Notes property
+        public string? Notes { get; set; }
+
         // Attachment property
         public required List<IFormFile> File { get; set; }
     }

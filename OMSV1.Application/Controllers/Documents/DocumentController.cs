@@ -172,11 +172,11 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
             "An error occurred while creating the reply document.",
             new[] { detailedError }
         );
-    }
-}
+            }
+        }       
         // PUT: api/document/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDocument(Guid id, [FromBody] UpdateDocumentCommand command)
+        public async Task<IActionResult> UpdateDocument(Guid id, [FromBody] UpdateDocumentDetailsCommand command)
         {
             // Validate that the URL document id matches the request command's document id.
             if (id != command.DocumentId)

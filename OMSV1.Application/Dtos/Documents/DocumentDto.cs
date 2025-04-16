@@ -1,3 +1,4 @@
+using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.Enums;
 using System;
 
@@ -16,10 +17,13 @@ namespace OMSV1.Application.Dtos.Documents
         public Guid ProjectId { get; set; }
         public DateTime DocumentDate { get; set; }
         public bool IsRequiresReply { get; set; }
+        public string? Notes { get; set; }
         public Guid PartyId { get; set; }
         
         // New: Main creator Profile reference.
         public Guid ProfileId { get; set; }
+        public string? ProfileFullName{ get; set; }  
+
         
         public string? Subject { get; set; }
         public Guid? ParentDocumentId { get; set; }
