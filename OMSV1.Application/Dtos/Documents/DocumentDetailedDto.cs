@@ -1,3 +1,4 @@
+using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -20,9 +21,13 @@ namespace OMSV1.Application.Dtos.Documents
         public DateTime DocumentDate { get; set; }
         public Guid PartyId { get; set; }
         public List<Guid>? CCIds { get; set; }
+        public string? Notes { get; set; }
+
         
         // New: Main creator Profile reference.
         public Guid ProfileId { get; set; }
+        public string? ProfileFullName{ get; set; }  
+
 
         // New status flags
         public bool IsReplied { get; set; }

@@ -77,7 +77,8 @@ namespace OMSV1.Application.Handlers.Documents
                     subject: request.Subject,
                     parentDocumentId: request.ParentDocumentId,
                     ccs: ccParties,
-                    responseType: request.ResponseType  // Value supplied by client
+                    responseType: request.ResponseType,  // Value supplied by client
+                    notes: request.Notes                 // NEW: Optional notes value
                 );
 
                 // Add the document to the repository.

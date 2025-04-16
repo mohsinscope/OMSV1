@@ -54,6 +54,9 @@ namespace OMSV1.Domain.Entities.Documents
         public bool IsReplied { get; private set; }
         public bool IsAudited { get; private set; }
 
+        // ***** New: Optional Notes property *****
+        public string? Notes { get; private set; }
+        
         // EF / Serialization constructor.
         protected Document()
         {
@@ -62,7 +65,7 @@ namespace OMSV1.Domain.Entities.Documents
             CCs = new List<DocumentParty>();
         }
 
-        // Main constructor with optional CCs.
+        // Main constructor with optional CCs and optional notes.
         public Document(
             string documentNumber,
             string title,
@@ -77,7 +80,8 @@ namespace OMSV1.Domain.Entities.Documents
             ResponseType responseType,
             string? subject = null,
             Guid? parentDocumentId = null,
-            IEnumerable<DocumentParty>? ccs = null
+            IEnumerable<DocumentParty>? ccs = null,
+            string? notes = null
             ) : this()
         {
             DocumentNumber = documentNumber;
@@ -107,6 +111,7 @@ namespace OMSV1.Domain.Entities.Documents
 
             IsReplied = false;
             IsAudited = false;
+            Notes = notes;
         }
 
         // Domain method to create a reply document.
@@ -118,7 +123,8 @@ namespace OMSV1.Domain.Entities.Documents
             Guid profileId, 
             Profile profile,
             ResponseType responseType,
-            IEnumerable<DocumentParty>? ccs = null)
+            IEnumerable<DocumentParty>? ccs = null,
+            string? notes = null)
         {
             var reply = new Document(
                 documentNumber: documentNumber,
@@ -134,7 +140,8 @@ namespace OMSV1.Domain.Entities.Documents
                 subject: this.Subject,
                 parentDocumentId: this.Id,
                 ccs: ccs,
-                responseType: responseType
+                responseType: responseType,
+                notes: notes
             );
 
             ChildDocuments.Add(reply);
@@ -145,7 +152,8 @@ namespace OMSV1.Domain.Entities.Documents
         /// Updates modifiable properties of the document.
         /// </summary>
         public void Update(string title, string? subject, DateTime documentDate,
-                           DocumentType docType, bool isRequiresReply, ResponseType responseType)
+                           DocumentType docType, bool isRequiresReply, ResponseType responseType,
+                           string? notes = null)
         {
             Title = title;
             Subject = subject;
@@ -153,6 +161,7 @@ namespace OMSV1.Domain.Entities.Documents
             DocumentType = docType;
             IsRequiresReply = isRequiresReply;
             ResponseType = responseType;
+            Notes = notes;
         }
 
         public void ConfirmIncoming()
@@ -169,7 +178,6 @@ namespace OMSV1.Domain.Entities.Documents
         {
             IsAudited = true;
         }
-
 
         public void MarkNoLongerRequiresReply()
         {

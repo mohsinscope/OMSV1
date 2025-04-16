@@ -22,30 +22,45 @@ namespace OMSV1.Application.Queries.Documents
 
         public async Task<DocumentDetailedDto> Handle(GetDocumentByDocumentNumberDetailedQuery request, CancellationToken cancellationToken)
         {
-            // Retrieve the document using the repository's queryable method.
-            // The query eagerly loads:
-            //   - CCs for the root document.
-            //   - ChildDocuments and their CCs.
-            //   - ChildDocuments and their ChildDocuments (further nesting).
-            var document = await _unitOfWork.Repository<Document>()
+            // Load all documents including the necessary related data.
+            var allDocuments = await _unitOfWork.Repository<Document>()
                 .GetAllAsQueryable()
-                .Where(d => d.DocumentNumber == request.DocumentNumber)
-                .Include(d => d.CCs) // Include CCs for the root document.
-                .Include(d => d.ChildDocuments)
-                    .ThenInclude(child => child.CCs) // Include CCs for first-level child documents.
-                .Include(d => d.ChildDocuments)
-                    .ThenInclude(child => child.ChildDocuments) // Include any nested child documents.
-                .SingleOrDefaultAsync(cancellationToken);
+                .Include(d => d.Profile) // Load the Profile (to map ProfileFullName)
+                .Include(d => d.CCs)     // Load CCs for all documents.
+                .ToListAsync(cancellationToken);
 
-            if (document == null)
+            // Identify the root document using the provided DocumentNumber.
+            var rootDocument = allDocuments.FirstOrDefault(d => d.DocumentNumber == request.DocumentNumber);
+            if (rootDocument == null)
             {
                 throw new KeyNotFoundException($"Document with DocumentNumber {request.DocumentNumber} was not found.");
             }
 
-            // Map the document recursively.
-            return MapDocumentToDto(document);
+            // Build and return the full recursive tree.
+            return BuildDocumentTree(rootDocument, allDocuments);
         }
 
+        /// <summary>
+        /// Recursively builds the document tree from the flat list of documents.
+        /// </summary>
+        private DocumentDetailedDto BuildDocumentTree(Document doc, IEnumerable<Document> allDocs)
+        {
+            // Map the current document.
+            var dto = MapDocumentToDto(doc);
+            
+            // Find all immediate child documents.
+            var children = allDocs.Where(x => x.ParentDocumentId == doc.Id).ToList();
+            foreach (var child in children)
+            {
+                dto.ChildDocuments.Add(BuildDocumentTree(child, allDocs));
+            }
+
+            return dto;
+        }
+
+        /// <summary>
+        /// Maps a single Document to its DTO.
+        /// </summary>
         private DocumentDetailedDto MapDocumentToDto(Document doc)
         {
             var dto = new DocumentDetailedDto
@@ -60,19 +75,16 @@ namespace OMSV1.Application.Queries.Documents
                 ProjectId = doc.ProjectId,
                 DocumentDate = doc.DocumentDate,
                 PartyId = doc.PartyId,
-                // Updated: Map the CC recipients to a nullable list of their IDs.
+                // Map CC recipients into a nullable list of their IDs.
                 CCIds = (doc.CCs != null && doc.CCs.Any()) ? doc.CCs.Select(cc => cc.Id).ToList() : null,
                 ProfileId = doc.ProfileId,
+                ProfileFullName = doc.Profile?.FullName,
                 IsReplied = doc.IsReplied,
                 IsAudited = doc.IsAudited,
                 Datecreated = doc.DateCreated,
+                Notes = doc.Notes,
                 ChildDocuments = new List<DocumentDetailedDto>()
             };
-
-            if (doc.ChildDocuments != null && doc.ChildDocuments.Any())
-            {
-                dto.ChildDocuments = doc.ChildDocuments.Select(child => MapDocumentToDto(child)).ToList();
-            }
 
             return dto;
         }

@@ -3,17 +3,11 @@ using OMSV1.Application.Commands.Documents;
 using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.DocumentHistories;
 using OMSV1.Domain.Entities.Documents;
-using OMSV1.Domain.Entities.Projects;
 using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.Enums;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Application.Helpers;
 using OMSV1.Infrastructure.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Linq;
 
 namespace OMSV1.Application.Handlers.Documents
 {
@@ -62,6 +56,7 @@ namespace OMSV1.Application.Handlers.Documents
 
                 // 4. Create the reply Document using the parent's domain method.
                 // Pass the user-supplied ReplyDocumentNumber into the CreateReply method.
+                // The optional notes are passed along as well.
                 var replyDoc = parentDoc.CreateReply(
                     documentNumber: request.ReplyDocumentNumber,
                     replyType: request.ReplyType,
@@ -70,7 +65,8 @@ namespace OMSV1.Application.Handlers.Documents
                     profileId: request.ProfileId,
                     profile: profile,
                     responseType: request.ResponseType,
-                    ccs: ccParties
+                    ccs: ccParties,
+                    notes: request.Notes    // NEW: Pass the optional notes here.
                 );
 
                 // 5. Mark the parent document as replied.
