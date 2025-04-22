@@ -1,41 +1,59 @@
-using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.Enums;
-using System;
-using System.Collections.Generic;
 
 namespace OMSV1.Application.Dtos.Documents
 {
     public class DocumentDetailedDto
     {
+        // Primary identity
         public Guid Id { get; set; }
-        public string DocumentNumber { get; set; } = string.Empty;
-        public string Title { get; set; } = string.Empty;
-        public OMSV1.Domain.Enums.DocumentType DocumentType { get; set; }
-        
-        // New property: Response type for replies/confirmations.
-        public ResponseType? ResponseType { get; set; }
-        
-        public string? Subject { get; set; }
-        public bool IsRequiresReply { get; set; }
-        public Guid ProjectId { get; set; }
-        public DateTime DocumentDate { get; set; }
-        public Guid PartyId { get; set; }
-        public List<Guid>? CCIds { get; set; }
-        public string? Notes { get; set; }
 
-        
-        // New: Main creator Profile reference.
-        public Guid ProfileId { get; set; }
-        public string? ProfileFullName{ get; set; }  
+        // Core fields
+        public string DocumentNumber     { get; set; } = string.Empty;
+        public string Title              { get; set; } = string.Empty;
+        public DocumentType DocumentType { get; set; }
+        public ResponseType ResponseType { get; set; }
+        public string? Subject           { get; set; }
 
+        // Reply/audit flags
+        public bool IsRequiresReply      { get; set; }
+        public bool IsReplied            { get; set; }
+        public bool IsAudited            { get; set; }
 
-        // New status flags
-        public bool IsReplied { get; set; }
-        public bool IsAudited { get; set; }
+        // Status flags
+        public bool IsUrgent             { get; set; }
+        public bool IsImportant          { get; set; }
+        public bool IsNeeded             { get; set; }
 
-        // Nested child documents (if any). 
-        public List<DocumentDetailedDto> ChildDocuments { get; set; } = new List<DocumentDetailedDto>();
+        // Dates & notes
+        public DateTime DocumentDate     { get; set; }
+        public string? Notes             { get; set; }
 
-        public DateTime Datecreated { get; set; }
+        // Hierarchy
+        public Guid? ParentDocumentId    { get; set; }
+        public List<DocumentDetailedDto> ChildDocuments { get; set; } = new();
+
+        // Foreign keys & navigations
+        public Guid ProjectId            { get; set; }
+
+        public Guid? MinistryId          { get; set; }
+        public string? MinistryName      { get; set; }
+
+        public Guid PartyId              { get; set; }
+        public string? PartyName         { get; set; }
+        public PartyType PartyType       { get; set; }
+        public bool PartyIsOfficial      { get; set; }
+
+        // CC recipients (link IDs)
+        public List<Guid> CcIds          { get; set; } = new();
+
+        // Tags (link IDs)
+        public List<Guid> TagIds         { get; set; } = new();
+
+        // Creator profile
+        public Guid ProfileId            { get; set; }
+        public string? ProfileFullName   { get; set; }
+
+        // Creation timestamp
+        public DateTime DateCreated      { get; set; }
     }
 }

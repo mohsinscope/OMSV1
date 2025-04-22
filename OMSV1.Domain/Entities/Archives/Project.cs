@@ -12,19 +12,27 @@ namespace OMSV1.Domain.Entities.Projects
         // One project has many documents
         public ICollection<Document> Documents { get; private set; }
 
+        // One project has many parties
+        public ICollection<Documents.DocumentParty> Parties { get; private set; }
+
         // EF / Serialization constructor
         protected Project()
         {
             Name = string.Empty;
             Documents = new List<Document>();
+            Parties = new List<Documents.DocumentParty>();
         }
 
         public Project(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Name cannot be null or empty.", nameof(name));
+
             Name = name;
             Documents = new List<Document>();
+            Parties = new List<Documents.DocumentParty>();
         }
-        // In OMSV1.Domain.Entities.Projects.Project
+
         public void UpdateName(string newName)
         {
             if (string.IsNullOrWhiteSpace(newName))
@@ -33,12 +41,18 @@ namespace OMSV1.Domain.Entities.Projects
             Name = newName;
         }
 
-
-        // Example domain method
+        // Document methods
         public void AddDocument(Document document)
         {
-            // Possibly add some business rules or checks
+            if (document == null) throw new ArgumentNullException(nameof(document));
             Documents.Add(document);
+        }
+
+        // Party methods
+        public void AddParty(Documents.DocumentParty party)
+        {
+            if (party == null) throw new ArgumentNullException(nameof(party));
+            Parties.Add(party);
         }
     }
 }

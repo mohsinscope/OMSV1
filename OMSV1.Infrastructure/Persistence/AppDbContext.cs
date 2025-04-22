@@ -59,6 +59,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         public DbSet<OMSV1.Domain.Entities.Documents.DocumentParty> DocumentParties {get;set;}
         public DbSet<OMSV1.Domain.Entities.DocumentHistories.DocumentHistory> DocumentHistories {get;set;}
         public DbSet<OMSV1.Domain.Entities.Projects.Project> Projects {get;set;}
+        public DbSet<OMSV1.Domain.Entities.Documents.DocumentCC> DocumentCCs {get;set;}
+        public DbSet<OMSV1.Domain.Entities.Documents.Tag> Tags {get;set;}
+
+
 
 
 

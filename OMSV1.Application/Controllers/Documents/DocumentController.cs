@@ -19,28 +19,77 @@ namespace OMSV1.Application.Controllers.Documents
         }
 
         // POST: api/document with form-data
-        [HttpPost]
-        public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmentCommand command)
+// POST: api/document with form-data
+// POST: api/document with form-data
+[HttpPost]
+public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmentCommand command)
+{
+    // 1) Pre‑validate empty GUIDs
+    var invalidTagIds = command.TagIds.Where(id => id == Guid.Empty).ToList();
+    var invalidCcIds  = (command.CCIds ?? new List<Guid>())
+                         .Where(id => id == Guid.Empty)
+                         .ToList();
+
+    if (invalidTagIds.Any() || invalidCcIds.Any())
+    {
+        return BadRequest(new
         {
-            try
+            code          = 400,
+            message       = "Some of the TagIds or CCIds you provided are empty GUIDs.",
+            invalidTagIds,
+            invalidCcIds
+        });
+    }
+
+    try
+    {
+        // 2) Dispatch to handler
+        var newDocId = await _mediator.Send(command);
+
+        return CreatedAtAction(
+            nameof(GetDocumentById),
+            new { id = newDocId },
+            new
             {
-                var id = await _mediator.Send(command);
-                return CreatedAtAction(nameof(GetDocumentById), new { id }, new { Message = "Document created successfully", Id = id });
+                code     = 201,
+                message  = "Document created successfully",
+                id       = newDocId
             }
-            catch (KeyNotFoundException knfEx)
-            {
-                return NotFound(new { message = knfEx.Message });
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper.CreateErrorResponse(
-                    HttpStatusCode.InternalServerError,
-                    "An error occurred while creating the document.",
-                    new[] { ex.Message }
-                );
-            }
-        }
-                // GET: api/document?PageNumber=1&PageSize=10
+        );
+    }
+    catch (KeyNotFoundException knfEx)
+    {
+        // 404 Not Found
+        return NotFound(new
+        {
+            code    = 404,
+            message = knfEx.Message
+        });
+    }
+    catch (ArgumentException argEx) when (argEx.Message.Contains("Ids must be valid GUIDs"))
+    {
+        // 400 Bad Request
+        return BadRequest(new
+        {
+            code    = 400,
+            message = "One or more TagIds or CCIds could not be processed because they were invalid GUIDs.",
+            details = argEx.Message
+        });
+    }
+    catch (Exception ex)
+    {
+        // 500 Internal Server Error, includes console HResult
+        return StatusCode(500, new
+        {
+            code       = 500,
+            message    = "An unexpected error occurred while creating the document.",
+            errors     = new[] { ex.Message },
+            errorCode  = ex.HResult
+        });
+    }
+}
+
+     // GET: api/document?PageNumber=1&PageSize=10
         // This endpoint returns only documents that do not have a ParentDocumentId (i.e. root documents)
         [HttpGet]
         public async Task<IActionResult> GetAllDocuments([FromQuery] PaginationParams paginationParams)

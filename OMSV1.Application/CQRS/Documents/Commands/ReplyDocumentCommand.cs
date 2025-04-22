@@ -1,3 +1,4 @@
+// --- ReplyDocumentWithAttachmentCommand.cs ---
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using OMSV1.Domain.Enums;
@@ -8,54 +9,39 @@ namespace OMSV1.Application.Commands.Documents
 {
     public class ReplyDocumentWithAttachmentCommand : IRequest<Guid>
     {
-        /// <summary>
-        /// The parent document to which the reply will be attached.
-        /// </summary>
-        public Guid ParentDocumentId { get; set; }
-        
-        /// <summary>
-        /// The unique document number for the reply.
-        /// </summary>
+        // Parent linkage
+        public Guid ParentDocumentId      { get; set; }
+
+        // Reply metadata
         public string ReplyDocumentNumber { get; set; } = string.Empty;
-        
-        /// <summary>
-        /// The type for the reply document (for instance, IncomingReply or OutgoingReply).
-        /// </summary>
-        public DocumentType ReplyType { get; set; }
-        
-        /// <summary>
-        /// The date for the reply document.
-        /// </summary>
-        public DateTime ReplyDate { get; set; }
-        
-        /// <summary>
-        /// Indicates whether the reply itself requires further response.
-        /// </summary>
-        public bool RequiresReply { get; set; }
-        
-        /// <summary>
-        /// The profile (main creator) of the reply document.
-        /// </summary>
+        public string Title                { get; set; } = string.Empty;
+        public DocumentType ReplyType      { get; set; }
+        public Guid ProjectId              { get; set; }
+        public DateTime ReplyDate          { get; set; }
+        public bool RequiresReply          { get; set; }
+
+        // Who is replying
+        public Guid PartyId   { get; set; }
         public Guid ProfileId { get; set; }
-        
-        /// <summary>
-        /// The response type for the reply document.
-        /// </summary>
+
+        // Content
         public ResponseType ResponseType { get; set; }
-        
-        /// <summary>
-        /// Optional notes for the reply.
-        /// </summary>
-        public string? Notes { get; set; }
-        
-        /// <summary>
-        /// Updated: Collection of CC IDs to set on the reply.
-        /// </summary>
-        public List<Guid>? CCIds { get; set; } = new List<Guid>();
-        
-        /// <summary>
-        /// One or more file attachments.
-        /// </summary>
-        public List<IFormFile> File { get; set; } = new List<IFormFile>();
+        public string?      Subject      { get; set; }
+
+        // Status flags
+        public bool IsUrgent    { get; set; }
+        public bool IsImportant { get; set; }
+        public bool IsNeeded    { get; set; }
+
+        // Link IDs
+        public List<Guid>? CCIds  { get; set; } = new();
+        public List<Guid>   TagIds { get; set; } = new();
+
+        // Optional notes
+        public string? Notes       { get; set; }
+        public Guid?   MinistryId  { get; set; }
+
+        // Attachments
+        public List<IFormFile> Files { get; set; } = default!;
     }
 }

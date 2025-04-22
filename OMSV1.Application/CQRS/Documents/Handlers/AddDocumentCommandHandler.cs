@@ -1,129 +1,145 @@
-using AutoMapper;
+// --- AddDocumentWithAttachmentCommandHandler.cs ---
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Commands.Documents;
 using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.DocumentHistories;
 using OMSV1.Domain.Entities.Documents;
-using OMSV1.Domain.Entities.Projects;
+using OMSV1.Domain.Entities.Ministries;
 using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.Enums;
 using OMSV1.Domain.SeedWork;
-using OMSV1.Application.Helpers;
 using OMSV1.Infrastructure.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Linq;
 
 namespace OMSV1.Application.Handlers.Documents
 {
-    public class AddDocumentWithAttachmentCommandHandler : IRequestHandler<AddDocumentWithAttachmentCommand, Guid>
+    public class AddDocumentWithAttachmentCommandHandler 
+        : IRequestHandler<AddDocumentWithAttachmentCommand, Guid>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
         private readonly IPhotoService _photoService;
 
         public AddDocumentWithAttachmentCommandHandler(
             IUnitOfWork unitOfWork,
-            IMapper mapper,
             IPhotoService photoService)
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
+            _unitOfWork   = unitOfWork;
             _photoService = photoService;
         }
 
-        public async Task<Guid> Handle(AddDocumentWithAttachmentCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(
+            AddDocumentWithAttachmentCommand request, 
+            CancellationToken cancellationToken)
         {
-            try
+            // 1. Load aggregates
+            var party = await _unitOfWork.Repository<DocumentParty>()
+                              .GetByIdAsync(request.PartyId);
+            if (party == null)
+                throw new KeyNotFoundException($"DocumentParty {request.PartyId} not found.");
+
+            var profile = await _unitOfWork.Repository<Profile>()
+                                .GetByIdAsync(request.ProfileId);
+            if (profile == null)
+                throw new KeyNotFoundException($"Profile {request.ProfileId} not found.");
+
+            // 2. Load existing CCs
+            var ccEntities = new List<DocumentCC>();
+            if (request.CCIds?.Any() == true)
             {
-                // Retrieve required entities.
-                var party = await _unitOfWork.Repository<DocumentParty>().GetByIdAsync(request.PartyId);
-                if (party == null)
-                    throw new KeyNotFoundException($"Document Party with ID {request.PartyId} was not found.");
-
-                var profile = await _unitOfWork.Repository<OMSV1.Domain.Entities.Profiles.Profile>().GetByIdAsync(request.ProfileId);
-                if (profile == null)
-                    throw new KeyNotFoundException($"Profile with ID {request.ProfileId} was not found.");
-
-                // Retrieve the CC DocumentParties if valid CCIds are provided.
-                var ccParties = new List<DocumentParty>();
-                if (request.CCIds != null && request.CCIds.Any())
+                foreach (var ccId in request.CCIds)
                 {
-                    foreach (var ccId in request.CCIds)
-                    {
-                        if (ccId != Guid.Empty)
-                        {
-                            var ccParty = await _unitOfWork.Repository<DocumentParty>().GetByIdAsync(ccId);
-                            if (ccParty != null)
-                                ccParties.Add(ccParty);
-                        }
-                    }
+                    var cc = await _unitOfWork.Repository<DocumentCC>()
+                                  .GetByIdAsync(ccId);
+                    if (cc != null)
+                        ccEntities.Add(cc);
                 }
-
-                // Create the document using client-supplied values.
-                var document = new Document(
-                    documentNumber: request.DocumentNumber,
-                    title: request.Title,
-                    docType: request.DocumentType,
-                    projectId: request.ProjectId,
-                    documentDate: DateTime.SpecifyKind(request.DocumentDate, DateTimeKind.Utc),
-                    requiresReply: request.IsRequiresReply,
-                    partyId: request.PartyId,
-                    party: party,
-                    profileId: request.ProfileId,
-                    profile: profile,
-                    subject: request.Subject,
-                    parentDocumentId: request.ParentDocumentId,
-                    ccs: ccParties,
-                    responseType: request.ResponseType,  // Value supplied by client
-                    notes: request.Notes                 // NEW: Optional notes value
-                );
-
-                // Add the document to the repository.
-                await _unitOfWork.Repository<Document>().AddAsync(document);
-
-                // Create a DocumentHistory entry for the Add action.
-                var history = new DocumentHistory(
-                    documentId: document.Id,
-                    profileId: request.ProfileId,
-                    actionType: DocumentActions.Add,
-                    actionDate: DateTime.UtcNow,
-                    notes: "Document created with attachment."
-                );
-                await _unitOfWork.Repository<DocumentHistory>().AddAsync(history);
-
-                // Process file attachments.
-                if (request.File == null || request.File.Count == 0)
-                    throw new ArgumentException("No files were uploaded for the attachments.");
-
-                foreach (var file in request.File)
-                {
-                    if (file != null && file.Length > 0)
-                    {
-                        var photoResult = await _photoService.AddPhotoAsync(file, document.Id, EntityType.Document);
-                        var attachment = new AttachmentCU(
-                            filePath: photoResult.FilePath,
-                            entityType: EntityType.Document,
-                            entityId: document.Id
-                        );
-                        await _unitOfWork.Repository<AttachmentCU>().AddAsync(attachment);
-                    }
-                }
-
-                // Commit changes in one transaction.
-                if (!await _unitOfWork.SaveAsync(cancellationToken))
-                {
-                    throw new Exception("Failed to save the document and its attachments to the database.");
-                }
-
-                return document.Id;
             }
-            catch (Exception ex)
+
+            // 3. Load Ministry if provided
+            Ministry? ministry = null;
+            if (request.MinistryId.HasValue)
             {
-                throw new HandlerException("An error occurred while creating the document with attachment.", ex);
+                ministry = await _unitOfWork.Repository<Ministry>()
+                                 .GetByIdAsync(request.MinistryId.Value);
+                if (ministry == null)
+                    throw new KeyNotFoundException($"Ministry {request.MinistryId} not found.");
             }
+
+            // 4. Load Tag entities (tracked) via IQueryable
+            var tagEntities = new List<Tag>();
+            if (request.TagIds?.Any() == true)
+            {
+                tagEntities = await _unitOfWork.Repository<Tag>()
+                    .GetAllAsQueryable()
+                    .Where(t => request.TagIds.Contains(t.Id))
+                    .ToListAsync(cancellationToken);
+            }
+
+            // 5. Instantiate new Document (ccs and tags via constructor)
+            var document = new Document(
+                documentNumber:   request.DocumentNumber,
+                title:            request.Title,
+                docType:          request.DocumentType,
+                projectId:        request.ProjectId,
+                documentDate:     DateTime.SpecifyKind(request.DocumentDate, DateTimeKind.Utc),
+                requiresReply:    request.IsRequiresReply,
+                partyId:          request.PartyId,
+                party:            party,
+                profileId:        request.ProfileId,
+                profile:          profile,
+                responseType:     request.ResponseType,
+                ministryId:       request.MinistryId,
+                ministry:         ministry,
+                isUrgent:         request.IsUrgent,
+                isImportant:      request.IsImportant,
+                isNeeded:         request.IsNeeded,
+                subject:          request.Subject,
+                parentDocumentId: request.ParentDocumentId,
+                notes:            request.Notes
+            );
+            
+            await _unitOfWork.Repository<Document>().AddAsync(document);
+            await _unitOfWork.SaveAsync(cancellationToken);  // now document.Id is persisted
+            foreach (var cc in ccEntities)
+            document.AddCc(cc);
+
+            foreach (var tag in tagEntities)
+            document.AddTag(tag);
+            await _unitOfWork.SaveAsync(cancellationToken);
+
+
+            // 6. History entry
+            var history = new DocumentHistory(
+                documentId: document.Id,
+                profileId:  request.ProfileId,
+                actionType: DocumentActions.Add,
+                actionDate: DateTime.UtcNow,
+                notes:      "Document created with attachments and tags."
+            );
+            await _unitOfWork.Repository<DocumentHistory>().AddAsync(history);
+
+            // 7. File uploads
+            if (request.Files == null || !request.Files.Any())
+                throw new ArgumentException("At least one file must be uploaded.");
+
+            foreach (var file in request.Files)
+            {
+                var result = await _photoService
+                    .AddPhotoAsync(file, document.Id, EntityType.Document);
+
+                var attachment = new AttachmentCU(
+                    filePath:   result.FilePath,
+                    entityType: EntityType.Document,
+                    entityId:   document.Id
+                );
+                await _unitOfWork.Repository<AttachmentCU>().AddAsync(attachment);
+            }
+
+            // 8. Commit
+            if (!await _unitOfWork.SaveAsync(cancellationToken))
+                throw new Exception("Failed to save document, attachments, or tags.");
+
+            return document.Id;
         }
     }
 }

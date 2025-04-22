@@ -44,7 +44,8 @@ namespace OMSV1.Application.Controllers.Documents
         {
             try
             {
-                var query = new GetDocumentPartyByIdQuery { Id = id };
+                // Use the constructor overload
+                var query = new GetDocumentPartyByIdQuery(id);
                 var documentParty = await _mediator.Send(query);
 
                 return Ok(documentParty);
@@ -62,6 +63,7 @@ namespace OMSV1.Application.Controllers.Documents
                 );
             }
         }
+
 
         // Get all DocumentParties with pagination parameters
         [HttpGet]
