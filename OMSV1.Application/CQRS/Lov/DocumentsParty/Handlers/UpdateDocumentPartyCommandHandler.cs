@@ -1,46 +1,48 @@
-using AutoMapper;
+// Application/Handlers/DocumentParties/UpdateDocumentPartyCommandHandler.cs
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using MediatR;
 using OMSV1.Application.Commands.DocumentParties;
 using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.Documents;
 using OMSV1.Domain.SeedWork;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OMSV1.Application.Handlers.DocumentParties
 {
-    public class UpdateDocumentPartyCommandHandler(IUnitOfWork unitOfWork, IMapper mapper) : IRequestHandler<UpdateDocumentPartyCommand, bool>
+    public class UpdateDocumentPartyCommandHandler : IRequestHandler<UpdateDocumentPartyCommand, bool>
     {
-        private readonly IUnitOfWork _unitOfWork = unitOfWork;
-        private readonly IMapper _mapper = mapper;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public UpdateDocumentPartyCommandHandler(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
 
         public async Task<bool> Handle(UpdateDocumentPartyCommand request, CancellationToken cancellationToken)
         {
             try
             {
-                // Retrieve the DocumentParty entity
-                var documentParty = await _unitOfWork.Repository<DocumentParty>().GetByIdAsync(request.Id);
-                if (documentParty == null)
-                {
+                var entity = await _unitOfWork.Repository<DocumentParty>()
+                    .GetByIdAsync(request.Id);
+
+                if (entity == null)
                     throw new KeyNotFoundException($"DocumentParty with ID {request.Id} not found.");
-                }
 
-                // Update the entity's name using the public method
-                documentParty.UpdateName(request.Name);
+                // Apply updates
+                entity.UpdateName(request.Name);
+                entity.UpdatePartyType(request.PartyType);
+                entity.SetOfficial(request.IsOfficial);
+                entity.ChangeProject(request.ProjectId);
 
-                // Save changes in the database
                 if (!await _unitOfWork.SaveAsync(cancellationToken))
-                {
-                    throw new Exception("Failed to update the Document Party in the database.");
-                }
+                    throw new HandlerException("Failed to update the DocumentParty in the database.");
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!(ex is HandlerException))
             {
-                throw new HandlerException("An error occurred while updating the Document Party.", ex);
+                throw new HandlerException("An error occurred while updating the DocumentParty.", ex);
             }
         }
     }

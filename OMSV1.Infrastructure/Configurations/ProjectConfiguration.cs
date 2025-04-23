@@ -1,7 +1,7 @@
+// Infrastructure/Configurations/ProjectConfiguration.cs
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OMSV1.Domain.Entities.Projects;
-using OMSV1.Domain.Entities.Documents;
 
 namespace OMSV1.Infrastructure.Configurations
 {
@@ -9,20 +9,25 @@ namespace OMSV1.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Project> builder)
         {
-            // Primary Key (assuming the base Entity defines an Id property)
+            // Primary Key
             builder.HasKey(p => p.Id);
 
-            // Configure the Name property as required with a maximum length.
+            // Name
             builder.Property(p => p.Name)
-                .IsRequired()
-                .HasMaxLength(200); // Adjust the max length as necessary.
+                   .IsRequired()
+                   .HasMaxLength(200);
 
-            // Configure one-to-many relationship:
-            // One project has many Documents.
+            // Documents relationship (existing)
             builder.HasMany(p => p.Documents)
-                .WithOne(d => d.Project)
-                .HasForeignKey(d => d.ProjectId)
-                .OnDelete(DeleteBehavior.Restrict);
+                   .WithOne(d => d.Project)
+                   .HasForeignKey(d => d.ProjectId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            // Parties relationship (new)
+            builder.HasMany(p => p.Parties)
+                   .WithOne(dp => dp.Project)
+                   .HasForeignKey(dp => dp.ProjectId)
+                   .OnDelete(DeleteBehavior.Restrict);
 
             // Table Mapping
             builder.ToTable("Projects");

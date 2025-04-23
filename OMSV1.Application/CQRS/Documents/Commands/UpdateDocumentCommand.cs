@@ -1,3 +1,4 @@
+// --- UpdateDocumentDetailsCommand.cs ---
 using MediatR;
 using OMSV1.Domain.Enums;
 using System;
@@ -29,6 +30,7 @@ namespace OMSV1.Application.Commands.Documents
         
         /// <summary>
         /// The new ProjectId for the document.
+        /// (Assumes your domain design will handle reassigning if allowed.)
         /// </summary>
         public Guid ProjectId { get; set; }
         
@@ -41,6 +43,13 @@ namespace OMSV1.Application.Commands.Documents
         /// Indicates whether the document requires a reply.
         /// </summary>
         public bool IsRequiresReply { get; set; }
+        
+        /// <summary>
+        /// New status flags
+        /// </summary>
+        public bool IsUrgent { get; set; }
+        public bool IsImportant { get; set; }
+        public bool IsNeeded { get; set; }
         
         /// <summary>
         /// The new PartyId.
@@ -61,12 +70,12 @@ namespace OMSV1.Application.Commands.Documents
         /// <summary>
         /// Optional ParentDocumentId if the document is a reply.
         /// </summary>
-        public Guid? ParentDocumentId { get; set; } = null;
+        public Guid? ParentDocumentId { get; set; }
         
         /// <summary>
         /// Updated: Collection of CC IDs.
         /// </summary>
-        public List<Guid>? CCIds { get; set; } = new List<Guid>();
+        public List<Guid> CCIds { get; set; } = new List<Guid>();
 
         /// <summary>
         /// The new response type for the document.

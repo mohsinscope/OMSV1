@@ -1,6 +1,4 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+// Application/Handlers/DocumentParties/AddDocumentPartyCommandHandler.cs
 using AutoMapper;
 using MediatR;
 using OMSV1.Application.Commands.DocumentParties;
@@ -23,35 +21,30 @@ namespace OMSV1.Application.Handlers.DocumentParties
 
         public async Task<Guid> Handle(AddDocumentPartyCommand request, CancellationToken cancellationToken)
         {
-            try
-            {
-                // Check for duplicate DocumentParty name
-                var existingParty = await _unitOfWork.Repository<DocumentParty>()
-                    .FirstOrDefaultAsync(dp => dp.Name == request.Name);
+            // Prevent duplicates in the same project
+            var existing = await _unitOfWork.Repository<DocumentParty>()
+                .FirstOrDefaultAsync(dp =>
+                    dp.Name == request.Name &&
+                    dp.ProjectId == request.ProjectId
+                    );
 
-                if (existingParty != null)
-                    throw new HandlerException($"A DocumentParty with the name '{request.Name}' already exists.");
+            if (existing != null)
+                throw new HandlerException($"A party named '{request.Name}' already exists for this project.");
 
-                // Option 1: Use direct instantiation if no mapping is needed
-                var documentParty = new DocumentParty(request.Name);
-                // Option 2: If you prefer using AutoMapper, you can map the command to the entity:
-                // var documentParty = _mapper.Map<DocumentParty>(request);
+            // Create new DocumentParty entity
+            var documentParty = new DocumentParty(
+                request.Name,
+                request.PartyType,
+                request.IsOfficial,
+                request.ProjectId);
 
-                await _unitOfWork.Repository<DocumentParty>().AddAsync(documentParty);
+            await _unitOfWork.Repository<DocumentParty>()
+                .AddAsync(documentParty);
 
-                if (!await _unitOfWork.SaveAsync(cancellationToken))
-                    throw new HandlerException("Failed to save the DocumentParty to the database.");
+            if (!await _unitOfWork.SaveAsync(cancellationToken))
+                throw new HandlerException("Failed to save the DocumentParty to the database.");
 
-                return documentParty.Id;
-            }
-            catch (HandlerException ex)
-            {
-                throw new HandlerException("An error occurred while creating the DocumentParty.", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new HandlerException("An unexpected error occurred.", ex);
-            }
+            return documentParty.Id;
         }
     }
 }

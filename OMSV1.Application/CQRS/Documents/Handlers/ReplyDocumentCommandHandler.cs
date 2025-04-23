@@ -1,120 +1,167 @@
+// --- ReplyDocumentWithAttachmentCommandHandler.cs ---
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Commands.Documents;
+using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.DocumentHistories;
 using OMSV1.Domain.Entities.Documents;
+using OMSV1.Domain.Entities.Ministries;
 using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.Enums;
 using OMSV1.Domain.SeedWork;
-using OMSV1.Application.Helpers;
 using OMSV1.Infrastructure.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OMSV1.Application.Handlers.Documents
 {
-    public class ReplyDocumentWithAttachmentCommandHandler : IRequestHandler<ReplyDocumentWithAttachmentCommand, Guid>
+    public class ReplyDocumentWithAttachmentCommandHandler
+    : IRequestHandler<ReplyDocumentWithAttachmentCommand, Guid>
+{
+    private readonly IUnitOfWork  _unitOfWork;
+    private readonly IPhotoService _photoService;
+
+    public ReplyDocumentWithAttachmentCommandHandler(
+        IUnitOfWork unitOfWork,
+        IPhotoService photoService)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IPhotoService _photoService;
+        _unitOfWork   = unitOfWork;
+        _photoService = photoService;
+    }
 
-        public ReplyDocumentWithAttachmentCommandHandler(IUnitOfWork unitOfWork, IPhotoService photoService)
-        {
-            _unitOfWork = unitOfWork;
-            _photoService = photoService;
-        }
+    public async Task<Guid> Handle(
+    ReplyDocumentWithAttachmentCommand request,
+    CancellationToken cancellationToken)
+{
+    // 1. Load parent document
+    var parentDoc = await _unitOfWork.Repository<Document>()
+        .GetByIdAsync(request.ParentDocumentId);
+    if (parentDoc == null)
+        throw new KeyNotFoundException($"Document {request.ParentDocumentId} not found.");
 
-        public async Task<Guid> Handle(ReplyDocumentWithAttachmentCommand request, CancellationToken cancellationToken)
-        {
-            try
-            {
-                // 1. Retrieve the parent Document.
-                var parentDoc = await _unitOfWork.Repository<Document>()
-                    .GetByIdAsync(request.ParentDocumentId);
-                if (parentDoc == null)
-                    throw new KeyNotFoundException($"Document with ID {request.ParentDocumentId} not found.");
+    // 2. Load party
+    var party = await _unitOfWork.Repository<DocumentParty>()
+        .GetByIdAsync(request.PartyId);
+    if (party == null)
+        throw new KeyNotFoundException($"DocumentParty {request.PartyId} not found.");
 
-                // 2. Retrieve the CC DocumentParties if valid CCIds are provided.
-                var ccParties = new List<DocumentParty>();
-                if (request.CCIds != null && request.CCIds.Any())
-                {
-                    foreach (var ccId in request.CCIds)
-                    {
-                        if (ccId != Guid.Empty)
-                        {
-                            var ccParty = await _unitOfWork.Repository<DocumentParty>().GetByIdAsync(ccId);
-                            if (ccParty != null)
-                            {
-                                ccParties.Add(ccParty);
-                            }
-                        }
-                    }
-                }
+    // 3. Load CC entities
+    var ccEntities = new List<DocumentCC>();
+    if (request.CCIds?.Any() == true)
+    {
+        ccEntities = await _unitOfWork.Repository<DocumentCC>()
+            .GetAllAsQueryable()
+            .Where(cc => request.CCIds.Contains(cc.Id))
+            .ToListAsync(cancellationToken);
+    }
 
-                // 3. Retrieve the Profile for the replying user using the provided ProfileId.
-                var profile = await _unitOfWork.Repository<Profile>().GetByIdAsync(request.ProfileId);
-                if (profile == null)
-                    throw new KeyNotFoundException($"Profile with ID {request.ProfileId} was not found.");
+    // 4. Load ministry
+    Ministry? ministry = null;
+    if (request.MinistryId.HasValue)
+    {
+        ministry = await _unitOfWork.Repository<Ministry>()
+            .GetByIdAsync(request.MinistryId.Value);
+        if (ministry == null)
+            throw new KeyNotFoundException($"Ministry {request.MinistryId} not found.");
+    }
 
-                // 4. Create the reply Document using the parent's domain method.
-                // Pass the user-supplied ReplyDocumentNumber into the CreateReply method.
-                // The optional notes are passed along as well.
-                var replyDoc = parentDoc.CreateReply(
-                    documentNumber: request.ReplyDocumentNumber,
-                    replyType: request.ReplyType,
-                    replyDate: request.ReplyDate,
-                    requiresReply: request.RequiresReply,
-                    profileId: request.ProfileId,
-                    profile: profile,
-                    responseType: request.ResponseType,
-                    ccs: ccParties,
-                    notes: request.Notes    // NEW: Pass the optional notes here.
-                );
+    // 5. Load Tag entities
+    var tagEntities = new List<Tag>();
+    if (request.TagIds.Any())
+    {
+        tagEntities = await _unitOfWork.Repository<Tag>()
+            .GetAllAsQueryable()
+            .Where(t => request.TagIds.Contains(t.Id))
+            .ToListAsync(cancellationToken);
+    }
 
-                // 5. Mark the parent document as replied.
-                parentDoc.MarkAsReplied();
+    // 6. Load profile
+    var profile = await _unitOfWork.Repository<Profile>()
+        .GetByIdAsync(request.ProfileId);
+    if (profile == null)
+        throw new KeyNotFoundException($"Profile {request.ProfileId} not found.");
 
-                // 6. Add the reply document to the repository.
-                await _unitOfWork.Repository<Document>().AddAsync(replyDoc);
+    // 7. Create the reply without link rows
+    var replyDoc = parentDoc.CreateReply(
+        documentNumber:    request.ReplyDocumentNumber,
+        title:             request.Title,
+        replyType:         request.ReplyType,
+        projectId:         request.ProjectId,
+        replyDate:         DateTime.SpecifyKind(request.ReplyDate, DateTimeKind.Utc),
+        requiresReply:     request.RequiresReply,
+        partyId:           request.PartyId,
+        party:             party,
+        profileId:         request.ProfileId,
+        profile:           profile,
+        responseType:      request.ResponseType,
+        ministryId:        request.MinistryId,
+        ministry:          ministry,
+        isUrgent:          request.IsUrgent,
+        isImportant:       request.IsImportant,
+        isNeeded:          request.IsNeeded,
+        subject:           request.Subject,
+        ccs:               null,
+        tags:              null,
+        notes:             request.Notes
+    );
 
-                // 7. Process file attachments.
-                if (request.File == null || request.File.Count == 0)
-                    throw new ArgumentException("No files were uploaded for the attachments.");
+    // 8. Persist the new reply (no links yet)
+    await _unitOfWork.Repository<Document>().AddAsync(replyDoc);
+    await _unitOfWork.SaveAsync(cancellationToken);
 
-                foreach (var file in request.File)
-                {
-                    if (file != null && file.Length > 0)
-                    {
-                        var photoResult = await _photoService.AddPhotoAsync(file, replyDoc.Id, EntityType.Document);
-                        var attachment = new AttachmentCU(
-                            filePath: photoResult.FilePath,
-                            entityType: EntityType.Document,
-                            entityId: replyDoc.Id
-                        );
-                        await _unitOfWork.Repository<AttachmentCU>().AddAsync(attachment);
-                    }
-                }
+    // 9. Seed CC and Tag link rows
+foreach (var cc in ccEntities)
+{
+    replyDoc.AddCc(cc);
+    replyDoc.CCs.Add(cc);           // also add to the skip-nav CC collection
+}
+foreach (var tag in tagEntities)
+{
+    replyDoc.AddTag(tag);
+    // no skip-nav Tags collection, TagLinks only
+}
 
-                // 8. Create a DocumentHistory entry for the reply action using ProfileId.
-                var history = new DocumentHistory(
-                    documentId: parentDoc.Id,
-                    profileId: request.ProfileId,
-                    actionType: DocumentActions.Reply,
-                    actionDate: DateTime.UtcNow,
-                    notes: request.Notes
-                );
-                await _unitOfWork.Repository<DocumentHistory>().AddAsync(history);
+// 10. Mark parent as replied
+    parentDoc.MarkAsReplied();
 
-                // 9. Commit all changes in one transaction.
-                if (!await _unitOfWork.SaveAsync(cancellationToken))
-                {
-                    throw new Exception("Failed to save the reply document and its attachments to the database.");
-                }
+    // 11. Save CC/Tag links and parent update
+    await _unitOfWork.SaveAsync(cancellationToken);
 
-                return replyDoc.Id;
-            }
-            catch (Exception ex)
-            {
-                throw new HandlerException("An error occurred while creating the reply document with attachment.", ex);
-            }
-        }
+    // 12. Process attachments
+    if (request.Files == null || !request.Files.Any())
+        throw new ArgumentException("At least one file is required.");
+
+    foreach (var file in request.Files)
+    {
+        var photo = await _photoService
+            .AddPhotoAsync(file, replyDoc.Id, EntityType.Document);
+        var attachment = new AttachmentCU(
+            filePath:   photo.FilePath,
+            entityType: EntityType.Document,
+            entityId:   replyDoc.Id
+        );
+        await _unitOfWork.Repository<AttachmentCU>().AddAsync(attachment);
+    }
+
+    // 13. Record history
+    var history = new DocumentHistory(
+        documentId: replyDoc.Id,
+        profileId:  request.ProfileId,
+        actionType: DocumentActions.Reply,
+        actionDate: DateTime.UtcNow,
+        notes:      request.Notes
+    );
+    await _unitOfWork.Repository<DocumentHistory>().AddAsync(history);
+
+    // 14. Final save for attachments & history
+    if (!await _unitOfWork.SaveAsync(cancellationToken))
+        throw new Exception("Failed to save reply attachments, tags or history.");
+
+    return replyDoc.Id;
+}
     }
 }

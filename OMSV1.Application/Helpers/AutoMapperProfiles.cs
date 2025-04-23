@@ -29,6 +29,7 @@ using OMSV1.Domain.Entities.Documents;
 using OMSV1.Domain.Entities.Expenses;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Lectures;
+using OMSV1.Domain.Entities.Ministries;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.Entities.Projects;
 using OMSV1.Domain.Entities.Reports;
@@ -60,6 +61,10 @@ public class AutoMapperProfiles : Profile
             CreateMap<DocumentParty, DocumentPartyDto>();
             CreateMap<OMSV1.Domain.Entities.Documents.Document, DocumentDto>();
             CreateMap<Project, ProjectDto>();
+            CreateMap<DocumentCC, DocumentCCDto>();
+            CreateMap<Ministry,MinistryDto>();
+            CreateMap<Tag,TagsDto>();
+
 
 
            // Governorate mappings
