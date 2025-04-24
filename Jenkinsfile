@@ -8,13 +8,13 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'main', credentialsId: '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', url: 'https://github.com/mohsinscope/OMSV1.git'
+                git branch: 'main', credentialsId: 'github-token', url: 'https://github.com/mohsinscope/OMSV1.git'
             }
         }
 
         stage('Build Backend') {
             steps {
-                dir('backend') {
+                dir('src/OMSV1.Web') {
                     bat 'dotnet restore'
                     bat 'dotnet build --configuration Release'
                     bat 'dotnet publish --configuration Release --output publish'
