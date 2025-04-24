@@ -22,7 +22,18 @@ public class Tag : Entity
         Name = name;
     }
 
-    public void UpdateName(string name) { /*...*/ }
-}
+    public void UpdateName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name cannot be empty.", nameof(name));
+
+        // don’t re‐assign if it’s the same
+        if (Name != name)
+        {
+            Name = name;
+            // Optional: update an “updated at” timestamp
+            // LastModifiedUtc = DateTime.UtcNow;
+        }
+    }}
 
 }
