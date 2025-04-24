@@ -22,13 +22,10 @@ pipeline {
             }
         }
 
-        stage('Deploy to IIS') {
+        stage('Deploy to Remote IIS') {
             steps {
                 bat '''
-                net stop W3SVC
-                if not exist C:\\inetpub\\wwwroot\\OMSV1 mkdir C:\\inetpub\\wwwroot\\OMSV1
-                xcopy /Y /E /I backend\\publish\\* C:\\inetpub\\wwwroot\\OMSV1\\
-                net start W3SVC
+                C:\\Tools\\PsExec\\PsExec.exe \\\\172.16.108.28 -u administrator -p LaithT551 cmd /c "net stop W3SVC && xcopy /Y /E /I backend\\publish\\* C:\\inetpub\\wwwroot\\YourApp && net start W3SVC"
                 '''
             }
         }
@@ -36,7 +33,7 @@ pipeline {
 
     post {
         success {
-            echo '✅ Backend deployed successfully to IIS'
+            echo '✅ Backend deployed successfully to remote IIS'
         }
         failure {
             echo '❌ Build or deployment failed. Check logs.'
