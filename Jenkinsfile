@@ -14,7 +14,7 @@ pipeline {
 
         stage('Build Backend') {
             steps {
-                dir('src/OMSV1.Web') {
+                dir('OMSV1.Application') {
                     bat 'dotnet restore'
                     bat 'dotnet build --configuration Release'
                     bat 'dotnet publish --configuration Release --output publish'
