@@ -1,9 +1,7 @@
-using OMSV1.Application.Dtos.Profiles;
-using OMSV1.Application.Dtos.Projects;
-using OMSV1.Application.Dtos.Documents;  // for DocumentCCDto, TagsDto
-using OMSV1.Domain.Enums;
+// Application/Dtos/Documents/DocumentDto.cs
 using System;
 using System.Collections.Generic;
+using OMSV1.Domain.Enums;
 
 namespace OMSV1.Application.Dtos.Documents
 {
@@ -11,52 +9,49 @@ namespace OMSV1.Application.Dtos.Documents
     {
         public Guid Id { get; set; }
 
-        // Core properties
-        public string DocumentNumber   { get; set; } = string.Empty;
-        public string Title            { get; set; } = string.Empty;
+        // Core
+        public string DocumentNumber    { get; set; } = string.Empty;
+        public string Title             { get; set; } = string.Empty;
         public DocumentType DocumentType { get; set; }
         public ResponseType ResponseType { get; set; }
-        public string? Subject         { get; set; }
-        public DateTime DocumentDate   { get; set; }
+        public string? Subject          { get; set; }
+        public DateTime DocumentDate    { get; set; }
 
-        // Reply / audit flags
-        public bool IsRequiresReply    { get; set; }
-        public bool IsReplied          { get; set; }
-        public bool IsAudited          { get; set; }
-
-        // Status flags
-        public bool IsUrgent           { get; set; }
-        public bool IsImportant        { get; set; }
-        public bool IsNeeded           { get; set; }
+        // Flags
+        public bool IsRequiresReply     { get; set; }
+        public bool IsReplied           { get; set; }
+        public bool IsAudited           { get; set; }
+        public bool IsUrgent            { get; set; }
+        public bool IsImportant         { get; set; }
+        public bool IsNeeded            { get; set; }
 
         // Notes
-        public string? Notes           { get; set; }
+        public string? Notes            { get; set; }
 
-        // Foreign keys
-        public Guid ProjectId          { get; set; }
-        public Guid PartyId            { get; set; }
-        public Guid? MinistryId        { get; set; }
-        public Guid? ParentDocumentId  { get; set; }
-        public Guid ProfileId          { get; set; }
+        // Foreign-key IDs (if you still need them)
+        public Guid ProjectId           { get; set; }
+        public Guid PartyId             { get; set; }
+        public Guid? MinistryId         { get; set; }
+        public Guid? ParentDocumentId   { get; set; }
+        public Guid ProfileId           { get; set; }
 
-        // Optional navigation DTOs
-        public ProjectDto? Project     { get; set; }
-        public DocumentPartyDto? Party { get; set; }
-        public MinistryDto? Ministry   { get; set; }
-        public ProfileDto? Profile     { get; set; }
+        // ONLY the *names* of those related entities
+        public string ProjectName       { get; set; } = string.Empty;
+        public string PartyName         { get; set; } = string.Empty;
+        public string MinistryName      { get; set; } = string.Empty;
+        public string ProfileFullName       { get; set; } = string.Empty;
 
-        // Hierarchy
+        // Child documents (unchanged)
         public List<DocumentDto> ChildDocuments { get; set; }
             = new List<DocumentDto>();
 
-        // Many‑to‑many link DTOs
-        public List<DocumentCCDto> CcLinks { get; set; }
-            = new List<DocumentCCDto>();
+        // Many-to-many — now *just* their names
+        public List<string> CcNames     { get; set; }
+            = new List<string>();
+        public List<string> TagNames    { get; set; }
+            = new List<string>();
 
-        public List<TagsDto> TagLinks { get; set; }
-            = new List<TagsDto>();
-
-        // Creation timestamp
-        public DateTime DateCreated { get; set; }
+        // Metadata
+        public DateTime DateCreated     { get; set; }
     }
 }
