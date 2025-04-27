@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOTNET_CLI_HOME = 'C:\\Windows\\Temp'
+        PUBLISH_DIR = 'C:\\Users\\Administrator\\.jenkins\\workspace\\DeployBackend\\publish'
     }
 
     stages {
@@ -15,9 +16,9 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('OMSV1.Application') {
-                    bat 'dotnet restore'
-                    bat 'dotnet build --configuration Release'
-                    bat 'dotnet publish --configuration Release --output publish'
+                    bat 'dotnet restore OMSV1.Application.csproj'
+                    bat 'dotnet build OMSV1.Application.csproj --configuration Release'
+                    bat "dotnet publish OMSV1.Application.csproj --configuration Release -o \"${env.PUBLISH_DIR}\""
                 }
             }
         }
@@ -26,15 +27,10 @@ pipeline {
             steps {
                 bat """
                 C:\\Tools\\PsExec\\PsExec.exe \\\\172.16.108.28 -u administrator -p LaithT551 cmd /c ^
-                "if exist OMSV1.Application\\publish\\ ( ^
-                    sc query W3SVC | findstr /I /C:\\"RUNNING\\" >nul && ( ^
-                        echo W3SVC is running, stopping service... ^
-                        net stop W3SVC ^
-                    ) || ( ^
-                        echo W3SVC is already stopped. ^
-                    ) ^
-                    && xcopy /Y /E /I OMSV1.Application\\publish\\* C:\\inetpub\\wwwroot ^
-                    && net start W3SVC ^
+                "if exist ${env.PUBLISH_DIR} ( ^
+                    net stop W3SVC && ^
+                    xcopy /Y /E /I \"${env.PUBLISH_DIR}\\*\" C:\\inetpub\\wwwroot && ^
+                    net start W3SVC ^
                 ) else ( ^
                     echo Publish folder not found. Skipping deployment. ^
                 )"
