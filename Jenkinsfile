@@ -25,7 +25,7 @@ pipeline {
         stage('Deploy to Remote IIS') {
             steps {
                 bat """
-                C:\\Tools\\PsExec\\PsExec.exe \\\\172.16.108.28 -u administrator -p LaithT551 cmd /c "net stop W3SVC && xcopy /Y /E /I publish\\* C:\\inetpub\\wwwroot && net start W3SVC"
+                    C:\\Tools\\PsExec\\PsExec.exe \\\\172.16.108.28 -u administrator -p LaithT551 cmd /c "net stop W3SVC && xcopy /Y /E /I OMSV1.Application\\publish\\* C:\\inetpub\\wwwroot && net start W3SVC"
                 """
             }
         }
