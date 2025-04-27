@@ -266,18 +266,27 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
                 return BadRequest("Unable to mark the document as audited.");
         }
         [HttpPost("search")]
-        public async Task<IActionResult> GetDocuments([FromBody] GetDocumentsQuery query)
+        public async Task<IActionResult> SearchDocuments([FromBody] GetDocumentsQuery query)
         {
             try
             {
-                var result = await _mediator.Send(query);
-                Response.AddPaginationHeader(result);  // Custom extension that adds pagination headers.
-                return Ok(result);
+                var paged = await _mediator.Send(query);
+                Response.AddPaginationHeader(paged);
+                return Ok(paged);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+                return StatusCode(500,
+                    new { message = "An error occurred while processing your request.", details = ex.Message });
             }
+        }
+        [HttpPost("search-by-links")]
+        public async Task<IActionResult> SearchByLinks(
+            [FromBody] SearchByLinksQuery query)
+        {
+            var result = await _mediator.Send(query);
+            Response.AddPaginationHeader(result);
+            return Ok(result);
         }
         
         // DELETE: api/document/{id}

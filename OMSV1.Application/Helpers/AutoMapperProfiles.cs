@@ -64,8 +64,8 @@ public class AutoMapperProfiles : Profile
             CreateMap<DocumentCC, DocumentCCDto>();
             CreateMap<Ministry,MinistryDto>();
             CreateMap<Tag,TagsDto>();
-           // CreateMap<DocumentCcLink, DocumentCCDto>();
-            //CreateMap<DocumentTagLink, TagsDto>();
+            CreateMap<DocumentCcLink, DocumentCCDto>();
+            CreateMap<DocumentTagLink, TagsDto>();
 
 
 
