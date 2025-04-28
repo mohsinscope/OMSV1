@@ -30,7 +30,7 @@ pipeline {
                 "if exist \"${env.PUBLISH_DIR}\" ( ^
                     sc query W3SVC | findstr /I 'RUNNING' > nul ^ 
                     if %errorlevel%==0 ( ^
-                        net stop W3SVC ^
+                        net stop W3SVC ^ 
                     ) ^ 
                     xcopy /Y /E /I \"${env.PUBLISH_DIR}\\*\" C:\\inetpub\\wwwroot ^ 
                     net start W3SVC ^
