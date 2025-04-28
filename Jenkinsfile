@@ -28,11 +28,11 @@ pipeline {
                 bat """
                 C:\\Tools\\PsExec\\PsExec.exe \\\\172.16.108.28 -u administrator -p LaithT551 cmd /c ^
                 "if exist ${env.PUBLISH_DIR} ( ^
-                    sc query W3SVC | findstr /I 'RUNNING' > nul ^
+                    sc query W3SVC | findstr /I 'RUNNING' > nul ^ 
                     if %errorlevel%==0 ( ^
                         net stop W3SVC ^
-                    ) ^
-                    xcopy /Y /E /I \"${env.PUBLISH_DIR}\\*\" C:\\inetpub\\wwwroot ^
+                    ) ^ 
+                    xcopy /Y /E /I \"${env.PUBLISH_DIR}\\*\" C:\\inetpub\\wwwroot ^ 
                     net start W3SVC ^
                 ) else ( ^
                     echo Publish folder not found. Skipping deployment. ^
