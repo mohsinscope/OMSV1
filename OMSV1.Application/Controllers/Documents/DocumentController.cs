@@ -5,7 +5,8 @@ using OMSV1.Application.Dtos.Documents;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Documents;
 using System.Net;
-using OMSV1.Infrastructure.Extensions;                // For Response.AddPaginationHeader if needed
+using OMSV1.Infrastructure.Extensions;
+using OMSV1.Application.Exceptions;                // For Response.AddPaginationHeader if needed
 
 namespace OMSV1.Application.Controllers.Documents
 {
@@ -64,6 +65,14 @@ public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmen
         {
             code    = 404,
             message = knfEx.Message
+        });
+    }
+    catch (DuplicateDocumentNumberException dupEx)
+    {
+        return Conflict(new
+        {
+            code    = 409,
+            message = dupEx.Message
         });
     }
     catch (ArgumentException argEx) when (argEx.Message.Contains("Ids must be valid GUIDs"))
@@ -204,6 +213,14 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
     {
         return NotFound(knfEx.Message);
     }
+    catch (DuplicateDocumentNumberException dupEx)
+    {
+        return Conflict(new
+        {
+            code    = 409,
+            message = dupEx.Message
+        });
+    }
     catch (Exception ex)
     {
         // Construct a more detailed error message.
@@ -242,7 +259,15 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
             {
                 return NotFound(knfEx.Message);
             }
-            catch (UnauthorizedAccessException uaEx)
+            catch (DuplicateDocumentNumberException dupEx)
+            {
+                return Conflict(new
+                {
+                    code    = 409,
+                    message = dupEx.Message
+                });
+            }
+                    catch (UnauthorizedAccessException uaEx)
             {
                 return StatusCode((int)HttpStatusCode.Forbidden, new { Message = uaEx.Message });
             }

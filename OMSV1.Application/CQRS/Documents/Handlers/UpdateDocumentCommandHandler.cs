@@ -12,6 +12,8 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using OMSV1.Application.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace OMSV1.Application.Handlers.Documents
 {
@@ -27,6 +29,14 @@ namespace OMSV1.Application.Handlers.Documents
             UpdateDocumentDetailsCommand request,
             CancellationToken cancellationToken)
         {
+                          // --- DUPLICATE CHECK ---
+        var alreadyExists = await _unitOfWork.Repository<Document>()
+            .GetAllAsQueryable()
+            .AnyAsync(d => d.DocumentNumber == request.DocumentNumber, cancellationToken);
+               if (alreadyExists)
+        throw new DuplicateDocumentNumberException(request.DocumentNumber);
+
+            
             // 1. Retrieve the document.
             var document = await _unitOfWork
                 .Repository<Document>()

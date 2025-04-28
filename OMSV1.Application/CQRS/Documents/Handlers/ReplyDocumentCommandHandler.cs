@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Commands.Documents;
+using OMSV1.Application.Exceptions;
 using OMSV1.Application.Helpers;
 using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.Entities.DocumentHistories;
@@ -37,6 +38,13 @@ namespace OMSV1.Application.Handlers.Documents
     ReplyDocumentWithAttachmentCommand request,
     CancellationToken cancellationToken)
 {
+                  // --- DUPLICATE CHECK ---
+        var alreadyExists = await _unitOfWork.Repository<Document>()
+            .GetAllAsQueryable()
+            .AnyAsync(d => d.DocumentNumber == request.ReplyDocumentNumber, cancellationToken);
+               if (alreadyExists)
+        throw new DuplicateDocumentNumberException(request.ReplyDocumentNumber);
+
     // 1. Load parent document
     var parentDoc = await _unitOfWork.Repository<Document>()
         .GetByIdAsync(request.ParentDocumentId);
