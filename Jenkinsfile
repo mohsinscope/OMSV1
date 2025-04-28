@@ -30,14 +30,14 @@ pipeline {
                 "if exist \"${env.PUBLISH_DIR}\" ( ^
                     echo Publish folder found, starting deployment... ^
 
-                    sc query W3SVC | findstr /I 'RUNNING' > nul ^
+                    sc query W3SVC | findstr /I 'RUNNING' > nul ^ 
                     if %errorlevel%==0 ( ^
-                        echo Stopping W3SVC service... ^
+                        echo Stopping W3SVC service... ^ 
                         net stop W3SVC ^ 
                     ) ^
-                    echo Copying files to C:\\inetpub\\wwwroot... ^
+                    echo Copying files to C:\\inetpub\\wwwroot... ^ 
                     xcopy /Y /E /I \"${env.PUBLISH_DIR}\\*\" C:\\inetpub\\wwwroot ^ 
-                    echo Starting W3SVC service... ^
+                    echo Starting W3SVC service... ^ 
                     net start W3SVC ^
                 ) else ( ^
                     echo Publish folder not found. Skipping deployment. ^
