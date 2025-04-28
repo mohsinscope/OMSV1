@@ -280,6 +280,24 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
                     new { message = "An error occurred while processing your request.", details = ex.Message });
             }
         }
+                // POST api/documents/count
+        [HttpPost("count")]
+        public async Task<IActionResult> Count([FromBody] CountDocumentsQuery query)
+        {
+            try
+            {
+                var total = await _mediator.Send(query);
+                return Ok(new { TotalCount = total });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new 
+                {
+                    Message = "An error occurred while counting documents.",
+                    Details = ex.Message
+                });
+            }
+        }
         [HttpPost("search-by-links")]
         public async Task<IActionResult> SearchByLinks(
             [FromBody] SearchByLinksQuery query)

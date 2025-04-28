@@ -4,6 +4,7 @@ using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.DocumentParties;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.DocumentParties;
+using OMSV1.Domain.Enums;
 using OMSV1.Infrastructure.Extensions;
 using System.Net;
 
@@ -63,7 +64,36 @@ namespace OMSV1.Application.Controllers.Documents
                 );
             }
         }
+        // GET api/documentparty/{projectId}/{partyType}/{isOfficial}
+        [HttpGet("{projectId}/{partyType}/{isOfficial}")]
+        public async Task<IActionResult> GetByProjectTypeAndOfficial(
+            Guid     projectId,
+            PartyType partyType,
+            bool     isOfficial)
+        {
+            try
+            {
+                var query = new GetDocumentPartiesByProjectAndTypeQuery(
+                    projectId,
+                    partyType,
+                    isOfficial);
 
+                var dtos = await _mediator.Send(query);
+                return Ok(dtos);
+            }
+            catch (ArgumentException argEx)
+            {
+                return BadRequest(argEx.Message);
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(
+                    HttpStatusCode.InternalServerError,
+                    "An error occurred while retrieving document parties.",
+                    new[] { ex.Message }
+                );
+            }
+        }
 
         // Get all DocumentParties with pagination parameters
         [HttpGet]

@@ -46,10 +46,11 @@ namespace OMSV1.Application.Dtos.Documents
             = new List<DocumentDto>();
 
         // Many-to-many — now *just* their names
-        public List<string> CcNames     { get; set; }
-            = new List<string>();
-        public List<string> TagNames    { get; set; }
-            = new List<string>();
+       // **NEW**: flattened CC & Tag info
+    public List<Guid>   CcIds   { get; set; } = new();
+    public List<string> CcNames { get; set; } = new();
+    public List<Guid>   TagIds  { get; set; } = new();
+    public List<string> TagNames{ get; set; } = new();
 
         // Metadata
         public DateTime DateCreated     { get; set; }

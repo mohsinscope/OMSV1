@@ -95,18 +95,16 @@ namespace OMSV1.Application.Queries.Documents.Handlers
                                         : string.Empty,
                 ProfileFullName    = d.Profile.FullName,
 
-                // flatten CC & tags to simple string lists
-                CcNames            = d.CcLinks
-                                        .Select(cl => cl.DocumentCc.RecipientName)
-                                        .Where(n => n != null)
-                                        .ToList(),
-                TagNames           = d.TagLinks
-                                        .Select(tl => tl.Tag.Name)
-                                        .Where(n => n != null)
-                                        .ToList(),
+           // flatten CC & tags to both names AND ids
+    CcIds   = d.CcLinks.Select(cl => cl.DocumentCcId).ToList(),
+    CcNames = d.CcLinks.Select(cl => cl.DocumentCc.RecipientName!)
+                       .Where(n => n != null).ToList(),
+    TagIds  = d.TagLinks.Select(tl => tl.TagId).ToList(),
+    TagNames= d.TagLinks.Select(tl => tl.Tag.Name!)
+                       .Where(n => n != null).ToList(),
 
-                ChildDocuments     = new List<DocumentDto>(),
-                DateCreated        = d.DateCreated
+    ChildDocuments = new List<DocumentDto>(),
+    DateCreated    = d.DateCreated
             });
 
             // 4) Paginate exactly as before

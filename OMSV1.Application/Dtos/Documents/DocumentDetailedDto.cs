@@ -45,10 +45,13 @@ namespace OMSV1.Application.Dtos.Documents
 
         // CC recipients (link IDs)
         public List<Guid> CcIds          { get; set; } = new();
+            public List<string> CcNames { get; set; } = new();
+
 
         // Tags (link IDs)
         public List<Guid> TagIds         { get; set; } = new();
-
+    // **NEW**: flattened CC & Tag info
+    public List<string> TagNames{ get; set; } = new();
         // Creator profile
         public Guid ProfileId            { get; set; }
         public string? ProfileFullName   { get; set; }

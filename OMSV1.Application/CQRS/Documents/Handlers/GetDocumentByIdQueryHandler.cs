@@ -100,10 +100,13 @@ namespace OMSV1.Application.Queries.Documents
                 PartyType        = doc.Party.PartyType,
                 PartyIsOfficial  = doc.Party.IsOfficial,
 
-                // join–tables
-                CcIds            = doc.CcLinks.Select(l => l.DocumentCcId).ToList(),
-                TagIds           = doc.TagLinks.Select(l => l.TagId).ToList(),
-
+               // CC & Tag ids + names
+        CcIds   = doc.CcLinks.Select(l => l.DocumentCcId).ToList(),
+        CcNames = doc.CcLinks.Select(l => l.DocumentCc.RecipientName!)
+                              .Where(n => n != null).ToList(),
+        TagIds  = doc.TagLinks.Select(l => l.TagId).ToList(),
+        TagNames= doc.TagLinks.Select(l => l.Tag.Name!)
+                              .Where(n => n != null).ToList(),
                 // profile
                 ProfileId        = doc.ProfileId,
                 ProfileFullName  = doc.Profile.FullName,

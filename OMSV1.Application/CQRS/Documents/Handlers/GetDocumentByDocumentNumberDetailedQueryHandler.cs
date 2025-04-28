@@ -91,6 +91,8 @@ namespace OMSV1.Application.Queries.Documents
                 IsNeeded            = doc.IsNeeded,
 
                 DocumentDate        = doc.DocumentDate,
+                DateCreated      = doc.DateCreated,
+
                 Notes               = doc.Notes,
 
                 ParentDocumentId    = doc.ParentDocumentId,
@@ -105,9 +107,13 @@ namespace OMSV1.Application.Queries.Documents
                 PartyType           = doc.Party.PartyType,
                 PartyIsOfficial     = doc.Party.IsOfficial,
 
-                CcIds               = doc.CcLinks.Select(link => link.DocumentCcId).ToList(),
-                TagIds              = doc.TagLinks.Select(link => link.TagId).ToList(),
-
+               // CC & Tag ids + names
+        CcIds   = doc.CcLinks.Select(l => l.DocumentCcId).ToList(),
+        CcNames = doc.CcLinks.Select(l => l.DocumentCc.RecipientName!)
+                              .Where(n => n != null).ToList(),
+        TagIds  = doc.TagLinks.Select(l => l.TagId).ToList(),
+        TagNames= doc.TagLinks.Select(l => l.Tag.Name!)
+                              .Where(n => n != null).ToList(),
                 ProfileId           = doc.ProfileId,
                 ProfileFullName     = doc.Profile.FullName,
 
