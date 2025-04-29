@@ -240,45 +240,46 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
         );
             }
         }       
-        // PUT: api/document/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDocument(Guid id, [FromBody] UpdateDocumentDetailsCommand command)
+    // PUT: api/documents/{id}
+    [HttpPut("{id}")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UpdateDocument(
+        Guid id,
+        [FromForm] UpdateDocumentWithAttachmentCommand command)
+    {
+        if (id != command.DocumentId)
+            return BadRequest("URL id does not match command.DocumentId");
+
+        try
         {
-            // Validate that the URL document id matches the request command's document id.
-            if (id != command.DocumentId)
-            {
-                return BadRequest("The document id in the URL does not match the document id in the request body.");
-            }
-            
-            try
-            {
-                var updatedDocumentId = await _mediator.Send(command);
-                return Ok(new { Message = "Document updated successfully", DocumentId = updatedDocumentId });
-            }
-            catch (KeyNotFoundException knfEx)
-            {
-                return NotFound(knfEx.Message);
-            }
-            catch (DuplicateDocumentNumberException dupEx)
-            {
-                return Conflict(new
-                {
-                    code    = 409,
-                    message = dupEx.Message
-                });
-            }
-                    catch (UnauthorizedAccessException uaEx)
-            {
-                return StatusCode((int)HttpStatusCode.Forbidden, new { Message = uaEx.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError,
-                    ResponseHelper.CreateErrorResponse(HttpStatusCode.InternalServerError, 
-                                                       "An error occurred while updating the document.", 
-                                                       new[] { ex.Message }));
-            }
+            var updatedId = await _mediator.Send(command);
+            return Ok(new { Message = "Document updated successfully", DocumentId = updatedId });
         }
+        catch (KeyNotFoundException knf)
+        {
+            return NotFound(knf.Message);
+        }
+        catch (DuplicateDocumentNumberException dup)
+        {
+            return Conflict(new { code = 409, message = dup.Message });
+        }
+        catch (UnauthorizedAccessException ua)
+        {
+            return StatusCode((int)HttpStatusCode.Forbidden, new { message = ua.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(
+                (int)HttpStatusCode.InternalServerError,
+                ResponseHelper.CreateErrorResponse(
+                    HttpStatusCode.InternalServerError,
+                    "An error occurred while updating the document.",
+                    new[] { ex.Message }
+                )
+            );
+        }
+    }
+
         [HttpPost("{documentId}/audit")]
         public async Task<IActionResult> MarkDocumentAsAudited(Guid documentId)
         {

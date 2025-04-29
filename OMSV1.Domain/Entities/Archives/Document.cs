@@ -193,7 +193,7 @@ namespace OMSV1.Domain.Entities.Documents
             return reply;
         }
 
-        public void Update(
+      public void Update(
             string       title,
             string?      subject,
             DateTime     documentDate,
@@ -203,7 +203,11 @@ namespace OMSV1.Domain.Entities.Documents
             bool         isUrgent,
             bool         isImportant,
             bool         isNeeded,
-            string?      notes = null
+            string?      notes,
+            Guid         projectId,
+            Guid         partyId,
+            Guid?        parentDocumentId,
+            Guid?        ministryId
         )
         {
             Title           = title;
@@ -216,7 +220,48 @@ namespace OMSV1.Domain.Entities.Documents
             IsImportant     = isImportant;
             IsNeeded        = isNeeded;
             Notes           = notes;
+
+            ProjectId        = projectId;
+            PartyId          = partyId;
+            ParentDocumentId = parentDocumentId;
+            MinistryId       = ministryId;
         }
+        // In OMSV1.Domain.Entities.Documents.Document
+public void Patch(
+    string?      documentNumber     = null,
+    string?      title              = null,
+    string?      subject            = null,
+    DateTime?    documentDate       = null,
+    DocumentType? docType           = null,
+    bool?        requiresReply      = null,
+    ResponseType? responseType      = null,
+    bool?        isUrgent           = null,
+    bool?        isImportant        = null,
+    bool?        isNeeded           = null,
+    string?      notes              = null,
+    Guid?        projectId          = null,
+    Guid?        partyId            = null,
+    Guid?        parentDocumentId   = null,
+    Guid?        ministryId         = null)
+{
+    if (documentNumber != null)    DocumentNumber    = documentNumber;
+    if (title        != null)      Title             = title;
+    if (subject      != null)      Subject           = subject;
+    if (documentDate.HasValue)     DocumentDate      = DateTime.SpecifyKind(documentDate.Value, DateTimeKind.Utc);
+    if (docType.HasValue)          DocumentType      = docType.Value;
+    if (requiresReply.HasValue)    IsRequiresReply   = requiresReply.Value;
+    if (responseType.HasValue)     ResponseType      = responseType.Value;
+    if (isUrgent.HasValue)         IsUrgent          = isUrgent.Value;
+    if (isImportant.HasValue)      IsImportant       = isImportant.Value;
+    if (isNeeded.HasValue)         IsNeeded          = isNeeded.Value;
+    if (notes        != null)      Notes             = notes;
+
+    if (projectId.HasValue)        ProjectId         = projectId.Value;
+    if (partyId.HasValue)          PartyId           = partyId.Value;
+    if (parentDocumentId.HasValue) ParentDocumentId  = parentDocumentId;
+    if (ministryId.HasValue)       MinistryId        = ministryId;
+}
+
 
         public void MarkAsReplied()             => IsReplied  = true;
         public void MarkAsAudited()             => IsAudited  = true;

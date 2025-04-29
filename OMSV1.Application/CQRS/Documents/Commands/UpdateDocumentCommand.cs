@@ -1,90 +1,40 @@
-// --- UpdateDocumentDetailsCommand.cs ---
+// --- UpdateDocumentWithAttachmentCommand.cs ---
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using OMSV1.Domain.Enums;
 using System;
 using System.Collections.Generic;
 
 namespace OMSV1.Application.Commands.Documents
 {
-    public class UpdateDocumentDetailsCommand : IRequest<Guid>
+    public class UpdateDocumentWithAttachmentCommand : IRequest<Guid>
     {
-        /// <summary>
-        /// The Id of the document being updated.
-        /// </summary>
-        public Guid DocumentId { get; set; }
-        
-        /// <summary>
-        /// The new document number.
-        /// </summary>
-        public required string DocumentNumber { get; set; }
-        
-        /// <summary>
-        /// The new title for the document.
-        /// </summary>
-        public required string Title { get; set; }
-        
-        /// <summary>
-        /// The new document type.
-        /// </summary>
-        public DocumentType DocumentType { get; set; }
-        
-        /// <summary>
-        /// The new ProjectId for the document.
-        /// (Assumes your domain design will handle reassigning if allowed.)
-        /// </summary>
-        public Guid ProjectId { get; set; }
-        
-        /// <summary>
-        /// The new document date.
-        /// </summary>
-        public DateTime DocumentDate { get; set; }
-        
-        /// <summary>
-        /// Indicates whether the document requires a reply.
-        /// </summary>
-        public bool IsRequiresReply { get; set; }
-        
-        /// <summary>
-        /// New status flags
-        /// </summary>
-        public bool IsUrgent { get; set; }
-        public bool IsImportant { get; set; }
-        public bool IsNeeded { get; set; }
-        
-        /// <summary>
-        /// The new PartyId.
-        /// </summary>
-        public Guid PartyId { get; set; }
-        
-        /// <summary>
-        /// The ProfileId of the user attempting the update.
-        /// Must match the document’s original ProfileId.
-        /// </summary>
-        public required Guid ProfileId { get; set; }
-        
-        /// <summary>
-        /// The new subject of the document.
-        /// </summary>
-        public string? Subject { get; set; }
-        
-        /// <summary>
-        /// Optional ParentDocumentId if the document is a reply.
-        /// </summary>
+        // Always required to identify which doc to update
+        public required Guid DocumentId { get; set; }
+        public required Guid ProfileId  { get; set; }
+
+        // All other fields are now optional
+        public string? DocumentNumber    { get; set; }
+        public string? Title             { get; set; }
+        public DocumentType? DocumentType { get; set; }
+        public ResponseType? ResponseType { get; set; }
+        public string? Subject           { get; set; }
+        public DateTime? DocumentDate    { get; set; }
+
+        public bool? IsRequiresReply { get; set; }
+        public bool? IsUrgent        { get; set; }
+        public bool? IsImportant     { get; set; }
+        public bool? IsNeeded        { get; set; }
+
+        public Guid? ProjectId        { get; set; }
+        public Guid? PartyId          { get; set; }
         public Guid? ParentDocumentId { get; set; }
-        
-        /// <summary>
-        /// Updated: Collection of CC IDs.
-        /// </summary>
-        public List<Guid> CCIds { get; set; } = new List<Guid>();
+        public Guid? MinistryId       { get; set; }
 
-        /// <summary>
-        /// The new response type for the document.
-        /// </summary>
-        public ResponseType ResponseType { get; set; }
+        public List<Guid>? CCIds  { get; set; }
+        public List<Guid>? TagIds { get; set; }
+        public List<IFormFile>? Files { get; set; }
 
-        /// <summary>
-        /// Optional notes.
-        /// </summary>
         public string? Notes { get; set; }
     }
 }
