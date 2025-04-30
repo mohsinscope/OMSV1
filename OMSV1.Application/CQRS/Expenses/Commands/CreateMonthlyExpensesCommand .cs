@@ -10,17 +10,22 @@ public class CreateMonthlyExpensesCommand : IRequest<Guid>
     public Guid OfficeId { get; set; }
     public Guid GovernorateId { get; set; }
     public Guid ProfileId { get; set; }
+
+    public DateTime DateCreated { get; set; }
     public CreateMonthlyExpensesCommand(
         decimal totalAmount,
         int status,
         Guid officeId,
         Guid governorateId,
-        Guid profileId)
+        Guid profileId,
+        DateTime dateCreated
+        )
     {
-         TotalAmount = totalAmount;
+        TotalAmount = totalAmount;
         Status = status;
         OfficeId = officeId;
         GovernorateId = governorateId;
         ProfileId = profileId;
+        DateCreated = dateCreated;
     }
 }

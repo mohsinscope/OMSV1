@@ -39,7 +39,7 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("RolePermissions");
+                    b.ToTable("RolePermissions", (string)null);
                 });
 
             modelBuilder.Entity("EmailReportReportType", b =>
@@ -1256,7 +1256,7 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserPermissions");
+                    b.ToTable("UserPermissions", (string)null);
                 });
 
             modelBuilder.Entity("AppRolePermission", b =>
