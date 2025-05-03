@@ -60,7 +60,9 @@ public class CreateMonthlyExpensesCommandHandler : IRequestHandler<CreateMonthly
                 request.TotalAmount,
                 request.OfficeId,
                 request.GovernorateId,
-                request.ProfileId
+                request.ProfileId,
+                request.DateCreated
+                
             );
 
             // Assign the determined threshold
