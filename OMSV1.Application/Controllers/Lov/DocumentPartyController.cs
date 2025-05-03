@@ -22,7 +22,8 @@ namespace OMSV1.Application.Controllers.Documents
 
         // Add a new DocumentParty
         [HttpPost]
-        // [RequirePermission("Docum")]
+        [RequirePermission("LOVDOC")]
+
         public async Task<IActionResult> AddDocumentParty([FromBody] AddDocumentPartyCommand command)
         {
             try
@@ -120,6 +121,8 @@ namespace OMSV1.Application.Controllers.Documents
         }
                 // PUT: Update an existing DocumentParty
         [HttpPut("{id}")]
+        [RequirePermission("LOVDOC")]
+
         public async Task<IActionResult> UpdateDocumentParty(Guid id, [FromBody] UpdateDocumentPartyCommand command)
         {
             try
@@ -146,6 +149,7 @@ namespace OMSV1.Application.Controllers.Documents
 
         // DELETE: Delete a DocumentParty
         [HttpDelete("{id}")]
+        [RequirePermission("LOVDOC")]
         public async Task<IActionResult> DeleteDocumentParty(Guid id)
         {
             try

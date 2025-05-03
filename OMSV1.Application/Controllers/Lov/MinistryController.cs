@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.Ministries;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Ministries;
@@ -20,7 +21,8 @@ namespace OMSV1.Application.Controllers.Documents
 
         // Add a new Ministry
         [HttpPost]
-        // [RequirePermission("Docum")]
+        [RequirePermission("LOVDOC")]
+
         public async Task<IActionResult> AddMinistry([FromBody] AddMinistryCommand command)
         {
             try
@@ -89,6 +91,8 @@ namespace OMSV1.Application.Controllers.Documents
         }
                 // PUT: Update an existing Ministry
         [HttpPut("{id}")]
+        [RequirePermission("LOVDOC")]
+
         public async Task<IActionResult> UpdateMinistry(Guid id, [FromBody] UpdateMinistryCommand command)
         {
             try
@@ -115,6 +119,7 @@ namespace OMSV1.Application.Controllers.Documents
 
         // DELETE: Delete a Ministry
         [HttpDelete("{id}")]
+        [RequirePermission("LOVDOC")]
         public async Task<IActionResult> DeleteMinistry(Guid id)
         {
             try

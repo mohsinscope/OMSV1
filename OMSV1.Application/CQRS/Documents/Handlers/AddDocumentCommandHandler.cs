@@ -123,7 +123,7 @@ namespace OMSV1.Application.Handlers.Documents
                 profileId:  request.ProfileId,
                 actionType: DocumentActions.Add,
                 actionDate: DateTime.UtcNow,
-                notes:      "Document created with attachments and tags."
+                notes:      "تم انشاء المستند."
             );
             await _unitOfWork.Repository<DocumentHistory>().AddAsync(history);
 

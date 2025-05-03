@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.Tags;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Tags;
@@ -20,7 +21,7 @@ namespace OMSV1.Application.Controllers.Tags
 
         // Add a new Tags
         [HttpPost]
-        // [RequirePermission("Docum")]
+        [RequirePermission("TAGS")]
         public async Task<IActionResult> AddTags([FromBody] AddTagsCommand command)
         {
             try
@@ -89,6 +90,7 @@ namespace OMSV1.Application.Controllers.Tags
         }
                 // PUT: Update an existing Tags
         [HttpPut("{id}")]
+        [RequirePermission("TAGS")]
         public async Task<IActionResult> UpdateTags(Guid id, [FromBody] UpdateTagsCommand command)
         {
             try
@@ -115,6 +117,7 @@ namespace OMSV1.Application.Controllers.Tags
 
         // DELETE: Delete a Tags
         [HttpDelete("{id}")]
+        [RequirePermission("TAGS")]
         public async Task<IActionResult> DeleteTags(Guid id)
         {
             try

@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.Projects;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Projects;
@@ -65,6 +66,7 @@ namespace OMSV1.Application.Controllers.Projects
 
         // POST: Add a new Project
         [HttpPost]
+        [RequirePermission("LOVDOC")]
         public async Task<IActionResult> AddProject([FromBody] AddProjectCommand command)
         {
             try
@@ -83,6 +85,7 @@ namespace OMSV1.Application.Controllers.Projects
         }
                 // PUT: api/project/{id}
         [HttpPut("{id}")]
+        [RequirePermission("LOVDOC")]
         public async Task<IActionResult> UpdateProject(Guid id, [FromBody] UpdateProjectCommand command)
         {
             try
@@ -118,6 +121,7 @@ namespace OMSV1.Application.Controllers.Projects
         }
         // DELETE: api/project/{id}
         [HttpDelete("{id}")]
+        [RequirePermission("LOVDOC")]
         public async Task<IActionResult> DeleteProject(Guid id)
         {
             try

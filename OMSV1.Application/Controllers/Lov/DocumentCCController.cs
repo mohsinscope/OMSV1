@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Commands.DocumentCC;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.DocumentCC;
@@ -20,7 +21,7 @@ namespace OMSV1.Application.Controllers.Documents
 
         // Add a new DocumentCC
         [HttpPost]
-        // [RequirePermission("Docum")]
+        [RequirePermission("LOVDOC")]
         public async Task<IActionResult> AddDocumentCC([FromBody] AddDocumentCCCommand command)
         {
             try
@@ -89,6 +90,7 @@ namespace OMSV1.Application.Controllers.Documents
         }
                 // PUT: Update an existing DocumentCC
         [HttpPut("{id}")]
+        [RequirePermission("LOVDOC")]
         public async Task<IActionResult> UpdateDocumentCC(Guid id, [FromBody] UpdateDocumentCCCommand command)
         {
             try
@@ -115,6 +117,7 @@ namespace OMSV1.Application.Controllers.Documents
 
         // DELETE: Delete a DocumentCC
         [HttpDelete("{id}")]
+        [RequirePermission("LOVDOC")]
         public async Task<IActionResult> DeleteDocumentCC(Guid id)
         {
             try

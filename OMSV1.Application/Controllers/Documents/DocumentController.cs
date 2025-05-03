@@ -6,7 +6,8 @@ using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Documents;
 using System.Net;
 using OMSV1.Infrastructure.Extensions;
-using OMSV1.Application.Exceptions;                // For Response.AddPaginationHeader if needed
+using OMSV1.Application.Exceptions;
+using OMSV1.Application.Authorization.Attributes;                // For Response.AddPaginationHeader if needed
 
 namespace OMSV1.Application.Controllers.Documents
 {
@@ -23,6 +24,8 @@ namespace OMSV1.Application.Controllers.Documents
 // POST: api/document with form-data
 // POST: api/document with form-data
 [HttpPost]
+[RequirePermission("DOCc")]
+
 public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmentCommand command)
 {
     // 1) Pre‑validate empty GUIDs
@@ -101,6 +104,8 @@ public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmen
      // GET: api/document?PageNumber=1&PageSize=10
         // This endpoint returns only documents that do not have a ParentDocumentId (i.e. root documents)
         [HttpGet]
+        [RequirePermission("DOCr")]
+
         public async Task<IActionResult> GetAllDocuments([FromQuery] PaginationParams paginationParams)
         {
             try
@@ -127,6 +132,7 @@ public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmen
         // GET: api/document/{id}
         // Returns a detailed document including all child documents and attachments.
         [HttpGet("{id}")]
+        [RequirePermission("DOCr")]
         public async Task<IActionResult> GetDocumentById(Guid id)
         {
             try
@@ -150,6 +156,7 @@ public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmen
         }
         // New endpoint to get document details by DocumentNumber
         [HttpGet("bynumber/{documentNumber}")]
+        [RequirePermission("DOCr")]
         public async Task<IActionResult> GetDocumentByDocumentNumber(string documentNumber)
         {
             try
@@ -173,6 +180,7 @@ public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmen
         }
         // GET: api/document/{documentId}/history
         [HttpGet("{documentId}/history")]
+        [RequirePermission("DOCr")]
         public async Task<IActionResult> GetDocumentHistoryByDocumentId(Guid documentId)
         {
             try
@@ -197,6 +205,8 @@ public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmen
          // POST: api/document/{id}/reply
 // POST: api/document/{id}/reply
 [HttpPost("{id}/reply")]
+[RequirePermission("DOCc")]
+
 public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm] ReplyDocumentWithAttachmentCommand command)
 {
     try
@@ -242,6 +252,8 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
         }       
     // PUT: api/documents/{id}
     [HttpPut("{id}")]
+    [RequirePermission("DOCu")]
+
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> UpdateDocument(
         Guid id,
@@ -281,6 +293,8 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
     }
 
         [HttpPost("{documentId}/audit")]
+        [RequirePermission("DOCu")]
+
         public async Task<IActionResult> MarkDocumentAsAudited(Guid documentId)
         {
             var command = new MarkDocumentAsAuditedCommand { DocumentId = documentId };
@@ -292,6 +306,7 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
                 return BadRequest("Unable to mark the document as audited.");
         }
         [HttpPost("search")]
+        [RequirePermission("DOCr")]
         public async Task<IActionResult> SearchDocuments([FromBody] GetDocumentsQuery query)
         {
             try
@@ -308,6 +323,8 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
         }
                 // POST api/documents/count
         [HttpPost("count")]
+        [RequirePermission("DOCr")]
+
         public async Task<IActionResult> Count([FromBody] CountDocumentsQuery query)
         {
             try
@@ -325,6 +342,8 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
             }
         }
         [HttpPost("search-by-links")]
+        [RequirePermission("DOCr")]
+
         public async Task<IActionResult> SearchByLinks(
             [FromBody] SearchByLinksQuery query)
         {
@@ -335,6 +354,8 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
         
         // DELETE: api/document/{id}
         [HttpDelete("{id}")]
+        [RequirePermission("DOCd")]
+
         public async Task<IActionResult> DeleteDocument(Guid id)
         {
             try
@@ -367,35 +388,36 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
         }
 
         
-        // POST: api/document/{id}/changestatus
-        [HttpPost("{id}/changestatus")]
-        public async Task<IActionResult> ChangeDocumentStatus(Guid id, [FromBody] ChangeDocumentStatusCommand command)
-        {
-            try
-            {
-                if (id != command.DocumentId)
-                    return BadRequest("URL document ID mismatch with command's DocumentId.");
+        // // POST: api/document/{id}/changestatus
+        // [HttpPost("{id}/changestatus")]
 
-                var result = await _mediator.Send(command);
-                if (result)
-                {
-                    return Ok("Document status changed successfully (IsRequiresReply set to false).");
-                }
-                return BadRequest("Failed to change document status.");
-            }
-            catch (KeyNotFoundException knfEx)
-            {
-                return NotFound(knfEx.Message);
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper.CreateErrorResponse(
-                    HttpStatusCode.InternalServerError,
-                    "An error occurred while changing the document status.",
-                    new[] { ex.Message }
-                );
-            }
-        }
+        // public async Task<IActionResult> ChangeDocumentStatus(Guid id, [FromBody] ChangeDocumentStatusCommand command)
+        // {
+        //     try
+        //     {
+        //         if (id != command.DocumentId)
+        //             return BadRequest("URL document ID mismatch with command's DocumentId.");
+
+        //         var result = await _mediator.Send(command);
+        //         if (result)
+        //         {
+        //             return Ok("Document status changed successfully (IsRequiresReply set to false).");
+        //         }
+        //         return BadRequest("Failed to change document status.");
+        //     }
+        //     catch (KeyNotFoundException knfEx)
+        //     {
+        //         return NotFound(knfEx.Message);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return ResponseHelper.CreateErrorResponse(
+        //             HttpStatusCode.InternalServerError,
+        //             "An error occurred while changing the document status.",
+        //             new[] { ex.Message }
+        //         );
+        //     }
+        // }
 
 
     }

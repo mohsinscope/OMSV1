@@ -155,14 +155,15 @@ foreach (var tag in tagEntities)
         await _unitOfWork.Repository<AttachmentCU>().AddAsync(attachment);
     }
 
-    // 13. Record history
-    var history = new DocumentHistory(
-        documentId: replyDoc.Id,
-        profileId:  request.ProfileId,
-        actionType: DocumentActions.Reply,
-        actionDate: DateTime.UtcNow,
-        notes:      request.Notes
-    );
+// 13. Record history (include the replier’s full name)
+var history = new DocumentHistory(
+    documentId: replyDoc.Id,
+    profileId:  request.ProfileId,
+    actionType: DocumentActions.Reply,
+    actionDate: DateTime.UtcNow,
+    notes:      $"تم التعليق بوساطة {profile.FullName}"
+);
+
     await _unitOfWork.Repository<DocumentHistory>().AddAsync(history);
 
     // 14. Final save for attachments & history

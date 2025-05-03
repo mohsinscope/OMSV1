@@ -10,6 +10,7 @@ using OMSV1.Domain.Entities.Ministries;
 using OMSV1.Domain.Enums;
 using OMSV1.Infrastructure.Interfaces;
 using OMSV1.Domain.SeedWork;
+using AutoMapper;
 
 namespace OMSV1.Application.Handlers.Documents
 {
@@ -51,6 +52,11 @@ public async Task<Guid> Handle(
     }
 
     // 2–6. (load party, CCs, tags, ministry as before...)
+    // 7.x Load the editing profile
+    var profile = await _unitOfWork.Repository<OMSV1.Domain.Entities.Profiles.Profile>()
+        .GetByIdAsync(request.ProfileId);
+    if (profile == null)
+        throw new KeyNotFoundException($"Profile {request.ProfileId} not found.");
 
     // 7. Do a _partial_ update:
     document.Patch(
@@ -76,6 +82,14 @@ public async Task<Guid> Handle(
     if (request.TagIds != null)  { /* clear/Add new Tags */ }
 
     // 10–12. Attachments, history and Save as before…
+    // 10–12. Create history, attachments, etc.
+    var history = new DocumentHistory(
+        documentId: document.Id,
+        profileId:  request.ProfileId,
+        actionType: DocumentActions.Edit,
+        actionDate: DateTime.UtcNow,
+        notes:      $"تم التعديل بوساطة {profile.FullName}"
+    );
 
     await _unitOfWork.Repository<Document>().UpdateAsync(document);
     if (!await _unitOfWork.SaveAsync(cancellationToken))
