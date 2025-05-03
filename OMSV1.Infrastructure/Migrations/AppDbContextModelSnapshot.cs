@@ -986,6 +986,11 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Property<bool?>("IsEmbassy")
                         .HasColumnType("boolean");
 
+                    b.Property<bool?>("IsTwoShifts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)

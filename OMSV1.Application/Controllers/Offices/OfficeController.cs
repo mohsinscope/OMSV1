@@ -79,7 +79,8 @@ namespace OMSV1.Application.Controllers.Offices
                     DeliveryStaff = officeDto.DeliveryStaff,
                     GovernorateId = officeDto.GovernorateId,
                     Budget = officeDto.Budget, // Explicitly map Budget
-                    IsEmbassy= officeDto.IsEmbassy
+                    IsEmbassy= officeDto.IsEmbassy,
+                    IsTwoShifts=officeDto.IsTwoShifts
                 };
 
                 // Delegate the command to the mediator

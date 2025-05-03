@@ -28,6 +28,7 @@ namespace OMSV1.Application.CQRS.Offices.Handlers
                 request.GovernorateId,
                 request.Name,
                 request.IsEmbassy,
+                request.IsTwoShifts,
                 request.Code
             );
 

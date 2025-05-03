@@ -8,7 +8,7 @@ public class Office : Entity
 {
     // Parameterized constructor for domain logic
     public Office(string name, int code, int receivingStaff, int accountStaff, int printingStaff,
-                  int qualityStaff, int deliveryStaff, Guid governorateId, decimal? budget, bool? isEmbassy)
+                  int qualityStaff, int deliveryStaff, Guid governorateId, decimal? budget, bool? isEmbassy,bool? isTwoShifts = true)
     {
         Name = name;
         Code = code;
@@ -20,12 +20,17 @@ public class Office : Entity
         GovernorateId = governorateId;
         Budget = budget;
         IsEmbassy = isEmbassy;
+        IsTwoShifts    = isTwoShifts; // ← assign
+
+        
     }
 
     // Parameterless constructor for EF Core
     private Office() 
     {
         Name = string.Empty; // Default to an empty string
+        IsTwoShifts  = true; // ← default for EF
+
         // No default is set for IsEmbassy, so it will be null.
     }
 
@@ -42,6 +47,8 @@ public class Office : Entity
 
     // Changed to a nullable bool.
     public bool? IsEmbassy { get; private set; }
+    public bool? IsTwoShifts { get; private set; } = true; // ← new property
+
 
     // Methods for updating properties
     public void UpdateCode(int code) => Code = code;
@@ -58,6 +65,8 @@ public class Office : Entity
 
     // Optional: A method to update the IsEmbassy flag if needed.
     public void UpdateIsEmbassy(bool? isEmbassy) => IsEmbassy = isEmbassy;
+    public void UpdateIsTwoShifts(bool? isTwoShifts) => IsTwoShifts = isTwoShifts;
+
 }
 
 }

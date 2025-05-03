@@ -43,6 +43,11 @@ namespace OMSV1.Infrastructure.Configurations
             // Configure IsEmbassy as nullable (not required)
             builder.Property(o => o.IsEmbassy)
                 .IsRequired(false);
+            // ← new IsTwoShifts mapping:
+            builder.Property(o => o.IsTwoShifts)
+                   .IsRequired(false)            // nullable in CLR and SQL
+                   .HasDefaultValue(true);       // default in DB
+
 
             // Relationship
             builder.HasOne(o => o.Governorate)

@@ -10,6 +10,8 @@ namespace OMSV1.Application.CQRS.Offices.Queries
         public string? Name { get; set; }
         public int? Code { get; set; }
         public bool? IsEmbassy { get; set; }
+        public bool? IsTwoShifts { get; set; }
+
         public PaginationParams PaginationParams { get; set; }
 
         public GetOfficesQuery(PaginationParams paginationParams)

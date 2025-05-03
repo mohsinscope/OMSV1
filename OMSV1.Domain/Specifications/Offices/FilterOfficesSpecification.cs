@@ -10,11 +10,13 @@ namespace OMSV1.Domain.Specifications.Offices
             Guid? governorateId,
             string? name,
             bool? isEmbassy,
+            bool? isTwoShifts,
             int? code)
             : base(o =>
                 (!governorateId.HasValue || o.GovernorateId == governorateId.Value) &&
                 (string.IsNullOrEmpty(name) || o.Name.Contains(name)) &&
                 (!isEmbassy.HasValue || o.IsEmbassy == isEmbassy) &&
+                (!isTwoShifts.HasValue || o.IsTwoShifts == isTwoShifts) &&
                 (!code.HasValue || o.Code == code.Value)
             )
         {
