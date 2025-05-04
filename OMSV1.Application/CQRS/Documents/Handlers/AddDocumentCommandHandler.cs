@@ -106,6 +106,13 @@ namespace OMSV1.Application.Handlers.Documents
                 parentDocumentId: request.ParentDocumentId,
                 notes:            request.Notes
             );
+            // ←— NEW: if this is itself a reply, mark it as replied
+            if (request.ResponseType == ResponseType.IncomingReply
+            || request.ResponseType == ResponseType.OutgoingReply)
+            {
+                document.MarkAsReplied();
+            }
+
             
             await _unitOfWork.Repository<Document>().AddAsync(document);
             await _unitOfWork.SaveAsync(cancellationToken);  // now document.Id is persisted
