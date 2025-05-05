@@ -15,7 +15,8 @@ public enum Position
         IT=10,
         ExpenseAuditer=11,
         ExpenseManager=12,
-        ExpenseGeneralManager=13
+        ExpenseGeneralManager=13,
+        DocumentAuditer=14
 
 
 }
