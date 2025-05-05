@@ -3,11 +3,6 @@ using Microsoft.EntityFrameworkCore; // For ToListAsync
 using OMSV1.Application.Dtos.Documents;
 using OMSV1.Domain.Entities.DocumentHistories;
 using OMSV1.Domain.SeedWork;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OMSV1.Application.Queries.Documents
 {
@@ -37,6 +32,7 @@ namespace OMSV1.Application.Queries.Documents
                 DocumentId = history.DocumentId,
                 ActionType = (int)history.ActionType,
                 ProfileId = history.ProfileId,
+                ProfileFullName = history.Profile.FullName,
                 ActionDate = history.ActionDate,
                 Notes = history.Notes,
                 Datecreated=history.DateCreated

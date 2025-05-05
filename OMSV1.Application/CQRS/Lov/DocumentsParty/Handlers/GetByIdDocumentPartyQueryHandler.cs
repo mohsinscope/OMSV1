@@ -29,6 +29,7 @@ namespace OMSV1.Application.Queries.DocumentParties
                 PartyType = documentParty.PartyType,
                 IsOfficial = documentParty.IsOfficial,
                 ProjectId = documentParty.ProjectId,
+                ProjectName = documentParty.Project.Name,
                 DateCreated = documentParty.DateCreated
             };
         }
