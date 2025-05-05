@@ -12,7 +12,10 @@ public enum Position
         SrController = 7,
         ProjectCoordinator = 8,
         OperationManager = 9,
-        IT=10
+        IT=10,
+        ExpenseAuditer=11,
+        ExpenseManager=12,
+        ExpenseGeneralManager=13
 
 
 }

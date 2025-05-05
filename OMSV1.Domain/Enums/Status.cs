@@ -18,5 +18,5 @@ public enum Status
     ReturnedToExpendeAuditer=11,//مدير الحسابات يرجع للمدقق
     SentToExpenseManager=12,//المدقق دز لمدير الحسابات
     ReturnedToExpenseManager=13,//ابو لبنى يرجع لأية
-    SentToExpenser=14//مدير الحسابات دز لأبو لبنى
+    SentToExpenseGeneralManager=14//مدير الحسابات دز لأبو لبنى
 }
