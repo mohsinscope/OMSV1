@@ -293,7 +293,7 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
     }
 
         [HttpPost("{documentId}/audit")]
-        [RequirePermission("DOCu")]
+        [RequirePermission("DOCAudit")]
 
         public async Task<IActionResult> MarkDocumentAsAudited(Guid documentId)
         {
