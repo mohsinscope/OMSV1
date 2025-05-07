@@ -9,6 +9,7 @@ namespace OMSV1.Application.Dtos.Documents
         public PartyType PartyType { get; set; }
         public bool IsOfficial { get; set; }
         public Guid ProjectId { get; set; }
+        public string ProjectName       { get; set; } = string.Empty;
         public DateTime DateCreated { get; set; }
     }
 }

@@ -1,10 +1,7 @@
 // Domain/Entities/Documents/Document.cs
-using System;
-using System.Collections.Generic;
-using System.Linq; // needed for Any()
-using OMSV1.Domain.Entities.Ministries;
 using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.Entities.Projects;
+using OMSV1.Domain.Entities.Sections;
 using OMSV1.Domain.Enums;
 using OMSV1.Domain.SeedWork;
 
@@ -37,15 +34,17 @@ namespace OMSV1.Domain.Entities.Documents
         public Guid     ProjectId  { get; private set; }
         public Project  Project    { get; private set; } = null!;
 
-        public Guid?    MinistryId { get; private set; }
-        public Ministry? Ministry  { get; private set; }
+
+        public Guid? SectionId  { get; private set; }
+        public Section? Section { get; private set; } = null!;
+        public Guid? PrivatePartyId { get; private set; }
+        public PrivateParty? PrivateParty { get; private set; }
+
+
 
         public Guid?      ParentDocumentId { get; private set; }
         public Document?  ParentDocument   { get; private set; }
         public ICollection<Document> ChildDocuments { get; private set; }
-
-        public Guid          PartyId { get; private set; }
-        public DocumentParty Party   { get; private set; } = null!;
 
         public Guid    ProfileId { get; private set; }
         public Profile Profile   { get; private set; } = null!;
@@ -74,13 +73,12 @@ namespace OMSV1.Domain.Entities.Documents
             Guid                projectId,
             DateTime            documentDate,
             bool                requiresReply,
-            Guid                partyId,
-            DocumentParty       party,
+
             Guid                profileId,
             Profile             profile,
             ResponseType        responseType,
-            Guid?               ministryId        = null,
-            Ministry?           ministry          = null,
+            Guid                sectionId,
+            Section             section,
             bool                isUrgent          = false,
             bool                isImportant       = false,
             bool                isNeeded          = false,
@@ -97,13 +95,13 @@ namespace OMSV1.Domain.Entities.Documents
             ProjectId       = projectId;
             DocumentDate    = DateTime.SpecifyKind(documentDate, DateTimeKind.Utc);
             IsRequiresReply = requiresReply;
-            PartyId         = partyId;
-            Party           = party;
+            // PartyId         = partyId;
+            // Party           = party;
             ProfileId       = profileId;
             Profile         = profile;
             ResponseType    = responseType;
-            MinistryId      = ministryId;
-            Ministry        = ministry;
+            SectionId       = sectionId;
+            Section         = section;
             IsUrgent        = isUrgent;
             IsImportant     = isImportant;
             IsNeeded        = isNeeded;
@@ -138,76 +136,71 @@ namespace OMSV1.Domain.Entities.Documents
 
         public void RemoveTag(Guid tagId) => _tagLinks.RemoveAll(l => l.TagId == tagId);
 
-        public Document CreateReply(
-            string              documentNumber,
-            string              title,
-            DocumentType        replyType,
-            Guid                projectId,
-            DateTime            replyDate,
-            bool                requiresReply,
-            Guid                partyId,
-            DocumentParty       party,
-            Guid                profileId,
-            Profile             profile,
-            ResponseType        responseType,
-            Guid?               ministryId = null,
-            Ministry?           ministry   = null,
-            string?             subject    = null,
-            bool                isUrgent   = false,
-            bool                isImportant= false,
-            bool                isNeeded   = false,
-            IEnumerable<DocumentCC>? ccs   = null,
-            IEnumerable<Tag>?   tags       = null,
-            string?             notes      = null
-        )
-        {
-            var reply = new Document(
-                documentNumber,
-                title,
-                replyType,
-                projectId,
-                replyDate,
-                requiresReply,
-                partyId,
-                party,
-                profileId,
-                profile,
-                responseType,
-                ministryId,
-                ministry,
-                isUrgent,
-                isImportant,
-                isNeeded,
-                subject,
-                Id,
-                ccs,
-                tags,
-                notes
-            );
+public Document CreateReply(
+    string                        documentNumber,
+    string                        title,
+    DocumentType                  replyType,
+    Guid                          projectId,
+    DateTime                      replyDate,
+    bool                          requiresReply,
+    Guid                          profileId,
+    Profile                       profile,
+    ResponseType                  responseType,
+    Guid                          sectionId,
+    Section                       section,
+    string?                       subject                  = null,
+    bool                          isUrgent                 = false,
+    bool                          isImportant              = false,
+    bool                          isNeeded                 = false,
+    IEnumerable<DocumentCC>?      ccs                      = null,
+    IEnumerable<Tag>?             tags                     = null,
+    string?                       notes                    = null
+)
+{
+    var reply = new Document(
+        documentNumber,
+        title,
+        replyType,
+        projectId,
+        replyDate,
+        requiresReply,
+        profileId,
+        profile,
+        responseType,
+        sectionId,
+        section,
+        isUrgent,
+        isImportant,
+        isNeeded,
+        subject,
+        /* parentDocumentId: */ Id,
+        ccs,
+        tags,
+        notes
+    );
 
-            if (tags != null)
-                foreach (var t in tags)
-                    reply.AddTag(t);
+    if (tags != null)
+        foreach (var t in tags)
+            reply.AddTag(t);
 
-            ChildDocuments.Add(reply);
-            return reply;
-        }
+    ChildDocuments.Add(reply);
+    return reply;
+}
 
-      public void Update(
-            string       title,
-            string?      subject,
-            DateTime     documentDate,
+        public void Update(
+            string    title,
+            string?   subject,
+            DateTime  documentDate,
             DocumentType docType,
-            bool         requiresReply,
+            bool      requiresReply,
             ResponseType responseType,
-            bool         isUrgent,
-            bool         isImportant,
-            bool         isNeeded,
-            string?      notes,
-            Guid         projectId,
-            Guid         partyId,
-            Guid?        parentDocumentId,
-            Guid?        ministryId
+            bool      isUrgent,
+            bool      isImportant,
+            bool      isNeeded,
+            string?   notes,
+            Guid      projectId,
+            Guid?     parentDocumentId,
+            Guid      sectionId
         )
         {
             Title           = title;
@@ -221,46 +214,45 @@ namespace OMSV1.Domain.Entities.Documents
             IsNeeded        = isNeeded;
             Notes           = notes;
 
-            ProjectId        = projectId;
-            PartyId          = partyId;
-            ParentDocumentId = parentDocumentId;
-            MinistryId       = ministryId;
+            ProjectId       = projectId;
+            ParentDocumentId= parentDocumentId;
+            SectionId       = sectionId;
         }
-        // In OMSV1.Domain.Entities.Documents.Document
-public void Patch(
-    string?      documentNumber     = null,
-    string?      title              = null,
-    string?      subject            = null,
-    DateTime?    documentDate       = null,
-    DocumentType? docType           = null,
-    bool?        requiresReply      = null,
-    ResponseType? responseType      = null,
-    bool?        isUrgent           = null,
-    bool?        isImportant        = null,
-    bool?        isNeeded           = null,
-    string?      notes              = null,
-    Guid?        projectId          = null,
-    Guid?        partyId            = null,
-    Guid?        parentDocumentId   = null,
-    Guid?        ministryId         = null)
-{
-    if (documentNumber != null)    DocumentNumber    = documentNumber;
-    if (title        != null)      Title             = title;
-    if (subject      != null)      Subject           = subject;
-    if (documentDate.HasValue)     DocumentDate      = DateTime.SpecifyKind(documentDate.Value, DateTimeKind.Utc);
-    if (docType.HasValue)          DocumentType      = docType.Value;
-    if (requiresReply.HasValue)    IsRequiresReply   = requiresReply.Value;
-    if (responseType.HasValue)     ResponseType      = responseType.Value;
-    if (isUrgent.HasValue)         IsUrgent          = isUrgent.Value;
-    if (isImportant.HasValue)      IsImportant       = isImportant.Value;
-    if (isNeeded.HasValue)         IsNeeded          = isNeeded.Value;
-    if (notes        != null)      Notes             = notes;
 
-    if (projectId.HasValue)        ProjectId         = projectId.Value;
-    if (partyId.HasValue)          PartyId           = partyId.Value;
-    if (parentDocumentId.HasValue) ParentDocumentId  = parentDocumentId;
-    if (ministryId.HasValue)       MinistryId        = ministryId;
-}
+
+        /* ─────────────── Patch Method ─────────────── */
+        public void Patch(
+            string?         documentNumber           = null,
+            string?         title                    = null,
+            string?         subject                  = null,
+            DateTime?       documentDate             = null,
+            DocumentType?   docType                  = null,
+            bool?           requiresReply            = null,
+            ResponseType?   responseType             = null,
+            bool?           isUrgent                 = null,
+            bool?           isImportant              = null,
+            bool?           isNeeded                 = null,
+            string?         notes                    = null,
+            Guid?           projectId                = null,
+            Guid?           parentDocumentId         = null,
+            Guid?           sectionId                = null
+        )
+        {
+            if (documentNumber  != null)     DocumentNumber         = documentNumber;
+            if (title           != null)     Title                  = title;
+            if (subject         != null)     Subject                = subject;
+            if (documentDate.HasValue)       DocumentDate           = DateTime.SpecifyKind(documentDate.Value, DateTimeKind.Utc);
+            if (docType.HasValue)            DocumentType           = docType.Value;
+            if (requiresReply.HasValue)      IsRequiresReply        = requiresReply.Value;
+            if (responseType.HasValue)       ResponseType           = responseType.Value;
+            if (isUrgent.HasValue)           IsUrgent               = isUrgent.Value;
+            if (isImportant.HasValue)        IsImportant            = isImportant.Value;
+            if (isNeeded.HasValue)           IsNeeded               = isNeeded.Value;
+            if (notes           != null)     Notes                  = notes;
+            if (projectId.HasValue)          ProjectId              = projectId.Value;
+            if (parentDocumentId.HasValue)   ParentDocumentId       = parentDocumentId;
+            if (sectionId.HasValue)          SectionId              = sectionId.Value;
+        }
 
 
         public void MarkAsReplied()             => IsReplied  = true;
