@@ -1,4 +1,5 @@
 // Ministry.cs
+using OMSV1.Domain.Entities.GeneralDirectorates;
 using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Domain.Entities.Ministries
@@ -16,11 +17,14 @@ namespace OMSV1.Domain.Entities.Ministries
         /// <summary>
         /// Documents optionally linked to this ministry.
         /// </summary>
-        public ICollection<OMSV1.Domain.Entities.Documents.Document> Documents { get; private set; }
+        // public ICollection<OMSV1.Domain.Entities.Documents.Document> Documents { get; private set; }
+        public ICollection<GeneralDirectorate> GeneralDirectorates { get; private set; }
+
 
         protected Ministry()
         {
-            Documents = new List<OMSV1.Domain.Entities.Documents.Document>();
+            GeneralDirectorates = new List<GeneralDirectorate>();
+            // Documents = new List<OMSV1.Domain.Entities.Documents.Document>();
         }
 
         public Ministry(string name) : this()

@@ -1,7 +1,7 @@
-// MinistryConfiguration.cs
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OMSV1.Domain.Entities.Ministries;
+using OMSV1.Domain.Entities.GeneralDirectorates;
 
 namespace OMSV1.Infrastructure.Configurations
 {
@@ -9,20 +9,18 @@ namespace OMSV1.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Ministry> builder)
         {
+            builder.ToTable("Ministries");
             builder.HasKey(m => m.Id);
 
             builder.Property(m => m.Name)
-                .IsRequired()
-                .HasMaxLength(200);
+                   .IsRequired()
+                   .HasMaxLength(200);
 
-            // One-to-many: a ministry may have many documents
-            builder
-                .HasMany(m => m.Documents)
-                .WithOne(d => d.Ministry)
-                .HasForeignKey(d => d.MinistryId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            builder.ToTable("Ministries");
+            builder.HasMany(m => m.GeneralDirectorates)
+                   .WithOne(gd => gd.Ministry)
+                   .HasForeignKey(gd => gd.MinistryId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
+
 }

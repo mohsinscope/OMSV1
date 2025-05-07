@@ -8,12 +8,16 @@ using OMSV1.Domain.Entities.Attendances;
 using OMSV1.Domain.Entities.Companies;
 using OMSV1.Domain.Entities.DamagedDevices;
 using OMSV1.Domain.Entities.DamagedPassport;
+using OMSV1.Domain.Entities.Directorates;
 using OMSV1.Domain.Entities.Expenses;
+using OMSV1.Domain.Entities.GeneralDirectorates;
 using OMSV1.Domain.Entities.Governorates;
 using OMSV1.Domain.Entities.Lectures;
+using OMSV1.Domain.Entities.Ministries;
 using OMSV1.Domain.Entities.Offices;
 using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.Entities.Reports;
+using OMSV1.Domain.Entities.Sections;
 using OMSV1.Infrastructure.Identity;
 
 namespace OMSV1.Infrastructure.Persistence;
@@ -56,9 +60,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         public DbSet<EmailReport> EmailReports {get;set;}
         public DbSet<ReportType> ReportTypes {get;set;}
         public DbSet<OMSV1.Domain.Entities.Documents.Document> Documents {get;set;}
-        public DbSet<OMSV1.Domain.Entities.Documents.DocumentParty> DocumentParties {get;set;}
         public DbSet<OMSV1.Domain.Entities.DocumentHistories.DocumentHistory> DocumentHistories {get;set;}
         public DbSet<OMSV1.Domain.Entities.Projects.Project> Projects {get;set;}
+        public DbSet<Ministry> Ministries { get; set; }
+        public DbSet<GeneralDirectorate> GeneralDirectorates { get; set; }
+        public DbSet<Directorate> Directorates { get; set; }
+        public DbSet<Department> Departments { get; set; }
+        public DbSet<OMSV1.Domain.Entities.Sections.Section> Sections { get; set; }
+
+
+
+
+
         public DbSet<OMSV1.Domain.Entities.Documents.DocumentCC> DocumentCCs {get;set;}
         public DbSet<OMSV1.Domain.Entities.Documents.Tag> Tags {get;set;}
 

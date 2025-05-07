@@ -17,17 +17,11 @@ namespace OMSV1.Infrastructure.Configurations
                    .IsRequired()
                    .HasMaxLength(200);
 
-            // Documents relationship (existing)
-            builder.HasMany(p => p.Documents)
-                   .WithOne(d => d.Project)
-                   .HasForeignKey(d => d.ProjectId)
-                   .OnDelete(DeleteBehavior.Restrict);
-
-            // Parties relationship (new)
-            builder.HasMany(p => p.Parties)
-                   .WithOne(dp => dp.Project)
-                   .HasForeignKey(dp => dp.ProjectId)
-                   .OnDelete(DeleteBehavior.Restrict);
+            // // Documents relationship
+            // builder.HasMany(p => p.Documents)
+            //        .WithOne(d => d.Project)
+            //        .HasForeignKey(d => d.ProjectId)
+            //        .OnDelete(DeleteBehavior.Restrict);
 
             // Table Mapping
             builder.ToTable("Projects");

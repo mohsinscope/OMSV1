@@ -1,3 +1,4 @@
+// Domain/Entities/Projects/Project.cs
 using OMSV1.Domain.Entities.Documents;
 using OMSV1.Domain.SeedWork;
 using System;
@@ -10,17 +11,13 @@ namespace OMSV1.Domain.Entities.Projects
         public string Name { get; private set; }
 
         // One project has many documents
-        public ICollection<Document> Documents { get; private set; }
-
-        // One project has many parties
-        public ICollection<Documents.DocumentParty> Parties { get; private set; }
+        // public ICollection<Document> Documents { get; private set; }
 
         // EF / Serialization constructor
         protected Project()
         {
             Name = string.Empty;
-            Documents = new List<Document>();
-            Parties = new List<Documents.DocumentParty>();
+            // Documents = new List<Document>();
         }
 
         public Project(string name)
@@ -29,8 +26,7 @@ namespace OMSV1.Domain.Entities.Projects
                 throw new ArgumentException("Name cannot be null or empty.", nameof(name));
 
             Name = name;
-            Documents = new List<Document>();
-            Parties = new List<Documents.DocumentParty>();
+            // Documents = new List<Document>();
         }
 
         public void UpdateName(string newName)
@@ -41,18 +37,11 @@ namespace OMSV1.Domain.Entities.Projects
             Name = newName;
         }
 
-        // Document methods
-        public void AddDocument(Document document)
-        {
-            if (document == null) throw new ArgumentNullException(nameof(document));
-            Documents.Add(document);
-        }
-
-        // Party methods
-        public void AddParty(Documents.DocumentParty party)
-        {
-            if (party == null) throw new ArgumentNullException(nameof(party));
-            Parties.Add(party);
-        }
+        // // Document methods
+        // public void AddDocument(Document document)
+        // {
+        //     if (document == null) throw new ArgumentNullException(nameof(document));
+        //     Documents.Add(document);
+        // }
     }
 }
