@@ -1,124 +1,130 @@
-// using MediatR;
-// using Microsoft.EntityFrameworkCore;
-// using OMSV1.Application.Dtos.Documents;
-// using OMSV1.Domain.Entities.Documents;
-// using OMSV1.Domain.SeedWork;
-// using System;
-// using System.Collections.Generic;
-// using System.Linq;
-// using System.Threading;
-// using System.Threading.Tasks;
+// --- GetDocumentByDocumentNumberDetailedQueryHandler.cs ---
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using OMSV1.Application.Dtos.Documents;
+using OMSV1.Domain.Entities.Documents;
+using OMSV1.Domain.SeedWork;
 
-// namespace OMSV1.Application.Queries.Documents
-// {
-//     public class GetDocumentByDocumentNumberDetailedQueryHandler 
-//         : IRequestHandler<GetDocumentByDocumentNumberDetailedQuery, DocumentDetailedDto>
-//     {
-//         private readonly IUnitOfWork _unitOfWork;
+namespace OMSV1.Application.Queries.Documents
+{
+    public class GetDocumentByDocumentNumberDetailedQueryHandler 
+        : IRequestHandler<GetDocumentByDocumentNumberDetailedQuery, DocumentDetailedDto>
+    {
+        private readonly IUnitOfWork _unitOfWork;
 
-//         public GetDocumentByDocumentNumberDetailedQueryHandler(IUnitOfWork unitOfWork)
-//         {
-//             _unitOfWork = unitOfWork;
-//         }
+        public GetDocumentByDocumentNumberDetailedQueryHandler(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
 
-//         public async Task<DocumentDetailedDto> Handle(
-//             GetDocumentByDocumentNumberDetailedQuery request, 
-//             CancellationToken cancellationToken)
-//         {
-//             // Load all documents with necessary related data, including tag & CC links
-//             var allDocuments = await _unitOfWork.Repository<Document>()
-//                 .GetAllAsQueryable()
-//                 .Include(d => d.Profile)
-//                 .Include(d => d.CcLinks)
-//                     .ThenInclude(link => link.DocumentCc)
-//                 .Include(d => d.TagLinks)
-//                     .ThenInclude(link => link.Tag)
-//                 .Include(d => d.Party)
-//                 .Include(d => d.Ministry)
-//                 // include first-level children with their tag & CC links
-//                 .Include(d => d.ChildDocuments)
-//                     .ThenInclude(cd => cd.CcLinks)
-//                         .ThenInclude(link => link.DocumentCc)
-//                 .Include(d => d.ChildDocuments)
-//                     .ThenInclude(cd => cd.TagLinks)
-//                         .ThenInclude(link => link.Tag)
-//                 .ToListAsync(cancellationToken);
+        public async Task<DocumentDetailedDto> Handle(
+            GetDocumentByDocumentNumberDetailedQuery request, 
+            CancellationToken cancellationToken)
+        {
+            // 1) Eager‐load the single document + full hierarchy + links
+            var doc = await _unitOfWork.Repository<Document>()
+                .GetAllAsQueryable()
+                .Include(d => d.Project)
+                .Include(d => d.Section)
+                    .ThenInclude(s => s.Department)
+                        .ThenInclude(dep => dep.Directorate)
+                            .ThenInclude(dir => dir.GeneralDirectorate)
+                                .ThenInclude(gd => gd.Ministry)
+                .Include(d => d.PrivateParty)
+                .Include(d => d.Profile)
+                .Include(d => d.CcLinks).ThenInclude(l => l.DocumentCc)
+                .Include(d => d.TagLinks).ThenInclude(l => l.Tag)
+                .Include(d => d.ChildDocuments)
+                    .ThenInclude(cd => cd.CcLinks).ThenInclude(l => l.DocumentCc)
+                .Include(d => d.ChildDocuments)
+                    .ThenInclude(cd => cd.TagLinks).ThenInclude(l => l.Tag)
+                .FirstOrDefaultAsync(d => d.DocumentNumber == request.DocumentNumber, cancellationToken);
 
-//             // Identify the root document by its number
-//             var root = allDocuments
-//                 .FirstOrDefault(d => d.DocumentNumber == request.DocumentNumber);
-//             if (root == null)
-//                 throw new KeyNotFoundException(
-//                     $"Document with DocumentNumber '{request.DocumentNumber}' not found.");
+            if (doc == null)
+                throw new KeyNotFoundException(
+                    $"Document with number '{request.DocumentNumber}' not found.");
 
-//             // Build and return the recursive DTO tree
-//             return BuildDocumentTree(root, allDocuments);
-//         }
+            // 2) Build and return the same recursive DTO tree
+            return BuildDocumentTree(doc);
+        }
 
-//         private DocumentDetailedDto BuildDocumentTree(
-//             Document doc, 
-//             IEnumerable<Document> allDocs)
-//         {
-//             var dto = MapDocumentToDto(doc);
+        private DocumentDetailedDto BuildDocumentTree(Document d)
+        {
+            var dto = MapToDetailedDto(d);
 
-//             // recurse into children
-//             var children = allDocs.Where(d => d.ParentDocumentId == doc.Id);
-//             foreach (var child in children)
-//             {
-//                 dto.ChildDocuments.Add(BuildDocumentTree(child, allDocs));
-//             }
+            foreach (var child in d.ChildDocuments.OrderBy(cd => cd.DocumentDate))
+                dto.ChildDocuments.Add(BuildDocumentTree(child));
 
-//             return dto;
-//         }
+            return dto;
+        }
 
-//         private DocumentDetailedDto MapDocumentToDto(Document doc)
-//         {
-//             return new DocumentDetailedDto
-//             {
-//                 Id                  = doc.Id,
-//                 DocumentNumber      = doc.DocumentNumber,
-//                 Title               = doc.Title,
-//                 DocumentType        = doc.DocumentType,
-//                 ResponseType        = doc.ResponseType,
-//                 Subject             = doc.Subject,
+        private DocumentDetailedDto MapToDetailedDto(Document d)
+        {
+            // unwrap the chain
+            var sec = d.Section;
+            var dep = sec?.Department;
+            var dir = dep?.Directorate;
+            var gd  = dir?.GeneralDirectorate;
+            var min = gd?.Ministry;
 
-//                 IsRequiresReply     = doc.IsRequiresReply,
-//                 IsReplied           = doc.IsReplied,
-//                 IsAudited           = doc.IsAudited,
+            // safe CC/Tag names
+            var ccNames = d.CcLinks
+                .Where(l => l.DocumentCc != null)
+                .Select(l => l.DocumentCc!.RecipientName ?? string.Empty)
+                .ToList();
+            var tagNames = d.TagLinks
+                .Where(l => l.Tag != null)
+                .Select(l => l.Tag!.Name ?? string.Empty)
+                .ToList();
 
-//                 IsUrgent            = doc.IsUrgent,
-//                 IsImportant         = doc.IsImportant,
-//                 IsNeeded            = doc.IsNeeded,
+            return new DocumentDetailedDto
+            {
+                Id               = d.Id,
+                DocumentNumber   = d.DocumentNumber,
+                Title            = d.Title,
+                DocumentType     = d.DocumentType,
+                ResponseType     = d.ResponseType,
+                Subject          = d.Subject,
 
-//                 DocumentDate        = doc.DocumentDate,
-//                 DateCreated      = doc.DateCreated,
+                IsRequiresReply  = d.IsRequiresReply,
+                IsReplied        = d.IsReplied,
+                IsAudited        = d.IsAudited,
+                IsUrgent         = d.IsUrgent,
+                IsImportant      = d.IsImportant,
+                IsNeeded         = d.IsNeeded,
 
-//                 Notes               = doc.Notes,
+                DocumentDate     = d.DocumentDate,
+                Notes            = d.Notes,
+                DateCreated      = d.DateCreated,
 
-//                 ParentDocumentId    = doc.ParentDocumentId,
+                ParentDocumentId = d.ParentDocumentId,
+                ChildDocuments   = new List<DocumentDetailedDto>(),
 
-//                 ProjectId           = doc.ProjectId,
+                ProjectId        = d.ProjectId,
+                ProjectName      = d.Project?.Name ?? string.Empty,
 
-//                 MinistryId          = doc.MinistryId,
-//                 MinistryName        = doc.Ministry?.Name,
+                SectionId                = sec?.Id,
+                SectionName              = sec?.Name               ?? string.Empty,
+                DepartmentId             = dep?.Id,
+                DepartmentName           = dep?.Name              ?? string.Empty,
+                DirectorateId            = dir?.Id,
+                DirectorateName          = dir?.Name             ?? string.Empty,
+                GeneralDirectorateId     = gd?.Id,
+                GeneralDirectorateName   = gd?.Name              ?? string.Empty,
+                MinistryId               = min?.Id,
+                MinistryName             = min?.Name             ?? string.Empty,
 
-//                 PartyId             = doc.PartyId,
-//                 PartyName           = doc.Party.Name,
-//                 PartyType           = doc.Party.PartyType,
-//                 PartyIsOfficial     = doc.Party.IsOfficial,
+                PrivatePartyId           = d.PrivatePartyId,
+                PrivatePartyName         = d.PrivateParty?.Name   ?? string.Empty,
 
-//                // CC & Tag ids + names
-//         CcIds   = doc.CcLinks.Select(l => l.DocumentCcId).ToList(),
-//         CcNames = doc.CcLinks.Select(l => l.DocumentCc.RecipientName!)
-//                               .Where(n => n != null).ToList(),
-//         TagIds  = doc.TagLinks.Select(l => l.TagId).ToList(),
-//         TagNames= doc.TagLinks.Select(l => l.Tag.Name!)
-//                               .Where(n => n != null).ToList(),
-//                 ProfileId           = doc.ProfileId,
-//                 ProfileFullName     = doc.Profile.FullName,
+                CcIds    = d.CcLinks.Select(l => l.DocumentCcId).ToList(),
+                CcNames  = ccNames,
+                TagIds   = d.TagLinks.Select(l => l.TagId).ToList(),
+                TagNames = tagNames,
 
-//                 ChildDocuments      = new List<DocumentDetailedDto>()
-//             };
-//         }
-//     }
-// }
+                ProfileId       = d.ProfileId,
+                ProfileFullName = d.Profile?.FullName ?? string.Empty
+            };
+        }
+    }
+}

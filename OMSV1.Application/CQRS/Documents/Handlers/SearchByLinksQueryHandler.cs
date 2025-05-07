@@ -2,6 +2,7 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Dtos.Documents;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Queries.Documents;
@@ -21,7 +22,7 @@ namespace OMSV1.Application.Queries.Documents.Handlers
 
         public SearchByLinksQueryHandler(
             IGenericRepository<Document> repository,
-            IMapper mapper)              // <-- inject IMapper here
+            IMapper mapper)
         {
             _repository = repository;
             _mapper     = mapper;
@@ -36,16 +37,37 @@ namespace OMSV1.Application.Queries.Documents.Handlers
                 ccIds:  request.CcIds,
                 tagIds: request.TagIds);
 
-            // 2) Apply spec and project via AutoMapper
-            var queryable = _repository
-                .ListAsQueryable(spec)
-                .ProjectTo<DocumentDto>(_mapper.ConfigurationProvider);
+            // 2) Apply spec and EAGER-LOAD all needed navigations:
+            var prepped = _repository.ListAsQueryable(spec)
+                // core navigations
+                .Include(d => d.Project)
+                .Include(d => d.PrivateParty)
+                .Include(d => d.Profile)
 
-            // 3) Paging unchanged
+                // CC & Tag link details
+                .Include(d => d.CcLinks)
+                    .ThenInclude(cl => cl.DocumentCc)
+                .Include(d => d.TagLinks)
+                    .ThenInclude(tl => tl.Tag)
+
+                // full Section→Department→Directorate→GeneralDirectorate→Ministry chain
+                .Include(d => d.Section)
+                    .ThenInclude(s => s.Department)
+                        .ThenInclude(dep => dep.Directorate)
+                            .ThenInclude(dir => dir.GeneralDirectorate)
+                                .ThenInclude(gd => gd.Ministry);
+
+            // 3) Project via AutoMapper into your new DocumentDto
+            var projected = prepped
+                .ProjectTo<DocumentDto>(_mapper.ConfigurationProvider)
+                .OrderByDescending(d => d.DocumentDate);
+
+            // 4) Paging
             return await PagedList<DocumentDto>.CreateAsync(
-                queryable,
+                projected,
                 request.PageNumber,
-                request.PageSize);
+                request.PageSize
+            );
         }
     }
 }

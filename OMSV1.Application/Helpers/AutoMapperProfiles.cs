@@ -66,7 +66,19 @@ public class AutoMapperProfiles : Profile
             CreateMap<OMSV1.Domain.Entities.Expenses.Action,ActionDto>();
             //Documents
             // CreateMap<DocumentParty, DocumentPartyDto>();
-            CreateMap<OMSV1.Domain.Entities.Documents.Document, DocumentDto>();
+            CreateMap<OMSV1.Domain.Entities.Documents.Document, DocumentDto>()
+                .ForMember(dest => dest.SectionName,
+        opt => opt.MapFrom(src => src.Section.Name))
+    .ForMember(dest => dest.DepartmentName,
+        opt => opt.MapFrom(src => src.Section.Department.Name))
+    .ForMember(dest => dest.DirectorateName,
+        opt => opt.MapFrom(src => src.Section.Department.Directorate.Name))
+    .ForMember(dest => dest.GeneralDirectorateName,
+        opt => opt.MapFrom(src => src.Section.Department.Directorate.GeneralDirectorate.Name))
+    .ForMember(dest => dest.MinistryName,
+        opt => opt.MapFrom(src => src.Section.Department.Directorate.GeneralDirectorate.Ministry.Name))
+    // ...and similarly for all the ID and Name members...
+    ;
             CreateMap<Project, ProjectDto>();
             CreateMap<DocumentCC, DocumentCCDto>();
             CreateMap<Ministry,MinistryDto>();

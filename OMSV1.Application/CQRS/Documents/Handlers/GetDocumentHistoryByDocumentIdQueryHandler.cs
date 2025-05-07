@@ -1,12 +1,18 @@
+// --- GetDocumentHistoryByDocumentIdQueryHandler.cs ---
 using MediatR;
-using Microsoft.EntityFrameworkCore; // For ToListAsync
+using Microsoft.EntityFrameworkCore; // for ToListAsync
 using OMSV1.Application.Dtos.Documents;
 using OMSV1.Domain.Entities.DocumentHistories;
 using OMSV1.Domain.SeedWork;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OMSV1.Application.Queries.Documents
 {
-    public class GetDocumentHistoryByDocumentIdQueryHandler : IRequestHandler<GetDocumentHistoryByDocumentIdQuery, List<DocumentHistoryDto>>
+    public class GetDocumentHistoryByDocumentIdQueryHandler 
+        : IRequestHandler<GetDocumentHistoryByDocumentIdQuery, List<DocumentHistoryDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -15,30 +21,37 @@ namespace OMSV1.Application.Queries.Documents
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<DocumentHistoryDto>> Handle(GetDocumentHistoryByDocumentIdQuery request, CancellationToken cancellationToken)
+        public async Task<List<DocumentHistoryDto>> Handle(
+            GetDocumentHistoryByDocumentIdQuery request, 
+            CancellationToken cancellationToken)
         {
-            // Use the repository's GetAllAsQueryable method to build a query that filters by DocumentId.
-            var query = _unitOfWork.Repository<DocumentHistory>()
+            // 1) Eager-load Profile
+            var histories = await _unitOfWork.Repository<DocumentHistory>()
                 .GetAllAsQueryable()
-                .Where(h => h.DocumentId == request.DocumentId);
+                .Where(h => h.DocumentId == request.DocumentId)
+                .Include(h => h.Profile)
+                .OrderBy(h => h.ActionDate)
+                .ToListAsync(cancellationToken);
 
-            // Execute the query using ToListAsync
-            var histories = await query.ToListAsync(cancellationToken);
+            if (!histories.Any())
+                throw new KeyNotFoundException(
+                    $"No history found for Document ID '{request.DocumentId}'.");
 
-            // Map each DocumentHistory entity to a DocumentHistoryDto.
-            var historyDtos = histories.Select(history => new DocumentHistoryDto
+            // 2) Map safely
+            var dtos = histories.Select(h => new DocumentHistoryDto
             {
-                Id = history.Id,
-                DocumentId = history.DocumentId,
-                ActionType = (int)history.ActionType,
-                ProfileId = history.ProfileId,
-                ProfileFullName = history.Profile.FullName,
-                ActionDate = history.ActionDate,
-                Notes = history.Notes,
-                Datecreated=history.DateCreated
-            }).ToList();
+                Id               = h.Id,
+                DocumentId       = h.DocumentId,
+                ActionType       = (int)h.ActionType,
+                ProfileId        = h.ProfileId,
+                ProfileFullName  = h.Profile?.FullName ?? string.Empty,
+                ActionDate       = h.ActionDate,
+                Notes            = h.Notes,
+                Datecreated      = h.DateCreated
+            })
+            .ToList();
 
-            return historyDtos;
+            return dtos;
         }
     }
 }

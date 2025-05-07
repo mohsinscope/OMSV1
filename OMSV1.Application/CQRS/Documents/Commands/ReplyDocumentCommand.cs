@@ -21,7 +21,8 @@ namespace OMSV1.Application.Commands.Documents
         public bool RequiresReply          { get; set; }
 
         // Who is replying
-        public Guid PartyId   { get; set; }
+        public Guid?       PrivatePartyId   { get; set; }    // ← already nullable
+        public Guid?       SectionId        { get; set; }    // ← now nullable
         public Guid ProfileId { get; set; }
 
         // Content

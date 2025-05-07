@@ -30,15 +30,30 @@ namespace OMSV1.Application.Dtos.Documents
 
         // Foreign-key IDs (if you still need them)
         public Guid ProjectId           { get; set; }
-        public Guid PartyId             { get; set; }
-        public Guid? MinistryId         { get; set; }
+        public Guid? PrivatePartyId { get; set; }
+        public Guid? SectionId         { get; set; }
+        public string SectionName      { get; set; } = string.Empty;
+
+        public Guid? DepartmentId    { get; set; }
+        public string DepartmentName { get; set; } = string.Empty;
+
+    // 2 up: Directorate
+        public Guid? DirectorateId    { get; set; }
+        public string DirectorateName { get; set; } = string.Empty;
+
+    // 3 up: GeneralDirectorate
+        public Guid? GeneralDirectorateId    { get; set; }
+        public string GeneralDirectorateName { get; set; } = string.Empty;
+
+    // 4 up: Ministry
+        public Guid? MinistryId    { get; set; }
+        public string MinistryName { get; set; } = string.Empty;
         public Guid? ParentDocumentId   { get; set; }
         public Guid ProfileId           { get; set; }
 
         // ONLY the *names* of those related entities
         public string ProjectName       { get; set; } = string.Empty;
-        public string PartyName         { get; set; } = string.Empty;
-        public string MinistryName      { get; set; } = string.Empty;
+        public string PrivatePartyName         { get; set; } = string.Empty;
         public string ProfileFullName       { get; set; } = string.Empty;
 
         // Child documents (unchanged)

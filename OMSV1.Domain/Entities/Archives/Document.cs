@@ -66,57 +66,67 @@ namespace OMSV1.Domain.Entities.Documents
             // Tags handled via TagLinks
         }
 
-        public Document(
-            string              documentNumber,
-            string              title,
-            DocumentType        docType,
-            Guid                projectId,
-            DateTime            documentDate,
-            bool                requiresReply,
 
-            Guid                profileId,
-            Profile             profile,
-            ResponseType        responseType,
-            Guid                sectionId,
-            Section             section,
-            bool                isUrgent          = false,
-            bool                isImportant       = false,
-            bool                isNeeded          = false,
-            string?             subject           = null,
-            Guid?               parentDocumentId  = null,
-            IEnumerable<DocumentCC>? ccs          = null,
-            IEnumerable<Tag>?   tags              = null,
-            string?             notes             = null
-        ) : this()
-        {
-            DocumentNumber  = documentNumber;
-            Title           = title;
-            DocumentType    = docType;
-            ProjectId       = projectId;
-            DocumentDate    = DateTime.SpecifyKind(documentDate, DateTimeKind.Utc);
-            IsRequiresReply = requiresReply;
-            // PartyId         = partyId;
-            // Party           = party;
-            ProfileId       = profileId;
-            Profile         = profile;
-            ResponseType    = responseType;
-            SectionId       = sectionId;
-            Section         = section;
-            IsUrgent        = isUrgent;
-            IsImportant     = isImportant;
-            IsNeeded        = isNeeded;
-            Subject         = subject;
-            ParentDocumentId= parentDocumentId;
-            Notes           = notes;
+public Document(
+    string              documentNumber,
+    string              title,
+    DocumentType        docType,
+    Guid                projectId,
+    DateTime            documentDate,
+    bool                requiresReply,
 
-            if (ccs != null)
-                foreach (var cc in ccs)
-                    AddCc(cc);
+    Guid                profileId,
+    Profile             profile,
+    ResponseType        responseType,
 
-            if (tags != null)
-                foreach (var t in tags)
-                    AddTag(t);
-        }
+    Guid?               sectionId,       // ← now nullable
+    Section?            section,         // ← now nullable
+
+    Guid?               privatePartyId,  // ← still nullable
+    PrivateParty?       privateParty,    // ← still nullable
+
+    bool                isUrgent      = false,
+    bool                isImportant   = false,
+    bool                isNeeded      = false,
+    string?             subject       = null,
+    Guid?               parentDocumentId = null,
+    IEnumerable<DocumentCC>? ccs      = null,
+    IEnumerable<Tag>?   tags          = null,
+    string?             notes         = null
+) : this()
+{
+    DocumentNumber   = documentNumber;
+    Title            = title;
+    DocumentType     = docType;
+    ProjectId        = projectId;
+    DocumentDate     = DateTime.SpecifyKind(documentDate, DateTimeKind.Utc);
+    IsRequiresReply  = requiresReply;
+
+    ProfileId        = profileId;
+    Profile          = profile;
+    ResponseType     = responseType;
+
+    SectionId        = sectionId;
+    Section          = section!;           // will be null if sectionId was null
+
+    PrivatePartyId   = privatePartyId;
+    PrivateParty     = privateParty!;      // will be null if privatePartyId was null
+
+    IsUrgent         = isUrgent;
+    IsImportant      = isImportant;
+    IsNeeded         = isNeeded;
+    Subject          = subject;
+    ParentDocumentId = parentDocumentId;
+    Notes            = notes;
+
+    if (ccs != null)
+        foreach (var cc in ccs)
+            AddCc(cc);
+
+    if (tags != null)
+        foreach (var t in tags)
+            AddTag(t);
+}
 
         public void AddCc(DocumentCC cc)
         {
@@ -143,40 +153,48 @@ public Document CreateReply(
     Guid                          projectId,
     DateTime                      replyDate,
     bool                          requiresReply,
+
     Guid                          profileId,
     Profile                       profile,
     ResponseType                  responseType,
-    Guid                          sectionId,
-    Section                       section,
-    string?                       subject                  = null,
-    bool                          isUrgent                 = false,
-    bool                          isImportant              = false,
-    bool                          isNeeded                 = false,
-    IEnumerable<DocumentCC>?      ccs                      = null,
-    IEnumerable<Tag>?             tags                     = null,
-    string?                       notes                    = null
+
+    Guid?                         sectionId,       // ← now nullable
+    Section?                      section,         // ← now nullable
+
+    Guid?                         privatePartyId,  // ← still nullable
+    PrivateParty?                 privateParty,    // ← still nullable
+
+    string?                       subject           = null,
+    bool                          isUrgent          = false,
+    bool                          isImportant       = false,
+    bool                          isNeeded          = false,
+    IEnumerable<DocumentCC>?      ccs               = null,
+    IEnumerable<Tag>?             tags              = null,
+    string?                       notes             = null
 )
 {
     var reply = new Document(
-        documentNumber,
-        title,
-        replyType,
-        projectId,
-        replyDate,
-        requiresReply,
-        profileId,
-        profile,
-        responseType,
-        sectionId,
-        section,
-        isUrgent,
-        isImportant,
-        isNeeded,
-        subject,
-        /* parentDocumentId: */ Id,
-        ccs,
-        tags,
-        notes
+        documentNumber:   documentNumber,
+        title:            title,
+        docType:          replyType,
+        projectId:        projectId,
+        documentDate:     replyDate,
+        requiresReply:    requiresReply,
+        profileId:        profileId,
+        profile:          profile,
+        responseType:     responseType,
+        sectionId:        sectionId,        // nullable
+        section:          section,          // nullable
+        privatePartyId:   privatePartyId,   // nullable
+        privateParty:     privateParty,     // nullable
+        isUrgent:         isUrgent,
+        isImportant:      isImportant,
+        isNeeded:         isNeeded,
+        subject:          subject,
+        parentDocumentId: Id,               // parent is this document
+        ccs:              ccs,
+        tags:             tags,
+        notes:            notes
     );
 
     if (tags != null)
@@ -200,7 +218,8 @@ public Document CreateReply(
             string?   notes,
             Guid      projectId,
             Guid?     parentDocumentId,
-            Guid      sectionId
+            Guid      sectionId,
+            Guid      privatePartyId
         )
         {
             Title           = title;
@@ -217,6 +236,7 @@ public Document CreateReply(
             ProjectId       = projectId;
             ParentDocumentId= parentDocumentId;
             SectionId       = sectionId;
+            PrivatePartyId= privatePartyId;
         }
 
 
@@ -235,7 +255,8 @@ public Document CreateReply(
             string?         notes                    = null,
             Guid?           projectId                = null,
             Guid?           parentDocumentId         = null,
-            Guid?           sectionId                = null
+            Guid?           sectionId                = null,
+            Guid?           privatePartyId           = null
         )
         {
             if (documentNumber  != null)     DocumentNumber         = documentNumber;
@@ -252,6 +273,8 @@ public Document CreateReply(
             if (projectId.HasValue)          ProjectId              = projectId.Value;
             if (parentDocumentId.HasValue)   ParentDocumentId       = parentDocumentId;
             if (sectionId.HasValue)          SectionId              = sectionId.Value;
+            if (privatePartyId.HasValue)     PrivatePartyId         = privatePartyId.Value;
+
         }
 
 

@@ -65,7 +65,33 @@ namespace OMSV1.Application.Controllers.Sections
                 );
             }
         }
+        // GET: api/Sections/ByDepartment/{departmentId}
+        [HttpGet("ByDepartment/{departmentId}")]
+        public async Task<IActionResult> GetByDepartment(Guid departmentId)
+        {
+            try
+            {
+                var query = new GetSectionsByDepartmentIdQuery(departmentId);
+                var sections = await _mediator.Send(query);
 
+                if (!sections.Any())
+                    return NotFound($"No sections found for DepartmentId {departmentId}.");
+
+                return Ok(sections);
+            }
+            catch (ArgumentException argEx)
+            {
+                return BadRequest(argEx.Message);
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(
+                    HttpStatusCode.InternalServerError,
+                    "An error occurred while retrieving sections by DepartmentId.",
+                    new[] { ex.Message }
+                );
+            }
+        }
         
 
         // Add a new Section

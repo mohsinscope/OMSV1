@@ -66,6 +66,34 @@ namespace OMSV1.Application.Controllers.Documents
                 );
             }
         }
+        // GET: api/Departments/ByDirectorate/{directorateId}
+[HttpGet("ByDirectorate/{directorateId}")]
+public async Task<IActionResult> GetByDirectorate(Guid directorateId)
+{
+    try
+    {
+        var query = new GetDepartmentsByDirectorateIdQuery(directorateId);
+        var departments = await _mediator.Send(query);
+
+        if (!departments.Any())
+            return NotFound($"No departments found for DirectorateId {directorateId}.");
+
+        return Ok(departments);
+    }
+    catch (ArgumentException argEx)
+    {
+        return BadRequest(argEx.Message);
+    }
+    catch (Exception ex)
+    {
+        return ResponseHelper.CreateErrorResponse(
+            HttpStatusCode.InternalServerError,
+            "An error occurred while retrieving departments by DirectorateId.",
+            new[] { ex.Message }
+        );
+    }
+}
+
 
         
 

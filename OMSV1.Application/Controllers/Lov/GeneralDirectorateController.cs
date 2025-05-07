@@ -66,6 +66,34 @@ namespace OMSV1.Application.Controllers.Documents
                 );
             }
         }
+        // GET: api/GeneralDirectorate/ByMinistry/{ministryId}
+        [HttpGet("ByMinistry/{ministryId}")]
+        public async Task<IActionResult> GetByMinistry(Guid ministryId)
+        {
+            try
+            {
+                var query = new GetGeneralDirectoratesByMinistryIdQuery(ministryId);
+                var list = await _mediator.Send(query);
+
+                if (!list.Any())
+                    return NotFound($"No GeneralDirectorates found for MinistryId {ministryId}.");
+
+                return Ok(list);
+            }
+            catch (ArgumentException argEx)
+            {
+                return BadRequest(argEx.Message);
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.CreateErrorResponse(
+                    HttpStatusCode.InternalServerError,
+                    "An error occurred while retrieving GeneralDirectorates by MinistryId.",
+                    new[] { ex.Message }
+                );
+            }
+        }
+
 
         
 

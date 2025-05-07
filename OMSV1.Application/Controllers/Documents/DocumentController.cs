@@ -24,7 +24,7 @@ namespace OMSV1.Application.Controllers.Documents
 // POST: api/document with form-data
 // POST: api/document with form-data
 [HttpPost]
-[RequirePermission("DOCc")]
+//[RequirePermission("DOCc")]
 
 public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmentCommand command)
 {
@@ -104,7 +104,7 @@ public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmen
      // GET: api/document?PageNumber=1&PageSize=10
         // This endpoint returns only documents that do not have a ParentDocumentId (i.e. root documents)
         [HttpGet]
-        [RequirePermission("DOCr")]
+        //[RequirePermission("DOCr")]
 
         public async Task<IActionResult> GetAllDocuments([FromQuery] PaginationParams paginationParams)
         {
@@ -131,32 +131,51 @@ public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmen
         }
         // GET: api/document/{id}
         // Returns a detailed document including all child documents and attachments.
-        [HttpGet("{id}")]
-        [RequirePermission("DOCr")]
-        public async Task<IActionResult> GetDocumentById(Guid id)
+[HttpGet("{id}")]
+//[RequirePermission("DOCr")]
+public async Task<IActionResult> GetDocumentById(Guid id)
+{
+    try
+    {
+        var query = new GetDocumentByIdDetailedQuery { Id = id };
+        DocumentDetailedDto documentDto = await _mediator.Send(query);
+        return Ok(documentDto);
+    }
+    catch (KeyNotFoundException knfEx)
+    {
+        // 404 if not found
+        return NotFound(new 
         {
-            try
-            {
-                var query = new GetDocumentByIdDetailedQuery { Id = id };
-                DocumentDetailedDto documentDto = await _mediator.Send(query);
-                return Ok(documentDto);
-            }
-            catch (KeyNotFoundException knfEx)
-            {
-                return NotFound(knfEx.Message);
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper.CreateErrorResponse(
-                    HttpStatusCode.InternalServerError,
-                    "An error occurred while retrieving the document.",
-                    new[] { ex.Message }
-                );
-            }
+            error   = knfEx.Message,
+            details = knfEx.StackTrace
+        });
+    }
+    catch (Exception ex)
+    {
+        // Walk the InnerException chain for more context
+        var errors = new List<string>();
+        Exception curr = ex;
+        while (curr != null)
+        {
+            errors.Add(curr.Message);
+            curr = curr.InnerException;
         }
+
+        return StatusCode(
+            StatusCodes.Status500InternalServerError,
+            new
+            {
+                error    = "An error occurred while retrieving the document.",
+                messages = errors,
+                stack    = ex.StackTrace
+            }
+        );
+    }
+}
+
         // New endpoint to get document details by DocumentNumber
         [HttpGet("bynumber/{documentNumber}")]
-        [RequirePermission("DOCr")]
+        //[RequirePermission("DOCr")]
         public async Task<IActionResult> GetDocumentByDocumentNumber(string documentNumber)
         {
             try
@@ -179,33 +198,48 @@ public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmen
             }
         }
         // GET: api/document/{documentId}/history
-        [HttpGet("{documentId}/history")]
-        [RequirePermission("DOCr")]
-        public async Task<IActionResult> GetDocumentHistoryByDocumentId(Guid documentId)
+[HttpGet("{documentId}/history")]
+//[RequirePermission("DOCr")]
+public async Task<IActionResult> GetDocumentHistoryByDocumentId(Guid documentId)
+{
+    try
+    {
+        var query = new GetDocumentHistoryByDocumentIdQuery(documentId);
+        var historyDtos = await _mediator.Send(query);
+        return Ok(historyDtos);
+    }
+    catch (KeyNotFoundException knfEx)
+    {
+        // 404 with both message and stack trace
+        return NotFound(new 
         {
-            try
+            error   = knfEx.Message,
+            stack   = knfEx.StackTrace
+        });
+    }
+    catch (Exception ex)
+    {
+        // Gather all messages from the exception chain
+        var messages = new List<string>();
+        for (var curr = ex; curr != null; curr = curr.InnerException)
+            messages.Add(curr.Message);
+
+        return StatusCode(
+            StatusCodes.Status500InternalServerError,
+            new
             {
-                var query = new GetDocumentHistoryByDocumentIdQuery(documentId);
-                var historyDtos = await _mediator.Send(query);
-                return Ok(historyDtos);
+                error    = "An error occurred while retrieving the document history.",
+                messages = messages,
+                stack    = ex.StackTrace
             }
-            catch (KeyNotFoundException knfEx)
-            {
-                return NotFound(knfEx.Message);
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper.CreateErrorResponse(
-                    HttpStatusCode.InternalServerError,
-                    "An error occurred while retrieving the document history.",
-                    new[] { ex.Message }
-                );
-            }
-        }
+        );
+    }
+}
+
          // POST: api/document/{id}/reply
 // POST: api/document/{id}/reply
 [HttpPost("{id}/reply")]
-[RequirePermission("DOCc")]
+//[RequirePermission("DOCc")]
 
 public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm] ReplyDocumentWithAttachmentCommand command)
 {
@@ -252,7 +286,7 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
         }       
     // PUT: api/documents/{id}
     [HttpPut("{id}")]
-    [RequirePermission("DOCu")]
+    //[RequirePermission("DOCu")]
 
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> UpdateDocument(
@@ -306,7 +340,7 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
                 return BadRequest("Unable to mark the document as audited.");
         }
         [HttpPost("search")]
-        [RequirePermission("DOCr")]
+        //[RequirePermission("DOCr")]
         public async Task<IActionResult> SearchDocuments([FromBody] GetDocumentsQuery query)
         {
             try
@@ -323,7 +357,7 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
         }
                 // POST api/documents/count
         [HttpPost("count")]
-        [RequirePermission("DOCr")]
+        //[RequirePermission("DOCr")]
 
         public async Task<IActionResult> Count([FromBody] CountDocumentsQuery query)
         {
@@ -342,7 +376,7 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
             }
         }
         [HttpPost("search-by-links")]
-        [RequirePermission("DOCr")]
+        //[RequirePermission("DOCr")]
 
         public async Task<IActionResult> SearchByLinks(
             [FromBody] SearchByLinksQuery query)
@@ -354,7 +388,7 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
         
         // DELETE: api/document/{id}
         [HttpDelete("{id}")]
-        [RequirePermission("DOCd")]
+        //[RequirePermission("DOCd")]
 
         public async Task<IActionResult> DeleteDocument(Guid id)
         {
