@@ -44,12 +44,16 @@ namespace OMSV1.Application.Queries.Documents
                     .ThenInclude(cd => cd.CcLinks).ThenInclude(l => l.DocumentCc)
                 .Include(d => d.ChildDocuments)
                     .ThenInclude(cd => cd.TagLinks).ThenInclude(l => l.Tag)
-                .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+        // ← NEW: bring in each child’s Profile
+        .Include(d => d.ChildDocuments)
+            .ThenInclude(cd => cd.Profile)
 
-            if (doc == null)
-                throw new KeyNotFoundException($"Document with ID '{request.Id}' not found.");
+        .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
 
-            return BuildDocumentTree(doc);
+    if (doc == null)
+        throw new KeyNotFoundException($"Document with ID '{request.Id}' not found.");
+
+    return BuildDocumentTree(doc);
         }
 
         private DocumentDetailedDto BuildDocumentTree(Document d)

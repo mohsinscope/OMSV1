@@ -21,7 +21,7 @@ namespace OMSV1.Application.Queries.Documents
             GetDocumentByDocumentNumberDetailedQuery request, 
             CancellationToken cancellationToken)
         {
-            // 1) Eager‐load the single document + full hierarchy + links
+            // 1) Eager‐load the single document + full hierarchy + links + child‐profiles
             var doc = await _unitOfWork.Repository<Document>()
                 .GetAllAsQueryable()
                 .Include(d => d.Project)
@@ -32,12 +32,21 @@ namespace OMSV1.Application.Queries.Documents
                                 .ThenInclude(gd => gd.Ministry)
                 .Include(d => d.PrivateParty)
                 .Include(d => d.Profile)
+                
+                // CC & Tags on root
                 .Include(d => d.CcLinks).ThenInclude(l => l.DocumentCc)
                 .Include(d => d.TagLinks).ThenInclude(l => l.Tag)
+                
+                // Child documents, their CC & Tags
                 .Include(d => d.ChildDocuments)
                     .ThenInclude(cd => cd.CcLinks).ThenInclude(l => l.DocumentCc)
                 .Include(d => d.ChildDocuments)
                     .ThenInclude(cd => cd.TagLinks).ThenInclude(l => l.Tag)
+                
+                // ← NEW: load each child Document’s Profile
+                .Include(d => d.ChildDocuments)
+                    .ThenInclude(cd => cd.Profile)
+                
                 .FirstOrDefaultAsync(d => d.DocumentNumber == request.DocumentNumber, cancellationToken);
 
             if (doc == null)
