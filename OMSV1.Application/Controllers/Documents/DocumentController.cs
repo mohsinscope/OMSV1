@@ -7,18 +7,24 @@ using OMSV1.Application.Queries.Documents;
 using System.Net;
 using OMSV1.Infrastructure.Extensions;
 using OMSV1.Application.Exceptions;
-using OMSV1.Application.Authorization.Attributes;                // For Response.AddPaginationHeader if needed
+using OMSV1.Application.Authorization.Attributes;
+using OMSV1.Application.Queries.Attachments;
+using OMSV1.Domain.Enums;
+using OMSV1.Infrastructure.Interfaces;                // For Response.AddPaginationHeader if needed
 
 namespace OMSV1.Application.Controllers.Documents
 {
     public class DocumentController : BaseApiController
     {
         private readonly IMediator _mediator;
+        private readonly IMinioService _minio;
 
-        public DocumentController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+
+public DocumentController(IMediator mediator, IMinioService minio)
+{
+    _mediator = mediator;
+    _minio    = minio;
+}
 
         // POST: api/document with form-data
 // POST: api/document with form-data
@@ -100,6 +106,30 @@ public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmen
         });
     }
 }
+[HttpGet("{documentId}/attachment-urls")]
+public async Task<IActionResult> GetAttachmentUrls(
+        Guid documentId,
+        [FromQuery] int expirySeconds = 3600)
+{
+    // 1) Pull attachment rows (they carry the FilePath)
+    var attachments = await _mediator.Send(
+        new GetAttachmentsByEntityIdQuery(
+            documentId, EntityType.Document));
+
+    if (attachments == null || attachments.Count == 0)
+        return NotFound("No attachments found for that document.");
+
+    // 2) Build a list of { id, url }
+    var tasks = attachments.Select(async a => new
+    {
+        a.Id,
+        url = await _minio.GetPresignedUrlAsync(a.FilePath, expirySeconds)
+    });
+
+    var urls = await Task.WhenAll(tasks);
+
+    return Ok(urls);
+}
 
      // GET: api/document?PageNumber=1&PageSize=10
         // This endpoint returns only documents that do not have a ParentDocumentId (i.e. root documents)
@@ -129,6 +159,7 @@ public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmen
                 );
             }
         }
+        
         // GET: api/document/{id}
         // Returns a detailed document including all child documents and attachments.
 [HttpGet("{id}")]

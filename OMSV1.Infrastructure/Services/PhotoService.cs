@@ -6,7 +6,7 @@ using OMSV1.Infrastructure.Interfaces;
 using OMSV1.Application.Dtos.Attachments;
 using OMSV1.Domain.Enums;
 using OMSV1.Domain.Entities.DamagedPassport;
-using OMSV1.Domain.SeedWork;  // For IGenericRepository<T>
+using OMSV1.Domain.SeedWork;
 
 namespace OMSV1.Infrastructure.Services;
 
@@ -23,13 +23,18 @@ public class PhotoService : IPhotoService, IDisposable
     private const long MaxFileSize = 2048; // 2MB max file size
     private const int ImageQuality = 75; // JPEG quality (0-100)
     private const long MaxFolderSize = 50L * 1024L * 1024L * 1024L; // 50GB in bytes
+    private readonly IMinioService _minioService;                  // ⬅ NEW
 
-    public PhotoService(IWebHostEnvironment webHostEnvironment, IGenericRepository<DamagedPassport> damagedPassportRepository,IGenericRepository<OMSV1.Domain.Entities.Documents.Document> documentRepository)
+
+    public PhotoService(IWebHostEnvironment webHostEnvironment, IGenericRepository<DamagedPassport> damagedPassportRepository,IGenericRepository<OMSV1.Domain.Entities.Documents.Document> documentRepository, IMinioService minioService)
     {
         _webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));
         _damagedPassportRepository = damagedPassportRepository ?? throw new ArgumentNullException(nameof(damagedPassportRepository));
         _documentRepository=documentRepository?? throw new ArgumentNullException(nameof(documentRepository));
+        _minioService              = minioService ?? throw new ArgumentNullException(nameof(minioService)); // ⬅ NEW
+
     }
+    
 
     private string GetNextAvailableFolder(string baseFolder)
     {
@@ -47,6 +52,16 @@ public class PhotoService : IPhotoService, IDisposable
         return currentFolder;
     }
 
+/* Simple helper; expand when you add more types */
+private static string GetMimeType(string path) =>
+    Path.GetExtension(path).ToLowerInvariant() switch
+    {
+        ".jpg" or ".jpeg"           => "image/jpeg",
+        ".png"                      => "image/png",
+        ".pdf"                      => "application/pdf",
+        _                           => "application/octet-stream"
+    };
+
     private long GetDirectorySize(string folderPath)
     {
         DirectoryInfo dirInfo = new DirectoryInfo(folderPath);
@@ -54,11 +69,22 @@ public class PhotoService : IPhotoService, IDisposable
             dirInfo.EnumerateFiles("*", SearchOption.AllDirectories).Sum(file => file.Length) : 
             0;
     }
+    
 
     public async Task<PhotoUploadResult> AddPhotoAsync(IFormFile file, Guid entityId, EntityType entityType)
     {
         if (file == null || file.Length == 0)
             throw new ArgumentException("No file uploaded.");
+            
+            /* ─────────────────────────────────────────────────────
+               1) Documents go straight to MinIO
+               ────────────────────────────────────────────────────*/
+            if (entityType == EntityType.Document)
+            {
+                // Delegate completely to the MinioService
+                return await _minioService.AddPhotoAsync(file, entityId, entityType);
+            }
+
 
         try
         {
@@ -238,25 +264,22 @@ public class PhotoService : IPhotoService, IDisposable
         return contentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase);
     }
 
-    public async Task<bool> DeletePhotoAsync(string filePath)
-    {
-        if (string.IsNullOrEmpty(filePath))
-            throw new ArgumentException("File path cannot be null or empty.");
-
-        try
+        public async Task<bool> DeletePhotoAsync(string filePath)
         {
-            string fullFilePath = Path.Combine(_networkStoragePath, filePath.TrimStart('/'));
-            if (!File.Exists(fullFilePath))
-                throw new FileNotFoundException("File not found in network storage.", fullFilePath);
+            if (string.IsNullOrWhiteSpace(filePath))
+                throw new ArgumentException("File path cannot be empty.", nameof(filePath));
 
-            File.Delete(fullFilePath);
+            // If it's a MinIO URL (starts with /oms/ or whatever bucket), delegate to MinioService
+            if (filePath.StartsWith("/oms/", StringComparison.OrdinalIgnoreCase))
+                return await _minioService.DeletePhotoAsync(filePath);
+
+            string full = Path.Combine(_networkStoragePath, filePath.TrimStart('/'));
+            if (!File.Exists(full))
+                throw new FileNotFoundException("File not found on network storage.", full);
+
+            File.Delete(full);
             return true;
         }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to delete file from network storage: {ex.Message}", ex);
-        }
-    }
 
     public void Dispose()
     {

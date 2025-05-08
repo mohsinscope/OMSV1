@@ -12,9 +12,7 @@ using System.Threading.Tasks;
 
 namespace OMSV1.Application.Controllers.Documents
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class PrivatePartyController : ControllerBase
+    public class PrivatePartyController : BaseApiController
     {
         private readonly IMediator _mediator;
 

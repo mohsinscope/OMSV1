@@ -5,6 +5,7 @@ using OMSV1.Application.Queries.Attachments;
 using OMSV1.Application.Commands.Attachment;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Commands.Attachments;
+using OMSV1.Infrastructure.Interfaces;
 
 namespace OMSV1.Application.Controllers
 {
@@ -12,11 +13,15 @@ namespace OMSV1.Application.Controllers
     public class AttachmentController : BaseApiController
     {
         private readonly IMediator mediator;
+            private readonly IMinioService _minioService;   // <- NEW
+
 
         // Inject the necessary services through the constructor
-        public AttachmentController(IMediator mediator)
+        public AttachmentController(IMediator mediator,IMinioService minioService)
         {
             this.mediator=mediator;
+            _minioService = minioService;
+
         }
         // Get Attachments by Entity ID and Entity Type
         [HttpGet("{entityType}/{id}")]
@@ -85,6 +90,16 @@ namespace OMSV1.Application.Controllers
                 return StatusCode(500, $"Unexpected error: {ex.Message}");
             }
         }
+        // Example controller method
+    [HttpGet("presign")]
+    public async Task<IActionResult> Presign([FromQuery] string path,
+                                             [FromQuery] int    expirySeconds = 3600)
+    {
+        string url = await _minioService.GetPresignedUrlAsync(path, expirySeconds);
+        return Ok(new { url });
+    }
+
+
 
          // POST: api/Attachment/add-attachment
         [HttpPost("add-attachment")]

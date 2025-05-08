@@ -37,6 +37,17 @@ namespace OMSV1.Infrastructure.Services
 
             EnsureBucketExistsAsync().GetAwaiter().GetResult();
         }
+        public async Task<string> GetPresignedUrlAsync(string filePath, int expirySeconds = 3600)
+        {
+            var (bucket, objectName) = filePath.TrimStart('/').Split('/', 2) switch
+            { var a => (a[0], a[1]) };
+
+            return await _minioClient.PresignedGetObjectAsync(
+                new PresignedGetObjectArgs()
+                    .WithBucket(bucket)
+                    .WithObject(objectName)
+                    .WithExpiry(expirySeconds));
+        }
 
         private async Task EnsureBucketExistsAsync()
         {
