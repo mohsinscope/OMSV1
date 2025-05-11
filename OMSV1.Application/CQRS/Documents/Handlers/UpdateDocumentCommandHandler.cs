@@ -93,6 +93,8 @@ document.Patch(
         actionDate: DateTime.UtcNow,
         notes:      $"تم التعديل بوساطة {profile.FullName}"
     );
+    await _unitOfWork.Repository<DocumentHistory>().AddAsync(history);
+
 
     await _unitOfWork.Repository<Document>().UpdateAsync(document);
     if (!await _unitOfWork.SaveAsync(cancellationToken))
