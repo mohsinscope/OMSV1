@@ -39,7 +39,7 @@ namespace OMSV1.Application.Queries.Documents.Handlers
 
             // 2) Apply spec and EAGER-LOAD all needed navigations:
             var prepped = _repository.ListAsQueryable(spec)
-                // core navigations
+                // Core navigations
                 .Include(d => d.Project)
                 .Include(d => d.PrivateParty)
                 .Include(d => d.Profile)
@@ -50,12 +50,35 @@ namespace OMSV1.Application.Queries.Documents.Handlers
                 .Include(d => d.TagLinks)
                     .ThenInclude(tl => tl.Tag)
 
-                // full Section→Department→Directorate→GeneralDirectorate→Ministry chain
+                // Always include any direct nav properties
+                .Include(d => d.Ministry)
+                .Include(d => d.GeneralDirectorate)
+                .Include(d => d.Directorate)
+                .Include(d => d.Department)
                 .Include(d => d.Section)
-                            .Include(d => d.Ministry)
-                                .Include(d => d.GeneralDirectorate)
-                                    .Include(d => d.Directorate)
-                                        .Include(d => d.Department);
+                
+                // Include the full Section→…→Ministry chain
+                .Include(d => d.Section)
+                    .ThenInclude(sec => sec.Department)
+                        .ThenInclude(dep => dep.Directorate)
+                            .ThenInclude(dir => dir.GeneralDirectorate)
+                                .ThenInclude(gd => gd.Ministry)
+                
+                // Include Department→…→Ministry chain
+                .Include(d => d.Department)
+                    .ThenInclude(dep => dep.Directorate)
+                        .ThenInclude(dir => dir.GeneralDirectorate)
+                            .ThenInclude(gd => gd.Ministry)
+                
+                // Include Directorate→…→Ministry chain
+                .Include(d => d.Directorate)
+                    .ThenInclude(dir => dir.GeneralDirectorate)
+                        .ThenInclude(gd => gd.Ministry)
+                
+                // Include GeneralDirectorate→Ministry chain
+                .Include(d => d.GeneralDirectorate)
+                    .ThenInclude(gd => gd.Ministry);
+
             // 3) Project via AutoMapper into your new DocumentDto
             var projected = prepped
                 .ProjectTo<DocumentDto>(_mapper.ConfigurationProvider)

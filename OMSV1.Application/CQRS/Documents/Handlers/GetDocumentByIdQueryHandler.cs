@@ -26,29 +26,53 @@ namespace OMSV1.Application.Queries.Documents
             GetDocumentByIdDetailedQuery request, 
             CancellationToken cancellationToken)
         {
-            var doc = await _unitOfWork.Repository<Document>()
-                .GetAllAsQueryable()
-                // **Make sure we load Project**
-                .Include(d => d.Project)
-                // Full hierarchy under Section
-                .Include(d => d.Section)
-                            .Include(d => d.Ministry)
-                                .Include(d => d.GeneralDirectorate)
-                                    .Include(d => d.Directorate)
-                                        .Include(d => d.Department)
-                .Include(d => d.PrivateParty)
-                .Include(d => d.Profile)
-                .Include(d => d.CcLinks).ThenInclude(l => l.DocumentCc)
-                .Include(d => d.TagLinks).ThenInclude(l => l.Tag)
-                .Include(d => d.ChildDocuments)
-                    .ThenInclude(cd => cd.CcLinks).ThenInclude(l => l.DocumentCc)
-                .Include(d => d.ChildDocuments)
-                    .ThenInclude(cd => cd.TagLinks).ThenInclude(l => l.Tag)
-        // ← NEW: bring in each child’s Profile
-        .Include(d => d.ChildDocuments)
-            .ThenInclude(cd => cd.Profile)
+var doc = await _unitOfWork.Repository<Document>()
+    .GetAllAsQueryable()
 
-        .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+    // Always include any direct nav you might use:
+  .Include(d => d.Ministry)
+    .Include(d => d.GeneralDirectorate)
+    .Include(d => d.Directorate)
+    .Include(d => d.Department)
+    .Include(d => d.Section)
+
+    // 2️⃣ If you want the full Section→…→Ministry chain:
+    .Include(d => d.Section)
+        .ThenInclude(sec => sec.Department)
+            .ThenInclude(dep => dep.Directorate)
+                .ThenInclude(dir => dir.GeneralDirectorate)
+                    .ThenInclude(gd => gd.Ministry)
+
+    // 3️⃣ And likewise for the department direct chain:
+    .Include(d => d.Department)
+        .ThenInclude(dep => dep.Directorate)
+            .ThenInclude(dir => dir.GeneralDirectorate)
+                .ThenInclude(gd => gd.Ministry)
+
+    // 4️⃣ And for the directorate direct chain:
+    .Include(d => d.Directorate)
+        .ThenInclude(dir => dir.GeneralDirectorate)
+            .ThenInclude(gd => gd.Ministry)
+
+    // 5️⃣ And for the general directorate direct chain:
+    .Include(d => d.GeneralDirectorate)
+        .ThenInclude(gd => gd.Ministry)
+
+    // … your other Includes (Project, PrivateParty, Profile, CCs, Tags, ChildDocuments)
+    .Include(d => d.Project)
+    .Include(d => d.PrivateParty)
+    .Include(d => d.Profile)
+    .Include(d => d.CcLinks).ThenInclude(l => l.DocumentCc)
+    .Include(d => d.TagLinks).ThenInclude(l => l.Tag)
+    .Include(d => d.ChildDocuments)
+        .ThenInclude(cd => cd.CcLinks).ThenInclude(l => l.DocumentCc)
+    .Include(d => d.ChildDocuments)
+        .ThenInclude(cd => cd.TagLinks).ThenInclude(l => l.Tag)
+    .Include(d => d.ChildDocuments)
+        .ThenInclude(cd => cd.Profile)
+
+    .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+
 
     if (doc == null)
         throw new KeyNotFoundException($"Document with ID '{request.Id}' not found.");
@@ -69,11 +93,12 @@ namespace OMSV1.Application.Queries.Documents
         private DocumentDetailedDto MapToDetailedDto(Document d)
         {
             // Safely unwrap hierarchy
-            var sec = d.Section;
-            var dep = sec?.Department;
-            var dir = dep?.Directorate;
-            var gd  = dir?.GeneralDirectorate;
-            var min = gd?.Ministry;
+    var sec =   d.Section;
+    var dep =   d.Department    ?? sec?.Department;
+    var dir =   d.Directorate   ?? dep?.Directorate;
+    var gd  =   d.GeneralDirectorate ?? dir?.GeneralDirectorate;
+    var min =   d.Ministry      ?? gd?.Ministry;
+
 
             // *** Defensively guard DocumentCc and Tag ***
             var ccNames = d.CcLinks
@@ -118,17 +143,20 @@ namespace OMSV1.Application.Queries.Documents
                 ProjectName      = d.Project?.Name ?? string.Empty,
 
                 // Section → Department → Directorate → GeneralDirectorate → Ministry
-                SectionId                = sec?.Id,
-                SectionName              = sec?.Name               ?? string.Empty,
-                DepartmentId             = dep?.Id,
-                DepartmentName           = dep?.Name              ?? string.Empty,
-                DirectorateId            = dir?.Id,
-                DirectorateName          = dir?.Name             ?? string.Empty,
-                GeneralDirectorateId     = gd?.Id,
-                GeneralDirectorateName   = gd?.Name              ?? string.Empty,
-                MinistryId               = min?.Id,
-                MinistryName             = min?.Name             ?? string.Empty,
+        SectionId              = sec?.Id,
+        SectionName            = sec?.Name               ?? string.Empty,
 
+        DepartmentId           = dep?.Id,
+        DepartmentName         = dep?.Name              ?? string.Empty,
+
+        DirectorateId          = dir?.Id,
+        DirectorateName        = dir?.Name             ?? string.Empty,
+
+        GeneralDirectorateId   = gd?.Id,
+        GeneralDirectorateName = gd?.Name              ?? string.Empty,
+
+        MinistryId             = min?.Id,
+        MinistryName           = min?.Name             ?? string.Empty,
                 // Private party
                 PrivatePartyId           = d.PrivatePartyId,
                 PrivatePartyName         = d.PrivateParty?.Name   ?? string.Empty,

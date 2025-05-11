@@ -24,28 +24,50 @@ namespace OMSV1.Application.Queries.Documents
             // 1) Eager‐load the single document + full hierarchy + links + child‐profiles
             var doc = await _unitOfWork.Repository<Document>()
                 .GetAllAsQueryable()
-                .Include(d => d.Project)
-                .Include(d => d.Section)
-                            .Include(d => d.Ministry)
-                                .Include(d => d.GeneralDirectorate)
-                                    .Include(d => d.Directorate)
-                                        .Include(d => d.Department)
-                .Include(d => d.PrivateParty)
-                .Include(d => d.Profile)
-                
-                // CC & Tags on root
-                .Include(d => d.CcLinks).ThenInclude(l => l.DocumentCc)
-                .Include(d => d.TagLinks).ThenInclude(l => l.Tag)
-                
-                // Child documents, their CC & Tags
-                .Include(d => d.ChildDocuments)
-                    .ThenInclude(cd => cd.CcLinks).ThenInclude(l => l.DocumentCc)
-                .Include(d => d.ChildDocuments)
-                    .ThenInclude(cd => cd.TagLinks).ThenInclude(l => l.Tag)
-                
+.Include(d => d.Ministry)
+    .Include(d => d.GeneralDirectorate)
+    .Include(d => d.Directorate)
+    .Include(d => d.Department)
+    .Include(d => d.Section)
+
+    // 2️⃣ If you want the full Section→…→Ministry chain:
+    .Include(d => d.Section)
+        .ThenInclude(sec => sec.Department)
+            .ThenInclude(dep => dep.Directorate)
+                .ThenInclude(dir => dir.GeneralDirectorate)
+                    .ThenInclude(gd => gd.Ministry)
+
+    // 3️⃣ And likewise for the department direct chain:
+    .Include(d => d.Department)
+        .ThenInclude(dep => dep.Directorate)
+            .ThenInclude(dir => dir.GeneralDirectorate)
+                .ThenInclude(gd => gd.Ministry)
+
+    // 4️⃣ And for the directorate direct chain:
+    .Include(d => d.Directorate)
+        .ThenInclude(dir => dir.GeneralDirectorate)
+            .ThenInclude(gd => gd.Ministry)
+
+    // 5️⃣ And for the general directorate direct chain:
+    .Include(d => d.GeneralDirectorate)
+        .ThenInclude(gd => gd.Ministry)
+
+    // … your other Includes (Project, PrivateParty, Profile, CCs, Tags, ChildDocuments)
+    .Include(d => d.Project)
+    .Include(d => d.PrivateParty)
+    .Include(d => d.Profile)
+    .Include(d => d.CcLinks).ThenInclude(l => l.DocumentCc)
+    .Include(d => d.TagLinks).ThenInclude(l => l.Tag)
+    .Include(d => d.ChildDocuments)
+        .ThenInclude(cd => cd.CcLinks).ThenInclude(l => l.DocumentCc)
+    .Include(d => d.ChildDocuments)
+        .ThenInclude(cd => cd.TagLinks).ThenInclude(l => l.Tag)
+    .Include(d => d.ChildDocuments)
+        .ThenInclude(cd => cd.Profile)
+
                 // ← NEW: load each child Document’s Profile
-                .Include(d => d.ChildDocuments)
-                    .ThenInclude(cd => cd.Profile)
+                // .Include(d => d.ChildDocuments)
+                //     .ThenInclude(cd => cd.Profile)
                 
                 .FirstOrDefaultAsync(d => d.DocumentNumber == request.DocumentNumber, cancellationToken);
 
@@ -70,12 +92,11 @@ namespace OMSV1.Application.Queries.Documents
         private DocumentDetailedDto MapToDetailedDto(Document d)
         {
             // unwrap the chain
-            var sec = d.Section;
-            var dep = sec?.Department;
-            var dir = dep?.Directorate;
-            var gd  = dir?.GeneralDirectorate;
-            var min = gd?.Ministry;
-
+    var sec =   d.Section;
+    var dep =   d.Department    ?? sec?.Department;
+    var dir =   d.Directorate   ?? dep?.Directorate;
+    var gd  =   d.GeneralDirectorate ?? dir?.GeneralDirectorate;
+    var min =   d.Ministry      ?? gd?.Ministry;
             // safe CC/Tag names
             var ccNames = d.CcLinks
                 .Where(l => l.DocumentCc != null)
@@ -112,17 +133,21 @@ namespace OMSV1.Application.Queries.Documents
                 ProjectId        = d.ProjectId,
                 ProjectName      = d.Project?.Name ?? string.Empty,
 
-                SectionId                = sec?.Id,
-                SectionName              = sec?.Name               ?? string.Empty,
-                DepartmentId             = dep?.Id,
-                DepartmentName           = dep?.Name              ?? string.Empty,
-                DirectorateId            = dir?.Id,
-                DirectorateName          = dir?.Name             ?? string.Empty,
-                GeneralDirectorateId     = gd?.Id,
-                GeneralDirectorateName   = gd?.Name              ?? string.Empty,
-                MinistryId               = min?.Id,
-                MinistryName             = min?.Name             ?? string.Empty,
+                // Section → Department → Directorate → GeneralDirectorate → Ministry
+        SectionId              = sec?.Id,
+        SectionName            = sec?.Name               ?? string.Empty,
 
+        DepartmentId           = dep?.Id,
+        DepartmentName         = dep?.Name              ?? string.Empty,
+
+        DirectorateId          = dir?.Id,
+        DirectorateName        = dir?.Name             ?? string.Empty,
+
+        GeneralDirectorateId   = gd?.Id,
+        GeneralDirectorateName = gd?.Name              ?? string.Empty,
+
+        MinistryId             = min?.Id,
+        MinistryName           = min?.Name             ?? string.Empty,
                 PrivatePartyId           = d.PrivatePartyId,
                 PrivatePartyName         = d.PrivateParty?.Name   ?? string.Empty,
 
