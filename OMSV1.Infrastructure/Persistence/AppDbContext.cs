@@ -67,6 +67,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         public DbSet<Directorate> Directorates { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<OMSV1.Domain.Entities.Sections.Section> Sections { get; set; }
+                public DbSet<OMSV1.Domain.Entities.Attachments.DocumentAttachment> DocumentAttachments { get; set; }
+
 
 
 

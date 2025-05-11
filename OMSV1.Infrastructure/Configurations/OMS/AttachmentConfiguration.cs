@@ -40,9 +40,10 @@ public class AttachmentConfiguration : IEntityTypeConfiguration<AttachmentCU>
         builder.HasIndex(a => a.EntityId)
             .HasDatabaseName("IX_AttachmentCU_EntityId_Expense")
             .HasFilter("\"EntityType\" = 'Expense'");
-                    builder.HasIndex(a => a.EntityId)
-            .HasDatabaseName("IX_AttachmentCU_EntityId_Document")
-            .HasFilter("\"EntityType\" = 'Document'");
+
+        // builder.HasIndex(a => a.EntityId)
+        //     .HasDatabaseName("IX_AttachmentCU_EntityId_Document")
+        //     .HasFilter("\"EntityType\" = 'Document'");
 
         // General composite index for queries across EntityType and EntityId
         builder.HasIndex(a => new { a.EntityType, a.EntityId })

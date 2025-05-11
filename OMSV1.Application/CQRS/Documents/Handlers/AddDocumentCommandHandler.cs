@@ -4,8 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using OMSV1.Application.Commands.Documents;
 using OMSV1.Application.Exceptions;
 using OMSV1.Domain.Entities.Attachments;
+using OMSV1.Domain.Entities.Directorates;
 using OMSV1.Domain.Entities.DocumentHistories;
 using OMSV1.Domain.Entities.Documents;
+using OMSV1.Domain.Entities.GeneralDirectorates;
 using OMSV1.Domain.Entities.Ministries;
 using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.Entities.Sections;
@@ -29,24 +31,60 @@ namespace OMSV1.Application.Handlers.Documents
             _photoService = photoService;
         }
 
+
         public async Task<Guid> Handle(
             AddDocumentWithAttachmentCommand request, 
             CancellationToken cancellationToken)
         {
-                // --- DUPLICATE CHECK ---
-        var alreadyExists = await _unitOfWork.Repository<Document>()
-            .GetAllAsQueryable()
-            .AnyAsync(d => d.DocumentNumber == request.DocumentNumber, cancellationToken);
-               if (alreadyExists)
-        throw new DuplicateDocumentNumberException(request.DocumentNumber);
+            // --- DUPLICATE CHECK ---
+            var exists = await _unitOfWork.Repository<Document>()
+                .GetAllAsQueryable()
+                .AnyAsync(d => d.DocumentNumber == request.DocumentNumber, cancellationToken);
+            if (exists)
+                throw new DuplicateDocumentNumberException(request.DocumentNumber);
 
+            // Load optional relations
+            Ministry? ministry = null;
+            if (request.MinistryId.HasValue)
+            {
+                ministry = await _unitOfWork.Repository<Ministry>()
+                    .GetByIdAsync(request.MinistryId.Value);
+                if (ministry == null)
+                    throw new KeyNotFoundException($"Ministry {request.MinistryId} not found.");
+            }
 
-            // 1. Load Section if provided
+            GeneralDirectorate? generalDir = null;
+            if (request.GeneralDirectorateId.HasValue)
+            {
+                generalDir = await _unitOfWork.Repository<GeneralDirectorate>()
+                    .GetByIdAsync(request.GeneralDirectorateId.Value);
+                if (generalDir == null)
+                    throw new KeyNotFoundException($"GeneralDirectorate {request.GeneralDirectorateId} not found.");
+            }
+
+            Directorate? directorate = null;
+            if (request.DirectorateId.HasValue)
+            {
+                directorate = await _unitOfWork.Repository<Directorate>()
+                    .GetByIdAsync(request.DirectorateId.Value);
+                if (directorate == null)
+                    throw new KeyNotFoundException($"Directorate {request.DirectorateId} not found.");
+            }
+
+            Department? department = null;
+            if (request.DepartmentId.HasValue)
+            {
+                department = await _unitOfWork.Repository<Department>()
+                    .GetByIdAsync(request.DepartmentId.Value);
+                if (department == null)
+                    throw new KeyNotFoundException($"Department {request.DepartmentId} not found.");
+            }
+
             Section? section = null;
             if (request.SectionId.HasValue)
             {
                 section = await _unitOfWork.Repository<Section>()
-                                 .GetByIdAsync(request.SectionId.Value);
+                    .GetByIdAsync(request.SectionId.Value);
                 if (section == null)
                     throw new KeyNotFoundException($"Section {request.SectionId} not found.");
             }
@@ -98,8 +136,16 @@ namespace OMSV1.Application.Handlers.Documents
                 profileId:        request.ProfileId,
                 profile:          profile,
                 responseType:     request.ResponseType,
-                sectionId:        request.SectionId,
-                section:          section,
+                ministryId: request.MinistryId,
+                ministry: ministry,
+                generalDirectorateId: request.GeneralDirectorateId,
+                generalDirectorate: generalDir,
+                directorateId: request.DirectorateId,
+                directorate: directorate,
+                departmentId: request.DepartmentId,
+                department: department,
+                sectionId: request.SectionId,
+                section: section,
                 privatePartyId:   request.PrivatePartyId,
                 privateParty:     privateParty,
                 isUrgent:         request.IsUrgent,
@@ -141,18 +187,22 @@ namespace OMSV1.Application.Handlers.Documents
             if (request.Files == null || !request.Files.Any())
                 throw new ArgumentException("At least one file must be uploaded.");
 
-            foreach (var file in request.Files)
-            {
-                var result = await _photoService
-                    .AddPhotoAsync(file, document.Id, EntityType.Document);
+// 7. رفع المرفقات وحفظها كمستند مرفق
+foreach (var file in request.Files)
+{
+    // 7.a) استدعاء خدمة الرفع وتخزين النتيجة
+    var uploadResult = await _photoService
+        .AddPhotoAsync(file, document.Id, EntityType.Document);
 
-                var attachment = new AttachmentCU(
-                    filePath:   result.FilePath,
-                    entityType: EntityType.Document,
-                    entityId:   document.Id
-                );
-                await _unitOfWork.Repository<AttachmentCU>().AddAsync(attachment);
-            }
+    // 7.b) إنشاء المرفق باستخدام مسار الملف من uploadResult
+    var docAttachment = new DocumentAttachment(
+        filePath:   uploadResult.FilePath,
+        documentId: document.Id
+    );
+
+    await _unitOfWork.Repository<DocumentAttachment>()
+                     .AddAsync(docAttachment);
+}
 
             // 8. Commit
             if (!await _unitOfWork.SaveAsync(cancellationToken))

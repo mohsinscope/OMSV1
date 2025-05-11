@@ -170,13 +170,48 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EntityId")
-                        .HasDatabaseName("IX_AttachmentCU_EntityId_Document")
-                        .HasFilter("\"EntityType\" = 'Document'");
+                        .HasDatabaseName("IX_AttachmentCU_EntityId_Expense")
+                        .HasFilter("\"EntityType\" = 'Expense'");
 
                     b.HasIndex("EntityType", "EntityId")
                         .HasDatabaseName("IX_AttachmentCU_EntityType_EntityId");
 
                     b.ToTable("AttachmentCUs", (string)null);
+                });
+
+            modelBuilder.Entity("OMSV1.Domain.Entities.Attachments.DocumentAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DocumentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Document");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentId")
+                        .HasDatabaseName("IX_DocumentAttachments_DocumentId");
+
+                    b.HasIndex("EntityType", "DocumentId")
+                        .HasDatabaseName("IX_DocAttachments_EntityType_DocumentId")
+                        .HasFilter("\"EntityType\" = 'Document'");
+
+                    b.ToTable("DocumentAttachments", (string)null);
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Attendances.Attendance", b =>
@@ -493,6 +528,12 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("DirectorateId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("DocumentDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -503,6 +544,9 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.Property<int>("DocumentType")
                         .HasColumnType("integer");
+
+                    b.Property<Guid?>("GeneralDirectorateId")
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsAudited")
                         .ValueGeneratedOnAdd()
@@ -531,6 +575,9 @@ namespace OMSV1.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
+
+                    b.Property<Guid?>("MinistryId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
@@ -565,8 +612,16 @@ namespace OMSV1.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("DirectorateId");
+
                     b.HasIndex("DocumentNumber")
                         .IsUnique();
+
+                    b.HasIndex("GeneralDirectorateId");
+
+                    b.HasIndex("MinistryId");
 
                     b.HasIndex("ParentDocumentId");
 
@@ -1414,6 +1469,17 @@ namespace OMSV1.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OMSV1.Domain.Entities.Attachments.DocumentAttachment", b =>
+                {
+                    b.HasOne("OMSV1.Domain.Entities.Documents.Document", "Document")
+                        .WithMany("DocumentAttachments")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+                });
+
             modelBuilder.Entity("OMSV1.Domain.Entities.Attendances.Attendance", b =>
                 {
                     b.HasOne("OMSV1.Domain.Entities.Governorates.Governorate", "Governorate")
@@ -1551,6 +1617,26 @@ namespace OMSV1.Infrastructure.Migrations
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Documents.Document", b =>
                 {
+                    b.HasOne("OMSV1.Domain.Entities.Sections.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OMSV1.Domain.Entities.Directorates.Directorate", "Directorate")
+                        .WithMany()
+                        .HasForeignKey("DirectorateId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OMSV1.Domain.Entities.GeneralDirectorates.GeneralDirectorate", "GeneralDirectorate")
+                        .WithMany()
+                        .HasForeignKey("GeneralDirectorateId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OMSV1.Domain.Entities.Ministries.Ministry", "Ministry")
+                        .WithMany()
+                        .HasForeignKey("MinistryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("OMSV1.Domain.Entities.Documents.Document", "ParentDocument")
                         .WithMany("ChildDocuments")
                         .HasForeignKey("ParentDocumentId")
@@ -1576,7 +1662,15 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasOne("OMSV1.Domain.Entities.Sections.Section", "Section")
                         .WithMany()
                         .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Department");
+
+                    b.Navigation("Directorate");
+
+                    b.Navigation("GeneralDirectorate");
+
+                    b.Navigation("Ministry");
 
                     b.Navigation("ParentDocument");
 
@@ -1885,6 +1979,8 @@ namespace OMSV1.Infrastructure.Migrations
                     b.Navigation("CcLinks");
 
                     b.Navigation("ChildDocuments");
+
+                    b.Navigation("DocumentAttachments");
 
                     b.Navigation("TagLinks");
                 });

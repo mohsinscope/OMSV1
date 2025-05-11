@@ -22,7 +22,6 @@ namespace OMSV1.Application.Commands.Documents
 
         // Who is replying
         public Guid?       PrivatePartyId   { get; set; }    // ← already nullable
-        public Guid?       SectionId        { get; set; }    // ← now nullable
         public Guid ProfileId { get; set; }
 
         // Content
@@ -40,7 +39,12 @@ namespace OMSV1.Application.Commands.Documents
 
         // Optional notes
         public string? Notes       { get; set; }
-        public Guid?   MinistryId  { get; set; }
+        public Guid?   MinistryId                { get; set; }
+        public Guid?   GeneralDirectorateId      { get; set; }
+        public Guid?   DirectorateId             { get; set; }
+        public Guid?   DepartmentId              { get; set; }
+        public Guid?   SectionId                 { get; set; }
+
 
         // Attachments
         public List<IFormFile> Files { get; set; } = default!;

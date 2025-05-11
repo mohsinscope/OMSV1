@@ -26,7 +26,11 @@ namespace OMSV1.Application.Commands.Documents
         // Relationships
         public Guid ProjectId         { get; set; }
         public Guid?       PrivatePartyId   { get; set; }    // ← already nullable
-        public Guid?       SectionId        { get; set; }    // ← now nullable
+        public Guid?   MinistryId                { get; set; }
+        public Guid?   GeneralDirectorateId      { get; set; }
+        public Guid?   DirectorateId             { get; set; }
+        public Guid?   DepartmentId              { get; set; }
+        public Guid?   SectionId                 { get; set; }
 
         public required Guid ProfileId{ get; set; }
         public Guid?    ParentDocumentId { get; set; }

@@ -66,10 +66,45 @@ namespace OMSV1.Infrastructure.Configurations
 
             // Relationships
             // Project
-            builder.HasOne(d => d.Project)
+       builder.HasOne(d => d.Project)
                    .WithMany()
                    .HasForeignKey(d => d.ProjectId)
                    .OnDelete(DeleteBehavior.Restrict);
+
+        // Ministry           
+       builder.HasOne(d => d.Ministry)
+                   .WithMany()
+                   .HasForeignKey(d => d.MinistryId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+       // GeneralDirectorate           
+       builder.HasOne(d => d.GeneralDirectorate)
+                   .WithMany()
+                   .HasForeignKey(d => d.GeneralDirectorateId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+       // Directorate           
+       builder.HasOne(d => d.Directorate)
+                   .WithMany()
+                   .HasForeignKey(d => d.DirectorateId)
+                   .OnDelete(DeleteBehavior.Restrict);
+                   
+       // Department           
+       builder.HasOne(d => d.Department)
+                   .WithMany()
+                   .HasForeignKey(d => d.DepartmentId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+       // Section           
+       builder.HasOne(d => d.Section)
+                   .WithMany()
+                   .HasForeignKey(d => d.SectionId)
+                   .OnDelete(DeleteBehavior.Restrict);
+                   
+                   
+
+
+
 
             // Profile
             builder.HasOne(d => d.Profile)
@@ -84,10 +119,10 @@ namespace OMSV1.Infrastructure.Configurations
                    .OnDelete(DeleteBehavior.Restrict);
 
             // Section (leaf)
-            builder.HasOne(d => d.Section)
-                   .WithMany()   // Sections don't know about Documents directly
-                   .HasForeignKey(d => d.SectionId)
-                   .OnDelete(DeleteBehavior.SetNull);
+       //      builder.HasOne(d => d.Section)
+       //             .WithMany()   // Sections don't know about Documents directly
+       //             .HasForeignKey(d => d.SectionId)
+       //             .OnDelete(DeleteBehavior.SetNull);
 
        builder.HasOne(d => d.PrivateParty)
        .WithMany(pp => pp.Documents)

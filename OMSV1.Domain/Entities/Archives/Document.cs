@@ -1,4 +1,8 @@
 // Domain/Entities/Documents/Document.cs
+using OMSV1.Domain.Entities.Attachments;
+using OMSV1.Domain.Entities.Directorates;
+using OMSV1.Domain.Entities.GeneralDirectorates;
+using OMSV1.Domain.Entities.Ministries;
 using OMSV1.Domain.Entities.Profiles;
 using OMSV1.Domain.Entities.Projects;
 using OMSV1.Domain.Entities.Sections;
@@ -31,16 +35,27 @@ namespace OMSV1.Domain.Entities.Documents
         public bool IsAudited { get; private set; }
 
         /* ─────────────── FKs & navigations ─────────────── */
+        //Project
         public Guid     ProjectId  { get; private set; }
         public Project  Project    { get; private set; } = null!;
-
-
+        //Ministry
+        public Guid? MinistryId  { get; private set; }
+        public Ministry? Ministry { get; private set; } = null!;
+        //GeneralDirectorate
+        public Guid? GeneralDirectorateId  { get; private set; }
+        public GeneralDirectorate? GeneralDirectorate { get; private set; } = null!;
+        //Directorate
+        public Guid? DirectorateId  { get; private set; }
+        public Directorate? Directorate { get; private set; } = null!;
+        //Department
+        public Guid? DepartmentId  { get; private set; }
+        public Department? Department { get; private set; } = null!;
+        //Section
         public Guid? SectionId  { get; private set; }
         public Section? Section { get; private set; } = null!;
+        //PrivateParty
         public Guid? PrivatePartyId { get; private set; }
         public PrivateParty? PrivateParty { get; private set; }
-
-
 
         public Guid?      ParentDocumentId { get; private set; }
         public Document?  ParentDocument   { get; private set; }
@@ -48,6 +63,8 @@ namespace OMSV1.Domain.Entities.Documents
 
         public Guid    ProfileId { get; private set; }
         public Profile Profile   { get; private set; } = null!;
+        public ICollection<DocumentAttachment> DocumentAttachments { get; private set; }
+
 
         /* ─────────────── CCs ─────────────── */
         public ICollection<DocumentCC> CCs { get; private set; }
@@ -78,10 +95,16 @@ public Document(
     Guid                profileId,
     Profile             profile,
     ResponseType        responseType,
-
+    Guid?               ministryId,       // ← now nullable
+    Ministry?            ministry,         // ← now nullable
+    Guid?               generalDirectorateId,       // ← now nullable
+    GeneralDirectorate?            generalDirectorate,         // ← now nullable
+    Guid?               directorateId,       // ← now nullable
+    Directorate?            directorate,         // ← now nullable
+    Guid?               departmentId,       // ← now nullable
+    Department?            department,         // ← now nullable
     Guid?               sectionId,       // ← now nullable
     Section?            section,         // ← now nullable
-
     Guid?               privatePartyId,  // ← still nullable
     PrivateParty?       privateParty,    // ← still nullable
 
@@ -105,7 +128,19 @@ public Document(
     ProfileId        = profileId;
     Profile          = profile;
     ResponseType     = responseType;
+    
+    MinistryId        = ministryId;
+    Ministry          = ministry!;
 
+    GeneralDirectorateId        = generalDirectorateId;
+    GeneralDirectorate          = generalDirectorate!;
+
+    DirectorateId        = directorateId;
+    Directorate          = directorate!; 
+
+    DepartmentId        = departmentId;
+    Department          = department!; 
+ 
     SectionId        = sectionId;
     Section          = section!;           // will be null if sectionId was null
 
@@ -158,8 +193,16 @@ public Document CreateReply(
     Profile                       profile,
     ResponseType                  responseType,
 
-    Guid?                         sectionId,       // ← now nullable
-    Section?                      section,         // ← now nullable
+    Guid?               ministryId,       // ← now nullable
+    Ministry?            ministry,         // ← now nullable
+    Guid?               generalDirectorateId,       // ← now nullable
+    GeneralDirectorate?            generalDirectorate,         // ← now nullable
+    Guid?               directorateId,       // ← now nullable
+    Directorate?            directorate,         // ← now nullable
+    Guid?               departmentId,       // ← now nullable
+    Department?            department,         // ← now nullable
+    Guid?               sectionId,       // ← now nullable
+    Section?            section,         // ← now nullable
 
     Guid?                         privatePartyId,  // ← still nullable
     PrivateParty?                 privateParty,    // ← still nullable
@@ -183,6 +226,14 @@ public Document CreateReply(
         profileId:        profileId,
         profile:          profile,
         responseType:     responseType,
+        ministryId:       ministryId,
+        ministry:         ministry,
+        generalDirectorateId:       generalDirectorateId,
+        generalDirectorate:         generalDirectorate,
+        directorateId:       directorateId,
+        directorate:         directorate,
+        departmentId:       departmentId,
+        department:         department,
         sectionId:        sectionId,        // nullable
         section:          section,          // nullable
         privatePartyId:   privatePartyId,   // nullable
@@ -217,8 +268,12 @@ public Document CreateReply(
             bool      isNeeded,
             string?   notes,
             Guid      projectId,
-            Guid?     parentDocumentId,
-            Guid      sectionId,
+            Guid?    parentDocumentId,
+            Guid              ministryId,       // ← now nullable
+            Guid              generalDirectorateId,       // ← now nullable
+            Guid               directorateId,       // ← now nullable
+            Guid               departmentId,       // ← now nullable
+            Guid               sectionId,       // ← now nullable
             Guid      privatePartyId
         )
         {
@@ -232,9 +287,12 @@ public Document CreateReply(
             IsImportant     = isImportant;
             IsNeeded        = isNeeded;
             Notes           = notes;
-
             ProjectId       = projectId;
             ParentDocumentId= parentDocumentId;
+            MinistryId        = ministryId;
+            GeneralDirectorateId        = generalDirectorateId;
+            DirectorateId        = directorateId;
+            DepartmentId        = departmentId;
             SectionId       = sectionId;
             PrivatePartyId= privatePartyId;
         }
@@ -255,6 +313,10 @@ public Document CreateReply(
             string?         notes                    = null,
             Guid?           projectId                = null,
             Guid?           parentDocumentId         = null,
+            Guid?           ministryId               = null,
+            Guid?           generalDirectorateId     = null,
+            Guid?           directorateId            = null,
+            Guid?           departmntId              = null,
             Guid?           sectionId                = null,
             Guid?           privatePartyId           = null
         )
@@ -272,7 +334,13 @@ public Document CreateReply(
             if (notes           != null)     Notes                  = notes;
             if (projectId.HasValue)          ProjectId              = projectId.Value;
             if (parentDocumentId.HasValue)   ParentDocumentId       = parentDocumentId;
+            
+            if (ministryId.HasValue)          MinistryId              = ministryId.Value;
+            if (generalDirectorateId.HasValue) GeneralDirectorateId              = generalDirectorateId.Value;
+            if (directorateId.HasValue)          DirectorateId              = directorateId.Value;
+            if (departmntId.HasValue)          DepartmentId              = departmntId.Value;
             if (sectionId.HasValue)          SectionId              = sectionId.Value;
+            
             if (privatePartyId.HasValue)     PrivatePartyId         = privatePartyId.Value;
 
         }

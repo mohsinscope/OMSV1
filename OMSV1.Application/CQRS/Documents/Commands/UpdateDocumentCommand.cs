@@ -28,7 +28,12 @@ namespace OMSV1.Application.Commands.Documents
 
         public Guid? ProjectId        { get; set; }
         public Guid? PrivatePartyId   { get; set; }    // ← already nullable
-        public Guid? SectionId        { get; set; }    // ← now nullable
+        public Guid?   MinistryId                { get; set; }
+        public Guid?   GeneralDirectorateId      { get; set; }
+        public Guid?   DirectorateId             { get; set; }
+        public Guid?   DepartmentId              { get; set; }
+        public Guid?   SectionId                 { get; set; }
+
         public Guid? ParentDocumentId { get; set; }
 
         public List<Guid>? CCIds  { get; set; }
