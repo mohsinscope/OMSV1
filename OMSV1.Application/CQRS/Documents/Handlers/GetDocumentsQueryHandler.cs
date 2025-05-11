@@ -61,10 +61,10 @@ namespace OMSV1.Application.Queries.Documents.Handlers
                 .Include(d => d.CcLinks).ThenInclude(cl => cl.DocumentCc)
                 .Include(d => d.TagLinks).ThenInclude(tl => tl.Tag)
                 .Include(d => d.Section)
-                    .ThenInclude(s => s.Department)
-                        .ThenInclude(dep => dep.Directorate)
-                            .ThenInclude(dir => dir.GeneralDirectorate)
-                                .ThenInclude(gd => gd.Ministry)
+                            .Include(d => d.Ministry)
+                                .Include(d => d.GeneralDirectorate)
+                                    .Include(d => d.Directorate)
+                                        .Include(d => d.Department)
                 .OrderByDescending(d => d.DocumentDate);
 
             // 3) project into DocumentDto

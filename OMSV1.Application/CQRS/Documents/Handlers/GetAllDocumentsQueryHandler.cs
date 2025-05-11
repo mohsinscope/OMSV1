@@ -39,14 +39,20 @@ namespace OMSV1.Application.Handlers.Documents
                     .Include(d => d.Project)
                     .Include(d => d.PrivateParty)
                     .Include(d => d.Profile)
+                        .Include(d => d.Department)
+                            .Include(d => d.Ministry)
+                                .Include(d => d.GeneralDirectorate)
+                                    .Include(d => d.Directorate)
+                                        .Include(d => d.Department)
+
+
+
+
+
                     .Include(d => d.CcLinks).ThenInclude(l => l.DocumentCc)
                     .Include(d => d.TagLinks).ThenInclude(l => l.Tag)
     // now load the whole tree under Section:
-    .Include(d => d.Section)
-        .ThenInclude(s => s.Department)
-            .ThenInclude(dep => dep.Directorate)
-                .ThenInclude(dir => dir.GeneralDirectorate)
-                    .ThenInclude(gd => gd.Ministry);
+    .Include(d => d.Section);
 
                 // 2) Manual projection to the updated DocumentDto
 var projected = query.Select(d => new DocumentDto

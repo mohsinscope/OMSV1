@@ -52,11 +52,10 @@ namespace OMSV1.Application.Queries.Documents.Handlers
 
                 // full Section→Department→Directorate→GeneralDirectorate→Ministry chain
                 .Include(d => d.Section)
-                    .ThenInclude(s => s.Department)
-                        .ThenInclude(dep => dep.Directorate)
-                            .ThenInclude(dir => dir.GeneralDirectorate)
-                                .ThenInclude(gd => gd.Ministry);
-
+                            .Include(d => d.Ministry)
+                                .Include(d => d.GeneralDirectorate)
+                                    .Include(d => d.Directorate)
+                                        .Include(d => d.Department);
             // 3) Project via AutoMapper into your new DocumentDto
             var projected = prepped
                 .ProjectTo<DocumentDto>(_mapper.ConfigurationProvider)
