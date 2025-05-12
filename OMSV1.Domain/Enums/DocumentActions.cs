@@ -6,6 +6,9 @@ namespace OMSV1.Domain.Enums
         Edit    = 2,
         Reply   = 3,
         Confirm = 4,
-        ChangeStatus=5, // when ISrequireReply is false seperate endpoint and is done by abdullah
+        ChangeStatus=5,
+        Audited=6 ,
+         UnAudited     = 7    // ← new
+
     }
 }

@@ -1,3 +1,4 @@
+// --- UnmarkDocumentAsAuditedCommandHandler.cs ---
 using MediatR;
 using OMSV1.Domain.Entities.Documents;
 using OMSV1.Domain.Entities.DocumentHistories;
@@ -9,21 +10,21 @@ using System.Threading.Tasks;
 
 namespace OMSV1.Application.Commands.Documents
 {
-    public class MarkDocumentAsAuditedCommandHandler 
-        : IRequestHandler<MarkDocumentAsAuditedCommand, bool>
+    public class UnmarkDocumentAsAuditedCommandHandler 
+        : IRequestHandler<UnmarkDocumentAsAuditedCommand, bool>
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public MarkDocumentAsAuditedCommandHandler(IUnitOfWork unitOfWork)
+        public UnmarkDocumentAsAuditedCommandHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
 
         public async Task<bool> Handle(
-            MarkDocumentAsAuditedCommand request, 
+            UnmarkDocumentAsAuditedCommand request, 
             CancellationToken cancellationToken)
         {
-            // 1. Load document
+            // 1. Load the document
             var document = await _unitOfWork
                 .Repository<Document>()
                 .GetByIdAsync(request.DocumentId);
@@ -35,22 +36,22 @@ namespace OMSV1.Application.Commands.Documents
         .GetByIdAsync(request.ProfileId);
     if (profile == null)
         throw new KeyNotFoundException($"Profile {request.ProfileId} not found.");
-            // 2. Flip audited flag
-            document.MarkAsAudited();
+            // 2. Flip audited flag off
+            document.UnmarkAsAudited();
 
-            // 3. Create history entry
+            // 3. Append history entry
             var history = new DocumentHistory(
                 documentId: document.Id,
                 profileId:  request.ProfileId,
-                actionType: DocumentActions.Audited,
+                actionType: DocumentActions.UnAudited,
                 actionDate: DateTime.UtcNow,
-                notes:      $"تم التدقيق بوساطة المستخدم {profile.FullName}"
+                notes:      $"تم إزالة التدقيق بوساطة المستخدم {profile.FullName}"
             );
             await _unitOfWork
                 .Repository<DocumentHistory>()
                 .AddAsync(history);
 
-            // 4. Save document and history
+            // 4. Persist changes
             await _unitOfWork
                 .Repository<Document>()
                 .UpdateAsync(document);
@@ -58,7 +59,7 @@ namespace OMSV1.Application.Commands.Documents
             if (await _unitOfWork.SaveAsync(cancellationToken))
                 return true;
 
-            throw new Exception("Failed to mark the document as audited.");
+            throw new Exception("Failed to un–audit the document.");
         }
     }
 }

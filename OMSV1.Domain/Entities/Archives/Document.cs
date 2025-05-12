@@ -349,5 +349,10 @@ public Document CreateReply(
         public void MarkAsReplied()             => IsReplied  = true;
         public void MarkAsAudited()             => IsAudited  = true;
         public void MarkNoLongerRequiresReply() => IsRequiresReply = false;
+        public void UnmarkAsAudited()
+            {
+                IsAudited = false;
+            }
+
     }
 }
