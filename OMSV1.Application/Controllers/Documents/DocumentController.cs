@@ -11,8 +11,6 @@ using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Queries.Attachments;
 using OMSV1.Domain.Enums;
 using OMSV1.Infrastructure.Interfaces;
-using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;                // For Response.AddPaginationHeader if needed
 
 namespace OMSV1.Application.Controllers.Documents
 {
@@ -358,23 +356,10 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
             );
         }
     }
-private Guid? GetProfileIdFromClaims()
-{
-    // 1st try our custom claim
-    var pid = User.FindFirst("profileId")?.Value
-           // then fall back to the JWT subject
-           ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
-           // then fall back to ASP.NET’s name identifier
-           ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-           ;
-
-    return Guid.TryParse(pid, out var guid) 
-        ? guid 
-        : (Guid?)null;
-}
-
     // POST /api/documents/{documentId}/audit
     [HttpPost("{documentId}/audit")]
+    [RequirePermission("DOCAudit")]
+
     public async Task<IActionResult> MarkDocumentAsAudited(
         Guid documentId,
         [FromBody] AuditRequest request)
@@ -395,6 +380,8 @@ public class AuditRequest
 }
     // POST /api/documents/{documentId}/unaudit
     [HttpPost("{documentId}/unaudit")]
+    [RequirePermission("DOCAudit")]
+
     public async Task<IActionResult> MarkDocumentAsUnAudited(
         Guid documentId,
         [FromBody] AuditRequest request)
