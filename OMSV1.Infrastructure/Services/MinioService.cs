@@ -119,29 +119,44 @@ namespace OMSV1.Infrastructure.Services
             }
         }
 
-        private async Task UploadDirectlyAsync(IFormFile file, string objectName, string contentType)
-        {
-            var tempFilePath = Path.GetTempFileName();
-            try
-            {
-                using var stream = new FileStream(tempFilePath, FileMode.Create);
-                await file.CopyToAsync(stream);
+        // private async Task UploadDirectlyAsync(IFormFile file, string objectName, string contentType)
+        // {
+        //     var tempFilePath = Path.GetTempFileName();
+        //     try
+        //     {
+        //         using var stream = new FileStream(tempFilePath, FileMode.Create);
+        //         await file.CopyToAsync(stream);
 
-                var fileInfo = new FileInfo(tempFilePath);
-                using var fileStream = File.OpenRead(tempFilePath);
+        //         var fileInfo = new FileInfo(tempFilePath);
+        //         using var fileStream = File.OpenRead(tempFilePath);
 
-                await _minioClient.PutObjectAsync(new PutObjectArgs()
-                    .WithBucket(_bucketName)
-                    .WithObject(objectName)
-                    .WithContentType(contentType)
-                    .WithStreamData(fileStream)
-                    .WithObjectSize(fileInfo.Length));
-            }
-            finally
-            {
-                if (File.Exists(tempFilePath)) File.Delete(tempFilePath);
-            }
-        }
+        //         await _minioClient.PutObjectAsync(new PutObjectArgs()
+        //             .WithBucket(_bucketName)
+        //             .WithObject(objectName)
+        //             .WithContentType(contentType)
+        //             .WithStreamData(fileStream)
+        //             .WithObjectSize(fileInfo.Length));
+        //     }
+        //     finally
+        //     {
+        //         if (File.Exists(tempFilePath)) File.Delete(tempFilePath);
+        //     }
+        // }
+private async Task UploadDirectlyAsync(IFormFile file, string objectName, string contentType)
+{
+    // Use the incoming request stream directly—no temp file needed
+    using var sourceStream = file.OpenReadStream();
+
+    // Tell MinIO exactly how big the upload is
+    var args = new PutObjectArgs()
+        .WithBucket(_bucketName)
+        .WithObject(objectName)
+        .WithContentType(contentType)
+        .WithStreamData(sourceStream)
+        .WithObjectSize(file.Length);
+
+    await _minioClient.PutObjectAsync(args);
+}
 
         public async Task<bool> DeletePhotoAsync(string filePath)
         {

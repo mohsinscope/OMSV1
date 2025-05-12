@@ -10,7 +10,7 @@ using OMSV1.Application.Exceptions;
 using OMSV1.Application.Authorization.Attributes;
 using OMSV1.Application.Queries.Attachments;
 using OMSV1.Domain.Enums;
-using OMSV1.Infrastructure.Interfaces;                // For Response.AddPaginationHeader if needed
+using OMSV1.Infrastructure.Interfaces;
 
 namespace OMSV1.Application.Controllers.Documents
 {
@@ -30,7 +30,7 @@ public DocumentController(IMediator mediator, IMinioService minio)
 // POST: api/document with form-data
 // POST: api/document with form-data
 [HttpPost]
-//[RequirePermission("DOCc")]
+[RequirePermission("DOCc")]
 
 public async Task<IActionResult> AddDocument([FromForm] AddDocumentWithAttachmentCommand command)
 {
@@ -134,7 +134,7 @@ public async Task<IActionResult> GetAttachmentUrls(
      // GET: api/document?PageNumber=1&PageSize=10
         // This endpoint returns only documents that do not have a ParentDocumentId (i.e. root documents)
         [HttpGet]
-        //[RequirePermission("DOCr")]
+        [RequirePermission("DOCr")]
 
         public async Task<IActionResult> GetAllDocuments([FromQuery] PaginationParams paginationParams)
         {
@@ -163,7 +163,7 @@ public async Task<IActionResult> GetAttachmentUrls(
         // GET: api/document/{id}
         // Returns a detailed document including all child documents and attachments.
 [HttpGet("{id}")]
-//[RequirePermission("DOCr")]
+[RequirePermission("DOCr")]
 public async Task<IActionResult> GetDocumentById(Guid id)
 {
     try
@@ -206,7 +206,7 @@ public async Task<IActionResult> GetDocumentById(Guid id)
 
         // New endpoint to get document details by DocumentNumber
         [HttpGet("bynumber/{documentNumber}")]
-        //[RequirePermission("DOCr")]
+        [RequirePermission("DOCr")]
         public async Task<IActionResult> GetDocumentByDocumentNumber(string documentNumber)
         {
             try
@@ -230,7 +230,7 @@ public async Task<IActionResult> GetDocumentById(Guid id)
         }
         // GET: api/document/{documentId}/history
 [HttpGet("{documentId}/history")]
-//[RequirePermission("DOCr")]
+[RequirePermission("DOCr")]
 public async Task<IActionResult> GetDocumentHistoryByDocumentId(Guid documentId)
 {
     try
@@ -270,7 +270,7 @@ public async Task<IActionResult> GetDocumentHistoryByDocumentId(Guid documentId)
          // POST: api/document/{id}/reply
 // POST: api/document/{id}/reply
 [HttpPost("{id}/reply")]
-//[RequirePermission("DOCc")]
+[RequirePermission("DOCc")]
 
 public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm] ReplyDocumentWithAttachmentCommand command)
 {
@@ -317,7 +317,7 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
         }       
     // PUT: api/documents/{id}
     [HttpPut("{id}")]
-    //[RequirePermission("DOCu")]
+    [RequirePermission("DOCu")]
 
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> UpdateDocument(
@@ -356,22 +356,48 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
             );
         }
     }
+    // POST /api/documents/{documentId}/audit
+    [HttpPost("{documentId}/audit")]
+    [RequirePermission("DOCAudit")]
 
-        [HttpPost("{documentId}/audit")]
-        [RequirePermission("DOCAudit")]
+    public async Task<IActionResult> MarkDocumentAsAudited(
+        Guid documentId,
+        [FromBody] AuditRequest request)
+    {
+        var cmd = new MarkDocumentAsAuditedCommand {
+            DocumentId = documentId,
+            ProfileId  = request.ProfileId
+        };
 
-        public async Task<IActionResult> MarkDocumentAsAudited(Guid documentId)
-        {
-            var command = new MarkDocumentAsAuditedCommand { DocumentId = documentId };
-            var result = await _mediator.Send(command);
+        var ok = await _mediator.Send(cmd);
+        if (!ok) return BadRequest("Unable to mark the document as audited.");
 
-            if (result)
-                return Ok(new { DocumentId = documentId, IsAudited = true });
-            else
-                return BadRequest("Unable to mark the document as audited.");
-        }
+        return Ok(new { DocumentId = documentId, IsAudited = true });
+    }
+public class AuditRequest
+{
+    public Guid ProfileId { get; set; }
+}
+    // POST /api/documents/{documentId}/unaudit
+    [HttpPost("{documentId}/unaudit")]
+    [RequirePermission("DOCAudit")]
+
+    public async Task<IActionResult> MarkDocumentAsUnAudited(
+        Guid documentId,
+        [FromBody] AuditRequest request)
+    {
+        var cmd = new UnmarkDocumentAsAuditedCommand {
+            DocumentId = documentId,
+            ProfileId  = request.ProfileId
+        };
+
+        var ok = await _mediator.Send(cmd);
+        if (!ok) return BadRequest("Unable to mark the document as unaudited.");
+
+        return Ok(new { DocumentId = documentId, IsAudited = false });
+    }
         [HttpPost("search")]
-        //[RequirePermission("DOCr")]
+        [RequirePermission("DOCr")]
         public async Task<IActionResult> SearchDocuments([FromBody] GetDocumentsQuery query)
         {
             try
@@ -388,7 +414,7 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
         }
                 // POST api/documents/count
         [HttpPost("count")]
-        //[RequirePermission("DOCr")]
+        [RequirePermission("DOCr")]
 
         public async Task<IActionResult> Count([FromBody] CountDocumentsQuery query)
         {
@@ -407,7 +433,7 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
             }
         }
         [HttpPost("search-by-links")]
-        //[RequirePermission("DOCr")]
+        [RequirePermission("DOCr")]
 
         public async Task<IActionResult> SearchByLinks(
             [FromBody] SearchByLinksQuery query)
@@ -419,7 +445,7 @@ public async Task<IActionResult> ReplyDocumentWithAttachment(Guid id, [FromForm]
         
         // DELETE: api/document/{id}
         [HttpDelete("{id}")]
-        //[RequirePermission("DOCd")]
+        [RequirePermission("DOCd")]
 
         public async Task<IActionResult> DeleteDocument(Guid id)
         {
