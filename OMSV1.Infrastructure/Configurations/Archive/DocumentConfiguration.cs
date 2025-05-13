@@ -134,13 +134,13 @@ namespace OMSV1.Infrastructure.Configurations
             builder.HasMany(d => d.CcLinks)
                    .WithOne(link => link.Document)
                    .HasForeignKey(link => link.DocumentId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.SetNull);
 
             // Tag links
             builder.HasMany(d => d.TagLinks)
                    .WithOne(link => link.Document)
                    .HasForeignKey(link => link.DocumentId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
