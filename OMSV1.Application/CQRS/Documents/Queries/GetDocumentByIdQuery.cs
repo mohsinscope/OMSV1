@@ -1,11 +1,15 @@
+// Application/Queries/Documents/GetDocumentByIdDetailedQuery.cs
 using MediatR;
 using OMSV1.Application.Dtos.Documents;
-using System;
 
-namespace OMSV1.Application.Queries.Documents
+public class GetDocumentByIdDetailedQuery : IRequest<DocumentDetailedDto>
 {
-    public class GetDocumentByIdDetailedQuery : IRequest<DocumentDetailedDto>
+    public Guid Id { get; }
+    public int Depth { get; }
+
+    public GetDocumentByIdDetailedQuery(Guid id, int depth)
     {
-        public Guid Id { get; set; }
+        Id = id;
+        Depth = depth;
     }
 }

@@ -32,6 +32,8 @@ namespace OMSV1.Application.Dtos.Documents
 
         // --- Hierarchy within documents ---
         public Guid? ParentDocumentId    { get; set; }
+            public int TotalCount { get; set; }
+
         public List<DocumentDetailedDto> ChildDocuments { get; set; } = new();
 
         // --- Project ---

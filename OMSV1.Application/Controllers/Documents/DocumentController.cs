@@ -162,62 +162,76 @@ public async Task<IActionResult> GetAttachmentUrls(
         
         // GET: api/document/{id}
         // Returns a detailed document including all child documents and attachments.
+        // Controllers/DocumentsController.cs
+private static int CountNodes(DocumentDetailedDto dto)
+{
+    // 1 for this node, plus all of its children
+    return 1 + dto.ChildDocuments.Sum(child => CountNodes(child));
+}
+
+// Controllers/DocumentsController.cs
 [HttpGet("{id}")]
 [RequirePermission("DOCr")]
-public async Task<IActionResult> GetDocumentById(Guid id)
+
+public async Task<IActionResult> GetDocumentById(
+    Guid id,
+    [FromQuery] int depth = 10   // default to 1 level of children
+)
 {
     try
     {
-        var query = new GetDocumentByIdDetailedQuery { Id = id };
-        DocumentDetailedDto documentDto = await _mediator.Send(query);
-        return Ok(documentDto);
+        // 1) fetch the DTO
+        var query   = new GetDocumentByIdDetailedQuery(id, depth);
+        var documentDto = await _mediator.Send(query);
+
+        // 2) compute the total count
+        // var totalCount = CountNodes(documentDto);
+
+        // 3) return an anonymous envelope
+        return Ok(new
+        {
+            data       = documentDto
+            // totalCount = totalCount
+        });
     }
     catch (KeyNotFoundException knfEx)
     {
-        // 404 if not found
-        return NotFound(new 
-        {
-            error   = knfEx.Message,
-            details = knfEx.StackTrace
-        });
+        return NotFound(knfEx.Message);
     }
     catch (Exception ex)
     {
-        // Walk the InnerException chain for more context
-        var errors = new List<string>();
-        Exception curr = ex;
-        while (curr != null)
-        {
-            errors.Add(curr.Message);
-            curr = curr.InnerException;
-        }
-
-        return StatusCode(
-            StatusCodes.Status500InternalServerError,
-            new
-            {
-                error    = "An error occurred while retrieving the document.",
-                messages = errors,
-                stack    = ex.StackTrace
-            }
+        return ResponseHelper.CreateErrorResponse(
+            HttpStatusCode.InternalServerError,
+            "An error occurred while retrieving the document.",
+            new[] { ex.Message }
         );
     }
 }
 
+
         // New endpoint to get document details by DocumentNumber
         [HttpGet("bynumber/{documentNumber}")]
         [RequirePermission("DOCr")]
-        public async Task<IActionResult> GetDocumentByDocumentNumber(string documentNumber)
+        public async Task<IActionResult> GetDocumentByDocumentNumber(
+            string documentNumber,
+            [FromQuery] int depth = 10   // default to 10 levels of children
+        )
         {
             try
             {
-                var query = new GetDocumentByDocumentNumberDetailedQuery { DocumentNumber = documentNumber };
-                DocumentDetailedDto documentDto = await _mediator.Send(query);
-                return Ok(documentDto);
+                // 1) fetch the DTO
+                var query = new GetDocumentByDocumentNumberDetailedQuery(documentNumber, depth);
+                var documentDto = await _mediator.Send(query);
+
+                // 2) Return the document with the embedded total count
+                return Ok(new
+                {
+                    data = documentDto
+                });
             }
             catch (KeyNotFoundException knfEx)
             {
-                return NotFound(new { message = knfEx.Message });
+                return NotFound(knfEx.Message);
             }
             catch (Exception ex)
             {
@@ -421,7 +435,7 @@ public class AuditRequest
             try
             {
                 var total = await _mediator.Send(query);
-                return Ok(new { TotalCount = total });
+                return Ok();
             }
             catch (Exception ex)
             {
