@@ -427,25 +427,29 @@ public class AuditRequest
             }
         }
                 // POST api/documents/count
-        [HttpPost("count")]
-        [RequirePermission("DOCr")]
-
-        public async Task<IActionResult> Count([FromBody] CountDocumentsQuery query)
+// POST api/documents/count
+[HttpPost("count")]
+[RequirePermission("DOCr")]
+public async Task<IActionResult> Count([FromBody] CountDocumentsQuery query)
+{
+    try
+    {
+        var total = await _mediator.Send(query);
+        // either:
+        return Ok(total);
+        // or, if you prefer a named property:
+        // return Ok(new { totalCount = total });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new 
         {
-            try
-            {
-                var total = await _mediator.Send(query);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new 
-                {
-                    Message = "An error occurred while counting documents.",
-                    Details = ex.Message
-                });
-            }
-        }
+            Message = "An error occurred while counting documents.",
+            Details = ex.Message
+        });
+    }
+}
+
         [HttpPost("search-by-links")]
         [RequirePermission("DOCr")]
 
