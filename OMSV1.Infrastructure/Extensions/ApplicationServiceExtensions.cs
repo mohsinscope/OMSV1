@@ -18,6 +18,7 @@ public static class ApplicationServiceExtensions
        services.AddScoped<ITokenService, TokenService>();
        services.AddScoped<IPhotoService,PhotoService>();
        services.AddScoped<IMinioService,MinioService>();
+       services.AddScoped<IDocumentLinkManager,DocumentLinkManager>();
 
     //    services.AddScoped<IUserRepository, UserRepository>();
     //    services.AddScoped<IPhotoService,PhotoService>();

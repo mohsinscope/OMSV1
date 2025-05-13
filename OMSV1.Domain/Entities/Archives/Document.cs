@@ -72,6 +72,7 @@ namespace OMSV1.Domain.Entities.Documents
         public IReadOnlyCollection<DocumentCcLink> CcLinks => _ccLinks.AsReadOnly();
 
         /* ─────────────── Tags ─────────────── */
+        
         private readonly List<DocumentTagLink> _tagLinks = new();
         public IReadOnlyCollection<DocumentTagLink> TagLinks => _tagLinks.AsReadOnly();
 
@@ -344,6 +345,11 @@ public Document CreateReply(
             if (privatePartyId.HasValue)     PrivatePartyId         = privatePartyId.Value;
 
         }
+public void ClearCcs()  
+    => _ccLinks.Clear();
+
+public void ClearTags() 
+    => _tagLinks.Clear();
 
 
         public void MarkAsReplied()             => IsReplied  = true;
