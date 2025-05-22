@@ -17,8 +17,8 @@ public class PhotoService : IPhotoService, IDisposable
     private readonly IGenericRepository<DamagedPassport> _damagedPassportRepository;
     private readonly IGenericRepository<OMSV1.Domain.Entities.Documents.Document> _documentRepository;
 
-    private readonly string _networkStoragePath = @"\\172.16.108.26\samba";
-    //private readonly string _networkStoragePath = @"C:\Uploads";
+    //private readonly string _networkStoragePath = @"\\172.16.108.26\samba";
+    private readonly string _networkStoragePath = @"C:\Uploads";
     private const int MaxImageDimension = 1920; // Max dimension for images
     private const long MaxFileSize = 2048; // 2MB max file size
     private const int ImageQuality = 75; // JPEG quality (0-100)

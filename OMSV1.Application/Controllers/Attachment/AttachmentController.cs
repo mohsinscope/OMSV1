@@ -46,50 +46,48 @@ namespace OMSV1.Application.Controllers
         }
         
         // PUT: api/attachment/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAttachment(Guid id, 
-            [FromForm] IFormFile file, 
-            [FromForm] Guid entityId, 
-            [FromForm] OMSV1.Domain.Enums.EntityType entityType)
+// PUT: api/attachment/{entityId}
+[HttpPut("{entityId}")]
+public async Task<IActionResult> UpdateAttachment(Guid entityId, 
+    [FromForm] IFormFileCollection files, 
+    [FromForm] OMSV1.Domain.Enums.EntityType entityType)
+{
+    if (files == null || files.Count == 0)
+    {
+        return BadRequest("No files were uploaded.");
+    }
+
+    try
+    {
+        // Create a new UpdateAttachmentCommand based on the form data
+        var request = new UpdateAttachmentCommand
         {
-            if (file == null || file.Length == 0)
-            {
-                return BadRequest("No file was uploaded.");
-            }
+            AttachmentId = Guid.Empty, // This is no longer used since we're updating by entity
+            NewPhotos = files,
+            EntityId = entityId,
+            EntityType = entityType
+        };
 
+        // Send the request to update the attachments
+        var result = await mediator.Send(request);
 
-
-            try
-            {
-                // Create a new UpdateAttachmentCommand based on the form data
-                var request = new UpdateAttachmentCommand
-                {
-                    AttachmentId = id,
-                    NewPhoto = file,
-                    EntityId = entityId,
-                    EntityType = entityType
-                };
-
-                // Send the request to update the attachment
-                var result = await mediator.Send(request);
-
-                if (!result)
-                {
-                    return NotFound($"Attachment with ID {id} not found.");
-                }
-
-                // Return a successful response if the update was successful
-                return NoContent(); // 204 No Content
-            }
-            catch (HandlerException ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Unexpected error: {ex.Message}");
-            }
+        if (!result)
+        {
+            return NotFound($"Entity with ID {entityId} not found.");
         }
+
+        // Return a successful response if the update was successful
+        return NoContent(); // 204 No Content
+    }
+    catch (HandlerException ex)
+    {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Unexpected error: {ex.Message}");
+    }
+}
         // Example controller method
     [HttpGet("presign")]
     public async Task<IActionResult> Presign([FromQuery] string path,
