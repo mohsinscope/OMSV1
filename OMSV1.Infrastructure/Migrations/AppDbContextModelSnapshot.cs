@@ -146,7 +146,7 @@ namespace OMSV1.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("OMSV1.Domain.Entities.Attachments.AttachmentCU", b =>
-                {
+                
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
@@ -1701,7 +1701,7 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasOne("OMSV1.Domain.Entities.Documents.Document", "Document")
                         .WithMany("CcLinks")
                         .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
                     b.Navigation("Document");
@@ -1714,7 +1714,7 @@ namespace OMSV1.Infrastructure.Migrations
                     b.HasOne("OMSV1.Domain.Entities.Documents.Document", "Document")
                         .WithMany("TagLinks")
                         .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
                     b.HasOne("OMSV1.Domain.Entities.Documents.Tag", "Tag")
