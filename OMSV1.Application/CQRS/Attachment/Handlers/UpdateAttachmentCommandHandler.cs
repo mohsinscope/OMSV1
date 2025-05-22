@@ -4,6 +4,12 @@ using OMSV1.Domain.Entities.Attachments;
 using OMSV1.Domain.SeedWork;
 using OMSV1.Application.Helpers;
 using OMSV1.Application.Commands.Attachment;
+using OMSV1.Domain.Enums;
+using OMSV1.Domain.Entities.DamagedDevices;
+using OMSV1.Domain.Entities.Lectures;
+using OMSV1.Domain.Entities.DamagedPassport;
+using OMSV1.Domain.Entities.Expenses;
+using OMSV1.Application.Specifications;
 
 namespace OMSV1.Application.Handlers.Attachments
 {
@@ -22,45 +28,102 @@ namespace OMSV1.Application.Handlers.Attachments
         {
             try
             {
-                // Retrieve the attachment entity from the database
-                var attachment = await _unitOfWork.Repository<AttachmentCU>().GetByIdAsync(request.AttachmentId);
-                if (attachment == null)
+                if (request.NewPhotos == null || request.NewPhotos.Count == 0)
                 {
-                    throw new KeyNotFoundException($"Attachment with ID {request.AttachmentId} not found.");
+                    throw new ArgumentException("No files were uploaded.");
                 }
 
-                // Step 1: Delete the old photo from the local storage (if it exists)
-                if (!string.IsNullOrEmpty(attachment.FilePath))
+                // Check if the entity exists based on the entity type using IUnitOfWork repositories
+                await ValidateEntityExists(request.EntityId, request.EntityType);
+
+                // Step 1: Get all existing attachments for this entity using specification
+                var attachmentSpec = new AttachmentByEntitySpecification(request.EntityId, request.EntityType);
+                var existingAttachments = await _unitOfWork.Repository<AttachmentCU>().ListAsync(attachmentSpec);
+
+                // Step 2: Delete old photos from storage and remove from database
+                foreach (var attachment in existingAttachments)
                 {
-                    await _photoService.DeletePhotoAsync(attachment.FilePath);
+                    if (!string.IsNullOrEmpty(attachment.FilePath))
+                    {
+                        await _photoService.DeletePhotoAsync(attachment.FilePath);
+                    }
+                    await _unitOfWork.Repository<AttachmentCU>().DeleteAsync(attachment);
                 }
 
-                // Step 2: Upload the new photo to the local storage
-                var uploadResult = await _photoService.AddPhotoAsync(request.NewPhoto, request.EntityId, request.EntityType);
+                // Step 3: Upload new photos and create new attachment entities
+                foreach (var file in request.NewPhotos)
+                {
+                    if (file != null && file.Length > 0)
+                    {
+                        // Upload the new photo to storage
+                        var uploadResult = await _photoService.AddPhotoAsync(file, request.EntityId, request.EntityType);
 
-                // Step 3: Update the attachment entity with the new photo details
-                attachment.Update(uploadResult.FilePath);
+                        // Create new attachment entity
+                        var newAttachment = new AttachmentCU(
+                            filePath: uploadResult.FilePath,
+                            entityType: request.EntityType,
+                            entityId: request.EntityId
+                        );
 
-                // Step 4: Update the attachment in the database asynchronously
-                await _unitOfWork.Repository<AttachmentCU>().UpdateAsync(attachment);
+                        // Add the new attachment to the database
+                        await _unitOfWork.Repository<AttachmentCU>().AddAsync(newAttachment);
+                    }
+                }
 
-                // Step 5: Save the changes asynchronously
+                // Step 4: Save all changes
                 await _unitOfWork.SaveAsync(cancellationToken);
 
                 return true;
             }
-            catch (KeyNotFoundException ex)
+            catch (ArgumentException ex)
             {
-                // Handle the case where the attachment is not found
-                throw new HandlerException("Failed to update the attachment: " + ex.Message, ex);
+                throw new HandlerException("Failed to update attachments: " + ex.Message, ex);
             }
             catch (Exception ex)
             {
-                // Catch other unexpected errors and throw a custom exception
-                throw new HandlerException("An unexpected error occurred while updating the attachment.", ex);
+                throw new HandlerException("An unexpected error occurred while updating attachments.", ex);
             }
         }
 
+        private async Task ValidateEntityExists(Guid entityId, EntityType entityType)
+        {
+            switch (entityType)
+            {
+                case EntityType.DamagedDevice:
+                    var damagedDeviceExists = await _unitOfWork.Repository<DamagedDevice>().GetByIdAsync(entityId);
+                    if (damagedDeviceExists == null)
+                    {
+                        throw new ArgumentException($"No damaged device found with ID {entityId}.");
+                    }
+                    break;
 
+                case EntityType.Lecture:
+                    var lectureExists = await _unitOfWork.Repository<Lecture>().GetByIdAsync(entityId);
+                    if (lectureExists == null)
+                    {
+                        throw new ArgumentException($"No lecture found with ID {entityId}.");
+                    }
+                    break;
+
+                case EntityType.DamagedPassport:
+                    var damagedPassportExists = await _unitOfWork.Repository<DamagedPassport>().GetByIdAsync(entityId);
+                    if (damagedPassportExists == null)
+                    {
+                        throw new ArgumentException($"No damaged passport found with ID {entityId}.");
+                    }
+                    break;
+
+                case EntityType.Expense:
+                    var expenseExists = await _unitOfWork.Repository<DailyExpenses>().GetByIdAsync(entityId);
+                    if (expenseExists == null)
+                    {
+                        throw new ArgumentException($"No expense found with ID {entityId}.");
+                    }
+                    break;
+
+                default:
+                    throw new ArgumentException("Unsupported entity type.");
+            }
+        }
     }
 }
